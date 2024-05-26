@@ -1,0 +1,44 @@
+<!-- login.html -->
+{% extends "base.html" %}
+
+{% block formcontent %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #007BFF; /* Cor de fundo azul */
+    }
+    .container {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .login-window {
+        padding: 20px;
+        background: #FFF; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar efeito de elevação */
+        border-radius: 8px; /* Bordas arredondadas */
+        width: 100%;
+        max-width: 400px; 
+    }
+</style>
+<div class="container">
+  <div class="login-window">
+    <form>
+      <div class="mb-4">
+        <label for="exampleInputEmail1" class="form-label">Usuário:</label>
+        <input type="text" class="form-control" id="ID-User" aria-describedby="UserHelp" name="user">
+        <div id="UserHelp" class="form-text">Seu usuário para realizar o login.</div>
+      </div>
+      <div class="mb-4">
+        <label for="exampleInputPassword1" class="form-label">Senha:</label>
+        <input type="password" class="form-control" id="exampleInputPassword1", name="password">
+        <div id="passwordHelp" class="form-text">Sua senha para realizar o login.</div>
+      </div>
+      <button type="submit" class="btn btn-success">Logar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
