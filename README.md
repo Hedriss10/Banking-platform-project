@@ -1,14 +1,11 @@
 # Banking-project ™️
 
 
-## Tecnologia usadas 💻
+## Technologies used on the platform 💻
 
 - Flask 
 - Postgressql
 - HTMX
 - FlaskSQLAlchemy
-
-
-
 
 ## Iusses 🚀
