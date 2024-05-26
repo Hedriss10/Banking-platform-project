@@ -1,4 +1,4 @@
-# Platorm Bs-consig ™️
+# Banking-project ™️
 
 
 ## Tecnologia usadas 💻
