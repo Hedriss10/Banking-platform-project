@@ -1,11 +1,19 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,linux,windows,flask
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,windows,flask
 
+
+.vscode/
+
+sql/
+
+
+
 ### Flask ###
 instance/*
 !instance/.gitignore
 .webassets-cache
 .env
+migrations 
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files

@@ -12,33 +12,69 @@
     .container {
         height: 100vh;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
     }
-    .login-window {
+    .login-window, .flash-messages {
         padding: 20px;
-        background: #FFF; 
+        background: #FFF;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar efeito de elevação */
         border-radius: 8px; /* Bordas arredondadas */
         width: 100%;
-        max-width: 400px; 
+        max-width: 400px;
+    }
+    .flash-messages {
+        margin-bottom: 20px; /* Espaçamento entre as mensagens e o formulário de login */
     }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var alerts = document.querySelectorAll('.btn-close');
+        alerts.forEach(function (closeButton) {
+            closeButton.addEventListener('click', function () {
+                var alert = this.parentElement;
+                alert.style.display = 'none'; // Esconde o alerta
+                if (alert.parentElement.children.length === 1) { // Se não há mais alertas
+                    alert.parentElement.style.display = 'none'; // Esconde o contêiner dos alertas
+                }
+            });
+        });
+    });
+</script>
 <div class="container">
-  <div class="login-window">
-    <form>
-      <div class="mb-4">
-        <label for="exampleInputEmail1" class="form-label">Usuário:</label>
-        <input type="text" class="form-control" id="ID-User" aria-describedby="UserHelp" name="user">
-        <div id="UserHelp" class="form-text">Seu usuário para realizar o login.</div>
-      </div>
-      <div class="mb-4">
-        <label for="exampleInputPassword1" class="form-label">Senha:</label>
-        <input type="password" class="form-control" id="exampleInputPassword1", name="password">
-        <div id="passwordHelp" class="form-text">Sua senha para realizar o login.</div>
-      </div>
-      <button type="submit" class="btn btn-success">Logar</button>
-    </form>
-  </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% else %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    <div class="login-window">
+        <form method="POST">
+            <div class="mb-4">
+                <label for="ID-User" class="form-label">Usuário:</label>
+                <input type="text" class="form-control" id="ID-User" aria-describedby="UserHelp" name="user">
+                <div id="UserHelp" class="form-text">Seu usuário para realizar o login.</div>
+            </div>
+            <div class="mb-4">
+                <label for="exampleInputPassword1" class="form-label">Senha:</label>
+                <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+            </div>
+            <button type="submit" class="btn btn-success">Logar</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
