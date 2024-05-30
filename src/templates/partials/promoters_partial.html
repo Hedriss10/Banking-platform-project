@@ -1,0 +1,23 @@
+{% block promoterscontent %} <!-- Listagem de usuários -->
+<hr>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">id</th>
+      <th scope="col">Nome</th>
+      <th scope="col">Indentificação</th>
+      <th scope="col">Permissão</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <th scope="row">{{ loop.index }}</th>
+      <td>{{ user.username }}</td>
+      <td>{{ user.user_identification }}</td>
+      <td>{{ user.type_user }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

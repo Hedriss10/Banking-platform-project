@@ -1,0 +1,12 @@
+{% block promoterseditcontent %}
+<form action="{{ url_for('edit_promoters', id=user.id) }}" method="POST">
+  <fieldset>
+    <div class="form-group">
+      <label for="username">Nome</label>
+      <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}">
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Atualizar</button>
+  </fieldset>
+</form>
+{% endblock %}
