@@ -1,61 +1,125 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 
 
 {% block contentoverview %}
-<div id="wrapper">
-    <div class="overlay"></div>
-     
-    <!-- Sidebar -->
-     <nav class="navbar navbar-inverse fixed-top" id="sidebar-wrapper" role="navigation">
-      <ul class="nav sidebar-nav">
-        <div class="sidebar-header">
-        <div class="sidebar-brand">
-          <a href="#">Brand</a></div></div>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#events">Events</a></li>
-        <li><a href="#team">Team</a></li>
-        <li class="dropdown">
-        <a href="#works" class="dropdown-toggle"  data-toggle="dropdown">Works <span class="caret"></span></a>
-      <ul class="dropdown-menu animated fadeInLeft" role="menu">
-       <div class="dropdown-header">Dropdown heading</div>
-       <li><a href="#pictures">Pictures</a></li>
-       <li><a href="#videos">Videeos</a></li>
-       <li><a href="#books">Books</a></li>
-       <li><a href="#art">Art</a></li>
-       <li><a href="#awards">Awards</a></li>
-       </ul>
-       </li>
-       <li><a href="#services">Services</a></li>
-       <li><a href="#contact">Contact</a></li>
-       <li><a href="#followme">Follow me</a></li>
-       </ul>
-   </nav>
-         <!-- /#sidebar-wrapper -->
- 
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <button type="button" class="hamburger animated fadeInLeft is-closed" data-toggle="offcanvas">
-                <span class="hamb-top"></span>
-                <span class="hamb-middle"></span>
-                <span class="hamb-bottom"></span>
-            </button>
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-8 col-lg-offset-2">
-                        <h1>Fancy Toggle Sidebar Navigation</h1>
-                        <p>Bacon ipsum dolor sit amet tri-tip shoulder tenderloin shankle. Bresaola tail pancetta ball tip doner meatloaf corned beef. Kevin pastrami tri-tip prosciutto ham hock pork belly bacon pork loin salami pork chop shank corned beef tenderloin meatball cow. Pork bresaola meatloaf tongue, landjaeger tail andouille strip steak tenderloin sausage chicken tri-tip. Pastrami tri-tip kielbasa sausage porchetta pig sirloin boudin rump meatball andouille chuck tenderloin biltong shank </p>
-                        <p>Pig meatloaf bresaola, spare ribs venison short loin rump pork loin drumstick jowl meatball brisket. Landjaeger chicken fatback pork loin doner sirloin cow short ribs hamburger shoulder salami pastrami. Pork swine beef ribs t-bone flank filet mignon, ground round tongue. Tri-tip cow turducken shank beef shoulder bresaola tongue flank leberkas ball tip.</p>
-                        <p>Filet mignon brisket pancetta fatback short ribs short loin prosciutto jowl turducken biltong kevin pork chop pork beef ribs bresaola. Tongue beef ribs pastrami boudin. Chicken bresaola kielbasa strip steak biltong. Corned beef pork loin cow pig short ribs boudin bacon pork belly chicken andouille. Filet mignon flank turkey tongue. Turkey ball tip kielbasa pastrami flank tri-tip t-bone kevin landjaeger capicola tail fatback pork loin beef jerky.</p>
-                        <p>Chicken ham hock shankle, strip steak ground round meatball pork belly jowl pancetta sausage spare ribs. Pork loin cow salami pork belly. Tri-tip pork loin sausage jerky prosciutto t-bone bresaola frankfurter sirloin pork chop ribeye corned beef chuck. Short loin hamburger tenderloin, landjaeger venison porchetta strip steak turducken pancetta beef cow leberkas sausage beef ribs. Shoulder ham jerky kielbasa. Pig doner short loin pork chop. Short ribs frankfurter rump meatloaf.</p>
-                        <p>Filet mignon biltong chuck pork belly, corned beef ground round ribeye short loin rump swine. Hamburger drumstick turkey, shank rump biltong pork loin jowl sausage chicken. Rump pork belly fatback ball tip swine doner pig. Salami jerky cow, boudin pork chop sausage tongue andouille turkey.</p>                         
-                    </div>
+<div class="main-container d-flex">
+    <div class="sidebar" id="side_nav">
+        <div class="header-box px-2 pt-3 pb-4 d-flex justify-content-between">
+            <h1 class="fs-4">
+                <span class="bg-white text-dark rounded shadow px-2 me-2">BS</span>
+                <span class="text-white">System</span>
+            </h1>
+            <button class="btn d-md-none d-block close-btn px-1 py-0 text-white"><i class="fal fa-stream"></i></button>
+        </div>
+        <ul class="list-unstyled px-2">
+            <li class="active">
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".dashboard-content"><i class="fal fa-home"></i> Dashboard</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".financeiro-content"><i class="fal fa-money-bill-alt"></i> Financeiro</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".propostas-content"><i class="fal fa-newspaper"></i></i></i> Propostas</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".campanhas-content"><i class="fal fa-mobile-alt"></i></i> Campanhas</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".promotores-content">
+                    <i class="fal fa-users"></i> Promotores
+                </a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".atendimento-content"><i class="fal fa-phone-volume"></i></i> Atendimento</a>
+            </li>
+            <hr class="h-color mx-2">
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".bsponto-content"><i class="fal fa-clock"></i></i> BS Ponto</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".config-content"><i class="fal fa-cog"></i></i> Configuração</a>
+            </li>
+            <!-- add functions sidebar -->
+        </ul>
+        
+    </div>
+    <div class="content">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between d-md-none d-block">
+                    <button class="btn px-1 py-0 open-btn me-2"><i class="fal fa-stream"></i></button>
+                    <a class="navbar-brand fs-4" href="#"><span class="bg-dark rounded px-2 py-0 text-white">BS</span></a>
+                </div>
+                <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fal fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Logout</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
+        </nav>
+        <!-- Conteúdo do Dashboard, inicialmente visível -->
+        <div class="dashboard-content content-section px-3 pt-4">
+            <h2 class="fs-5">Dashboard</h2>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, totam?</p>
         </div>
-        <!-- /#page-content-wrapper -->
+        <!-- Outras seções de conteúdo, inicialmente ocultas -->
+        <div class="financeiro-content content-section px-3 pt-4" style="display:none;">
+            <h2 class="fs-5">Financeiro</h2>
+            <p>Detalhes financeiros...</p>
+        </div>
+        <div class="propostas-content content-section px-3 pt-4" style="display:none;">
+            <h2 class="fs-5">Propostas</h2>
+            <p>Detalhes das propostas...</p>
+        </div>
+        <div class="campanhas-content content-section px-3 pt-4" style="display:none;">
+            <h2 class="fs-5">Campanhas</h2>
+            <p>Informações sobre campanhas...</p>
+        </div>
 
-     </div>
-     <!-- /#wrapper -->
+        <div class="promotores-content content-section px-3 pt-4" style="display: none;"> <!-- Gerenciamento dos promoters -->
+            <h2 class="fs-5">Promotores</h2>
+            <p class="fs-6">Gestão de promotores e vendedores:</p>
+        
+            <button hx-get="{{ url_for('users.promoters') }}" hx-trigger="click" hx-target="#search-promoters" 
+            class="btn btn-primary" data-target="loadPromoters">
+                Carregar Promotores
+            </button>
+        
+            <button hx-get="{{ url_for('users.get_register_form') }}" hx-target="#post-promoters"
+            class="btn btn-success" data-target="registerPromoters">
+                Cadastrar Promotores
+            </button>
+        
+            <div id="search-promoters">{% block promoterscontent %}{% endblock %}</div> <!-- Listagem de todos os usuários -->
+            <div id="post-promoters">{% block promotersregistercontent %}{% endblock %}</div> <!-- Adicionar os usuários -->
+        
+        </div>
+        <div class="atendimento-content content-section px-3 pt-4" style="display:none;">
+            <h2 class="fs-5">Atendimento</h2>
+            <p>Informações de atendimento...</p>
+        </div>
 
+        <div class="bsponto-content content-section px-3 pt-4" style="display:none;">
+            <h2 class="fs-5">bs-ponto</h2>
+            <p>Informações do ponto eletronico dos funcionarios</p>
+        </div>
+
+        <div class="config-content content-section px-3 pt-4" style="display:none;">
+            <h2 class="fs-5">Configuração</h2>
+            <p>Informações de configurações</p>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/TrasnlateEvent.js') }}"></script>
 {% endblock %}
