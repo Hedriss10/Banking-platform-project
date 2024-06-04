@@ -61,22 +61,22 @@
                             <a class="nav-link active" aria-current="page" href="#">Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Logout</a>
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('auth.login')}}">Logout</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
-        <!-- Conteúdo do Dashboard, inicialmente visível -->
         <div class="dashboard-content content-section px-3 pt-4">
             <h2 class="fs-5">Dashboard</h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum, totam?</p>
+            <p>Sistema de dashboard dependente do sistema de finanças</p>
         </div>
-        <!-- Outras seções de conteúdo, inicialmente ocultas -->
+
         <div class="financeiro-content content-section px-3 pt-4" style="display:none;">
             <h2 class="fs-5">Financeiro</h2>
             <p>Detalhes financeiros...</p>
         </div>
+        
         <div class="propostas-content content-section px-3 pt-4" style="display:none;">
             <h2 class="fs-5">Propostas</h2>
             <p>Detalhes das propostas...</p>
@@ -99,11 +99,23 @@
             class="btn btn-success" data-target="registerPromoters">
                 Cadastrar Promotores
             </button>
-        
-            <div id="search-promoters">{% block promoterscontent %}{% endblock %}</div> <!-- Listagem de todos os usuários -->
-            <div id="post-promoters">{% block promotersregistercontent %}{% endblock %}</div> <!-- Adicionar os usuários -->
-        
+            
+            <button hx-get="{{ url_for('users.get_edit_form') }}" hx-target="#edit-promoters"
+            class="btn btn-warning" data-target="editPromoters">
+                Editar Promotores
+            </button>
+
+            <button hx-get="{{ url_for('users.get_delete_form') }}" hx-target="#delete-promoters"
+            class="btn btn-danger" data-target="deletePromoters">
+                Deletar Promoters
+            </button>
+
+            <div id="search-promoters" style="display:none;">{% block promoterscontent %}{% endblock %}</div>
+            <div id="post-promoters" style="display:none;">{% block promotersregistercontent %}{% endblock %}</div>
+            <div id="edit-promoters" style="display:none;">{% block promotersedit %}{% endblock %}</div>
+            <div id="delete-promoters" style="display:none;">{% block promotersdelete %}{% endblock %}</div>
         </div>
+
         <div class="atendimento-content content-section px-3 pt-4" style="display:none;">
             <h2 class="fs-5">Atendimento</h2>
             <p>Informações de atendimento...</p>
