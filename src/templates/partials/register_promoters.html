@@ -19,7 +19,11 @@
     </div>
     <div class="form-group">
       <label for="type_user"><strong>Permissão: </strong></label>
-      <input type="text" id="type_user" name="type_user" class="form-control">
+      <select id="type_user" name="type_user" class="form-control">
+        <option value="sellers">Vendedor</option>
+        <option value="admin">Administrador</option>
+        <option value="promoters">Promotor</option>
+      </select>
     </div>
     <br>
     <button type="submit" class="btn btn-primary btn-salvar">Salvar</button>
@@ -46,7 +50,10 @@
                           messageDiv.classList.add('alert', 'alert-success', 'alert-dismissible', 'fade', 'show');
                       } else if (xhr.status === 400) {
                           messageDiv.classList.add('alert', 'alert-danger', 'alert-dismissible', 'fade', 'show');
+                      } else if (xhr.status === 500){
+                          messageDiv.classList.add('alert', 'alert-danger', 'alert-dismissible', 'fade', 'show');
                       }
+
 
                       document.getElementById('response-container').innerHTML = ''; 
                       document.getElementById('response-container').appendChild(messageDiv);

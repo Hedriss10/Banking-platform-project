@@ -1,5 +1,8 @@
-from src.external import create_app
+from dotenv import load_dotenv
+load_dotenv()
+
+from src import create_app
+app = create_app()
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, port=8000) # port 8000 for not problem
+    app.run(debug=True, port=8000)
