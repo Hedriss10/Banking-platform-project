@@ -121,9 +121,14 @@
             <p>Informações de atendimento...</p>
         </div>
 
-        <div class="bsponto-content content-section px-3 pt-4" style="display:none;">
-            <h2 class="fs-5">bs-ponto</h2>
-            <p>Informações do ponto eletronico dos funcionarios</p>
+        <div class="bsponto-content content-section px-3 pt-4" style="display:none;"> <!--Gestão de ponto BS-->
+            <h2 class="fs-4">Bs ponto</h2>
+            <p class="fs-6">Gerenciamento de ponto, ao clicar no Butão abaixo segue o cadastro simples e sua situação do ponto. 
+                Exemplo, se é <strong>entrada</strong>, <strong>intervalo</strong>, <strong>saída</strong> conforme a regra de negócio, o intervalo é tanto para seu almoço ou seu lanche!</p>
+            <button hx-get={{url_for('hourpoint.get_point_hour')}} hx-target="#pontofunc" class="btn btn-success" data-target="pontofunc" onclick="openModal()">
+                Registrar horário
+            </button>
+            <div id="pontofunc">{% block hourpoint %}{% endblock%}</div>
         </div>
 
         <div class="config-content content-section px-3 pt-4" style="display:none;">
@@ -134,4 +139,6 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/TrasnlateEvent.js') }}"></script>
+<script src="{{ url_for('static', filename='js/point/OpenModalPoint.js') }}"></script>
+
 {% endblock %}
