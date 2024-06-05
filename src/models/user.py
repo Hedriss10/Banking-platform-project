@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 from src import db 
 
 class User(db.Model, UserMixin):
-    __tablename__ = "users"
+    __tablename__ = 'user'
     
     id = db.Column(db.Integer, primary_key=True)
     user_identification = db.Column(db.Integer, unique=False)
@@ -16,7 +16,9 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     created_on = db.Column(db.DateTime, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
-    
+    points = db.relationship('Point', back_populates='user', lazy='dynamic')
+    vacations = db.relationship('VocationBs', back_populates='user', lazy='dynamic')
+
     def __init__(self, user_identification, username, type_user, password, is_admin=False):
         self.user_identification = user_identification
         self.username = username

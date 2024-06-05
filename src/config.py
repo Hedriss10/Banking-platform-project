@@ -3,7 +3,6 @@ from decouple import config
 class Config(object):
     DEBUG = False
     TESTING = False
-    CSRF_ENABLED = True
     SECRET_KEY = config('SECRET_KEY', default='bs-consig')
     SQLALCHEMY_DATABASE_URI = config('DATABASE_URL').replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
