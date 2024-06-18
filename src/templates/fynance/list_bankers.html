@@ -1,0 +1,34 @@
+{% block listbankers %}
+<style>
+    .convenio-item {
+        background-color: #898989;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .delete-icon {
+        cursor: pointer;
+    }
+</style>
+<br>
+<p>Sistema de gerenciamento de comissões</p>
+<!-- List bankers -->
+<ul id="bankList" class="list-group mt-4">
+    {% for bank in banks %}
+    <li class="list-group-item" onclick="toggleConvenios('{{ bank.id }}')">
+        {{ bank.name }}
+        <ul id="convenios-{{ bank.id }}" class="list-group mt-2" style="display:none;">
+            {% for convenio in bank.financial_agreements %}
+            <li class="list-group-item convenio-item">
+                <strong>{{ convenio.name }}</strong>
+                <i class="fal fa-trash" data-id="{{ convenio.id }}" onclick="deleteConvenio(event, this)"></i>
+            </li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+<script src="{{ url_for('static', filename='js/fynance/toggleTables.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fynance/DeleteConvBanker.js') }}"></script>
+{% endblock %}

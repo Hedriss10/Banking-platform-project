@@ -1,0 +1,32 @@
+{% block registerconven %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title" id="addBankModalLabel">Adicionar Novo Convênio</h5>
+        </div>
+        <div class="card-body">
+            <form id="addBankForm">
+                <div class="form-row">
+                    <div class="col-md-6 mb-3">
+                        <label for="convName" class="form-label">Nome do convênio</label>
+                        <input type="text" class="form-control" id="convName" name="convName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="bankerId" class="form-label">Escolha o Banco</label>
+                        <select class="form-control" id="bankerId" name="bankSelect" required>
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}">{{ bank.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <button type="submit" class="btn btn-primary">Salvar <i class="bi bi-save"></i></button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.reload();">Fechar <i class="bi bi-x-circle"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/fynance/SendNewConven.js') }}"></script>
+{% endblock %}

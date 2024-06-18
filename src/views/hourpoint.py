@@ -18,11 +18,9 @@ def get_point_hour():
 @bp_point_hour.route("/registerpoint", methods=['POST'])
 @login_required
 def point_hour():
-    print(request.form)
     day_hour_str = request.form['day_hour']
     type = request.form['type']
     user_id = current_user.id
-    print("Hora do formulario", day_hour_str)
     
     try:
         day_hour = datetime.strptime(day_hour_str, '%d/%m/%Y, %H:%M')

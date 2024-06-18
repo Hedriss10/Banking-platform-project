@@ -36,15 +36,17 @@ def create_app(config_class=DevelopmentConfig):
     from .views.overview import bp_overview
     from .auth.userManager import bp_auth
     from .views.hourpoint import bp_point_hour
+    from .views.fynance import bp_fynance
     
     app.register_blueprint(bp_user, url_prefix="/")
     app.register_blueprint(bp_overview, url_prefix="/")
     app.register_blueprint(bp_auth, url_prefix="/")
     app.register_blueprint(bp_point_hour, url_prefix="/")
-    
+    app.register_blueprint(bp_fynance, url_prefix="/")
     
     from .models.user import User
     from .models.hourpoint import Point, VocationBs
+    from .models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat
     
     @login_manager.user_loader
     def load_user(user_id):
