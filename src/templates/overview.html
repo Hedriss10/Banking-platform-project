@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-
 {% block contentoverview %}
 <div class="main-container d-flex">
     <div class="sidebar" id="side_nav">
@@ -16,7 +15,7 @@
                 <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".dashboard-content"><i class="fal fa-home"></i> Dashboard</a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".financeiro-content"><i class="fal fa-money-bill-alt"></i> Financeiro</a>
+                <a href="#"   class="text-decoration-none px-3 py-2 d-block" data-target=".financeiro-content"><i class="fal fa-money-bill-alt"></i> Financeiro</a>
             </li>
             <li>
                 <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".propostas-content"><i class="fal fa-newspaper"></i></i></i> Propostas</a>
@@ -73,8 +72,23 @@
         </div>
 
         <div class="financeiro-content content-section px-3 pt-4" style="display:none;">
-            <h2 class="fs-5">Financeiro</h2>
-            <p>Detalhes financeiros...</p>
+            <h2 class="fs-5">Gerenciamento Financeiro</h2>
+            <br>
+            <button class="btn btn-warning" hx-get="{{url_for('fynance.get_list_bankers')}}" hx-target="#list-bankers" data-target="listBankers">
+                Gerenciamento de comissões
+            </button>
+            <button class="btn btn-success" hx-get="{{url_for('fynance.get_register_bankers')}}" hx-target="#register-bankers" data-target="registerBankers">Cadastrar Bancos</button>   
+            <button class="btn btn-info" hx-get="{{url_for('fynance.get_register_conven')}}" hx-target="#conven-banker" data-target="convenBankers">Registrar Convênio</button>
+            <button class="btn btn-dark" hx-get="{{url_for('fynance.get_register_report')}}" hx-target="#report-banker" data-target="reportBankers">Importar relatório de comissão</button>
+            <button class="btn btn-danger" hx-get="{{url_for('fynance.get_delete_banker')}}" hx-target="#delete-banker" data-target="deleteBankers">Deletar Bancos</button>
+
+            <div id="register-bankers" style="display:none;"></div>
+            <div id="list-bankers" style="display:none;"></div>
+            <div id="conven-banker" style="display:none;"></div>
+            <div id="report-banker" style="display:none;"></div>
+            <div id="delete-banker" style="display:none;"></div>
+
+
         </div>
         
         <div class="propostas-content content-section px-3 pt-4" style="display:none;">
@@ -140,5 +154,5 @@
 
 <script src="{{ url_for('static', filename='js/TrasnlateEvent.js') }}"></script>
 <script src="{{ url_for('static', filename='js/point/OpenModalPoint.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/fynance/TranslateEventFynance.js') }}"></script>
 {% endblock %}
