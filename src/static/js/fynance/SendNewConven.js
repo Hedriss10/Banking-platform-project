@@ -1,7 +1,7 @@
-document.getElementById('addBankForm').addEventListener('submit', function(event) {
+document.getElementById('addBankConvForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const convName = document.getElementById('convName').value;
-    const bankId = document.getElementById('bankerId').value; 
+    const bankId = document.getElementById('bankerIdConv').value; 
 
     var data = {
         name : convName,
@@ -20,6 +20,7 @@ document.getElementById('addBankForm').addEventListener('submit', function(event
     .then(data => {
         if (data.success) {
             alert('Convênio cadastrado com sucesso.')
+            window.location.reload();
         } else {
             alert(data.error || 'Error occurred while adding the bank');
         }

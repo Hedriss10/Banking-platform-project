@@ -77,10 +77,10 @@
             <button class="btn btn-warning" hx-get="{{url_for('fynance.get_list_bankers')}}" hx-target="#list-bankers" data-target="listBankers">
                 Gerenciamento de comissões
             </button>
-            <button class="btn btn-success" hx-get="{{url_for('fynance.get_register_bankers')}}" hx-target="#register-bankers" data-target="registerBankers">Cadastrar Bancos</button>   
-            <button class="btn btn-info" hx-get="{{url_for('fynance.get_register_conven')}}" hx-target="#conven-banker" data-target="convenBankers">Registrar Convênio</button>
-            <button class="btn btn-dark" hx-get="{{url_for('fynance.get_register_report')}}" hx-target="#report-banker" data-target="reportBankers">Importar relatório de comissão</button>
-            <button class="btn btn-danger" hx-get="{{url_for('fynance.get_delete_banker')}}" hx-target="#delete-banker" data-target="deleteBankers">Deletar Bancos</button>
+            <button class="btn btn-success" data-target="registerBankers">Undefined</button>   
+            <button class="btn btn-info" data-target="convenBankers">Undefined</button>
+            <button class="btn btn-dark"  data-target="reportBankers">Undefined</button>
+            <button class="btn btn-danger" data-target="deleteBankers">Undefined</button>
 
             <div id="register-bankers" style="display:none;"></div>
             <div id="list-bankers" style="display:none;"></div>

@@ -25,7 +25,7 @@ function registerBank() {
 
 function registerConvenio() {
     const convName = document.getElementById('convName').value;
-    const bankId = document.getElementById('bankerId').value; 
+    const bankId = document.getElementById('bankerIdConv').value; 
 
     var data = {
         name: convName,
@@ -53,42 +53,6 @@ function registerConvenio() {
     });
 }
 
-function deleteBanker() {
-    const selectElement = document.getElementById('bankerIdDelete');
-    const bankId = selectElement.value; 
-
-    if (!bankId) {
-        alert('O ID do banco é necessário para deletar.');
-        return;
-    }
-
-    const url = `/delete-bankers/${bankId}`;
-
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message || 'Banco deletado com sucesso.');
-
-            // Remove a opção correspondente ao ID do banco deletado
-            const optionToRemove = selectElement.querySelector(`option[value="${bankId}"]`);
-            if (optionToRemove) {
-                selectElement.removeChild(optionToRemove);
-            }
-        } else {
-            alert(data.error || 'Ocorreu um erro ao deletar o banco.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Ocorreu um erro ao comunicar com o servidor.');
-    });
-}
 
 // Adicionando ouvintes de eventos para os formulários
 document.getElementById('addBankForm').addEventListener('submit', function(event) {
@@ -99,10 +63,4 @@ document.getElementById('addBankForm').addEventListener('submit', function(event
 document.getElementById('addConvenioForm').addEventListener('submit', function(event) {
     event.preventDefault();
     registerConvenio();
-});
-
-
-document.getElementById('deleteBankForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    deleteBanker();
 });

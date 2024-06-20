@@ -29,7 +29,6 @@ def get_list_bankers():
 @bp_fynance.route("/get-register-coven")
 def get_register_conven():
     """Register coven, return banker for register conv in banker"""
-
     bankers = Banker.query.order_by(Banker.name).all()
     return render_template("fynance/register_conven.html", banks=bankers)
 
@@ -47,13 +46,6 @@ def get_delete_banker():
     bankers = Banker.query.order_by(Banker.name).all()
     return render_template("fynance/delete_bankers.html", banks=bankers)
 
-
-# @bp_fynance.route("/register-bankers/tables", methods=['POST'])
-# def get_register_bankers_tables():
-#     """Register tables"""
-#     return render_template("overview.html") # manipulation route action form get front
-#     # return redirect(url_for('overview.home'))
- 
 
 @bp_fynance.route("/register-convenio", methods=['POST'])
 def post_register_conven():
@@ -105,7 +97,7 @@ def post_register_bankers():
 
 @bp_fynance.route("/register-bankers/tables", methods=['POST'])
 def register_tables_bankers():
-    print(request.form)
+    """rout api for import tables in large quantities"""
     
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
@@ -139,13 +131,44 @@ def register_tables_bankers():
             )
             db.session.add(new_table)
         db.session.commit()
-        return jsonify({'success': True, 'message': 'Data imported successfully'}), 200
+        return redirect(url_for("overview.home"))
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 
+@bp_fynance.route("/register-bankers/tables/banker/conv/one", methods=['POST'])
+def register_tables_one():
+    """Endpoint for registering one table for bank and conv select"""
+    bank_id = request.form['bankSelectOne']
+    convenio_id = request.form['convenioSelect']
+    name = request.form['name']
+    type_table = request.form['type_table']
+    table_code = request.form['tablecode']
+    start_term = request.form['start_term']
+    end_term = request.form['end_term']
+    rate = request.form['rate']
     
+    try:
+        new_table = TablesFinance(
+            name=name, 
+            table_code=table_code,
+            type_table=type_table,
+            start_term=start_term,
+            end_term=end_term,
+            rate=rate,
+            banker_id=bank_id,
+            conv_id=convenio_id,
+        )
+        db.session.add(new_table)
+        db.session.commit()
+        return redirect(url_for("overview.home"))
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+    
+
 @bp_fynance.route("/delete-bankers/<int:id>", methods=['POST'])
 def delete_bankers(id):
     banker = Banker.query.get_or_404(id)

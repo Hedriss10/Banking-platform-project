@@ -19,7 +19,6 @@ function toggleConveniosBankersTables(tablesId, event) {
 }
 
 function deleteTable(tableId) {
-    event.stopPropagation();  // Impede que o evento clique se propague para elementos pai
-    // Implemente a lógica para deletar a tabela aqui
+    event.stopPropagation(); 
     console.log('Deletar tabela', tableId);
 }
