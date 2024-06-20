@@ -7,6 +7,8 @@ from flask_login import login_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from src import db 
 
+from ..utils.generator_password import generator_password
+
 from ..models.user import User
 
 bp_user = Blueprint("users", __name__)
@@ -32,18 +34,21 @@ def post_promoters():
     """Add promoters"""
     try:
         username = request.form['username'].strip()
+        lastname = request.form['lastname'].strip()
+        email = request.form['email'].strip()
         user_identification = request.form['user_identification'].strip()
         type_user = request.form['type_user']
-        password = request.form['password'].strip()
-
-        if not (username and user_identification and type_user and password):
+        
+        if not (username and user_identification and type_user):
             return jsonify({'error': 'Todos os campos são obrigatórios'}), 400        
         
         new_user = User(
-            user_identification=user_identification, 
-            username=username, 
-            password=password, 
-            type_user=type_user
+            user_identification=user_identification, # cpf
+            username=username, # name
+            lastname=lastname, # sobrenome
+            email=email, 
+            password=generator_password(size=8), 
+            type_user_func=type_user # cargo do usuário
         )
         db.session.add(new_user)
         db.session.commit()

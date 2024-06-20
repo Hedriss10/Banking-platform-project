@@ -9,6 +9,7 @@ from sqlalchemy.orm import joinedload
 from ..models.fynance import Banker, FinancialAgreement, TablesFinance
 from werkzeug.utils import secure_filename
 
+
 bp_fynance = Blueprint("fynance", __name__)
 
 
@@ -110,10 +111,14 @@ def register_tables_bankers():
         return jsonify({'error': 'No file provided'}), 400
 
     filename = secure_filename(file.filename)
-    if filename.endswith('.csv'):
-        data = pd.read_csv(file)
-    elif filename.endswith('.xlsx'):
-        data = pd.read_excel(file)
+    if filename.endswith(('.csv', '.xlsx', ';', ',')):
+        if filename.endswith('.csv') or filename.endswith(','):
+            data = pd.read_csv(file, dtype="object", sep=",")
+        elif filename.endswith(';'):
+            data = pd.read_csv(file, dtype="object", sep=";")
+        elif filename.endswith('.xlsx'):
+            data = pd.read_excel(file, dtype="object")
+        else: jsonify({"error": 'Invalid type formart'}), 400
     else:
         return jsonify({'error': 'Invalid file format'}), 400
     
