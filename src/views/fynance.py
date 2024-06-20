@@ -21,9 +21,10 @@ def get_register_bankers():
 @bp_fynance.route("/get-bankers")
 def get_list_bankers():
     """Get list all bankers"""
-    bankers = Banker.query.options(joinedload(Banker.financial_agreements)).order_by(Banker.name).all()
+    bankers = Banker.query.options(
+        db.joinedload(Banker.financial_agreements).subqueryload(FinancialAgreement.tables_finance)
+    ).order_by(Banker.name).all()
     return render_template("fynance/list_bankers.html", banks=bankers)
-
 
 @bp_fynance.route("/get-register-coven")
 def get_register_conven():
@@ -47,11 +48,11 @@ def get_delete_banker():
     return render_template("fynance/delete_bankers.html", banks=bankers)
 
 
-@bp_fynance.route("/register-bankers/tables", methods=['POST'])
-def get_register_bankers_tables():
-    """Register tables"""
-    # return render_template("overview.html") # manipulation route action form get front
-    return redirect(url_for('overview.home'))
+# @bp_fynance.route("/register-bankers/tables", methods=['POST'])
+# def get_register_bankers_tables():
+#     """Register tables"""
+#     return render_template("overview.html") # manipulation route action form get front
+#     # return redirect(url_for('overview.home'))
  
 
 @bp_fynance.route("/register-convenio", methods=['POST'])
@@ -159,3 +160,12 @@ def delete_conv_in_banker(id):
     db.session.delete(convenio)
     db.session.commit()
     return jsonify({'success': True, 'message': 'Convênio deletado com sucesso!'}), 200
+
+
+@bp_fynance.route("/delete-bankers/conv/tables/<int:id>", methods=['POST'])
+def delete_table_in_conv_in_banker(id):
+    table = TablesFinance.query.get_or_404(id)
+    db.session.delete(table)
+    db.session.commit()
+    return jsonify({"success": True, 'message': 'Tabela deletada com sucesso!'}), 200
+

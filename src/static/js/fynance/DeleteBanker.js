@@ -1,4 +1,4 @@
-document.getElementById('addBankForm').addEventListener('submit', function(event) {
+document.getElementById('deleteBanker').addEventListener('submit', function(event) {
     event.preventDefault(); 
 
     const selectElement = document.getElementById('bankerId');

@@ -6,9 +6,8 @@ from src.models.user import User
 class Banker(db.Model, UserMixin):
     __tablename__ = 'bankers'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=False, nullable=False)
+    name = db.Column(db.String, nullable=False)
     financial_agreements = db.relationship('FinancialAgreement', back_populates='banker')
-    tables = db.relationship('TablesFinance', backref='banker', lazy=True)
 
 class FinancialAgreement(db.Model, UserMixin):
     __tablename__ = 'financial_agreements'
@@ -16,7 +15,7 @@ class FinancialAgreement(db.Model, UserMixin):
     name = db.Column(db.String, nullable=False)
     banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id'))
     banker = db.relationship('Banker', back_populates='financial_agreements')
-    tables = db.relationship('TablesFinance', backref='financial_agreement', lazy=True)
+    tables_finance = db.relationship('TablesFinance', back_populates='financial_agreement', lazy='subquery')  # Mudado para subquery
 
 class TablesFinance(db.Model, UserMixin):
     __tablename__ = 'tables_finance'
@@ -28,8 +27,9 @@ class TablesFinance(db.Model, UserMixin):
     end_term = db.Column(db.String(100), nullable=False)
     rate = db.Column(db.String(100), nullable=False)
     banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id'), nullable=False)
-    conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id'), nullable=False)
-
+    conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id', ondelete='CASCADE'))
+    financial_agreement = db.relationship('FinancialAgreement', back_populates='tables_finance')
+    
 class RankFlat(db.Model, UserMixin):
     __tablename__ = 'rank_flats'
     id = db.Column(db.Integer, primary_key=True)
@@ -37,7 +37,6 @@ class RankFlat(db.Model, UserMixin):
     tables_finance = db.relationship('TablesFinance', back_populates='rank_flats')
 
 TablesFinance.rank_flats = db.relationship('RankFlat', back_populates='tables_finance')
-
 
 # class ReportBanker(db, UserMixin):
 #     """Conference report banker with tablesFynance"""

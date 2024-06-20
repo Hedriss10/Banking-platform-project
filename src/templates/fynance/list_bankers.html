@@ -1,34 +1,155 @@
 {% block listbankers %}
-<style>
-    .convenio-item {
-        background-color: #898989;
-        color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .delete-icon {
-        cursor: pointer;
-    }
-</style>
-<br>
-<p>Sistema de gerenciamento de comissões</p>
-<!-- List bankers -->
-<ul id="bankList" class="list-group mt-4">
-    {% for bank in banks %}
-    <li class="list-group-item" onclick="toggleConvenios('{{ bank.id }}')">
-        {{ bank.name }}
-        <ul id="convenios-{{ bank.id }}" class="list-group mt-2" style="display:none;">
-            {% for convenio in bank.financial_agreements %}
-            <li class="list-group-item convenio-item">
-                <strong>{{ convenio.name }}</strong>
-                <i class="fal fa-trash" data-id="{{ convenio.id }}" onclick="deleteConvenio(event, this)"></i>
-            </li>
-            {% endfor %}
-        </ul>
-    </li>
-    {% endfor %}
-</ul>
-<script src="{{ url_for('static', filename='js/fynance/toggleTables.js') }}"></script>
+
+<div class="container mt-3 ms-3">
+    
+    <div class="list-group shadow">
+        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#addBankModal">
+            <strong>Adicionar Banco</strong>
+            <i class="fas fa-university"></i>
+        </button>
+    </div>
+    
+    <div class="list-group shadow">
+        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#addBankModalConv">
+            <strong>Adicionar Convênio</strong>
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+    
+    <div class="list-group shadow">
+        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#deleteBankModal">
+            <strong>Deletar Banco</strong>
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+    
+    <div class="list-group shadow">
+        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#addBankModal">
+            <strong>Importar tabela de comissão</strong>
+            <i class="fas fa-upload"></i>
+        </button>
+    </div>
+    
+    <div class="list-group shadow">
+        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#addBankModal">
+            <strong>Adicionar tabela de comissão</strong>
+            <i class="fad fa-table"></i>
+        </button>
+    </div>
+    
+
+    <!-- Modal structure add new banker --> 
+    <div class="modal fade" id="addBankModal" tabindex="-1" aria-labelledby="addBankModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBankModalLabel">Adicionar Banco</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="addBankForm">
+                        <div class="mb-3">
+                            <label for="bankName" class="form-label">Nome do Banco</label>
+                            <input type="text" class="form-control" id="bankName" name="bankName" required>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <button type="submit" class="btn btn-primary">Salvar <i class="bi bi-save"></i></button>
+                            <button type="button" class="btn btn-secondary" onclick="window.location.reload();">Fechar <i class="bi bi-x-circle"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal structure add new conv --> 
+    <div class="modal fade" id="addBankModalConv" tabindex="-1" aria-labelledby="addBankConvModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBankConvModalLabel">Adcionar Convênio</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <form id="addBankConvForm">
+                            <div class="form-row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="convName" class="form-label">Nome do convênio</label>
+                                    <input type="text" class="form-control" id="convName" name="convName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="bankerId" class="form-label">Escolha o Banco</label>
+                                    <select class="form-control" id="bankerId" name="bankSelect" required>
+                                        {% for bank in banks %}
+                                        <option value="{{ bank.id }}">{{ bank.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <button type="submit" class="btn btn-primary">Salvar <i class="bi bi-save"></i></button>
+                                <button type="button" class="btn btn-secondary" onclick="window.location.reload();">Fechar <i class="bi bi-x-circle"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal structure delete banker conv --> 
+    <div class="modal fade" id="deleteBankModal" tabindex="-1" aria-labelledby="deleteBankModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form id="deleteBankForm">
+                        <div class="form-group">
+                            <label for="bankerIdDelete" class="form-label">Escolha o Banco</label>
+                            <select class="form-control" id="bankerIdDelete" name="bankSelect" required>
+                                {% for bank in banks %}
+                                <option value="{{ bank.id }}">{{ bank.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger">Deletar <i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar <i class="bi bi-x-circle"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- List bankers with conv and tables fynance -->
+    <ul id="bankList" class="list-group mt-4">
+        {% for bank in banks %}
+        <li class="list-group-item" onclick="toggleConvenios('{{ bank.id }}', event)">
+            <strong>{{ bank.name }}</strong>
+            <ul id="convenios-{{ bank.id }}" class="list-group mt-2" style="display:none;">
+                {% for convenio in bank.financial_agreements %}
+                <li class="list-group-item convenio-item" onclick="toggleConveniosBankersTables('{{ convenio.id }}', event)">
+                    <strong>{{ convenio.name }}</strong>
+                    <i class="fal fa-trash" data-id="{{ convenio.id }}" onclick="deleteConvenio(event, this)"></i>
+                </li>
+                <ul id="tables-{{ convenio.id }}" class="list-group nested-list">
+                    {% for table in convenio.tables_finance %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="display:none;">
+                        <div>
+                            <strong>{{ table.name }}</strong>
+                            <span class="details">Tipo: {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}</span>
+                        </div>
+                        <i class="fas fa-trash" data-id="{{table.id}}" onclick="deleteTableInCovInBanker(event, this)"></i>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>    
+</div>
+<script src="{{ url_for('static', filename='js/fynance/ToggleTables.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/DeleteConvBanker.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fynance/GermentCrudBankers.js') }}"></script>
 {% endblock %}

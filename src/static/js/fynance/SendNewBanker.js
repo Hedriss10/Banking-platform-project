@@ -21,4 +21,5 @@ document.getElementById('addBankForm').addEventListener('submit', function(event
         console.error('Error:', error);
         alert('An error occurred while communicating with the server.');
     });
-});
+})
+
