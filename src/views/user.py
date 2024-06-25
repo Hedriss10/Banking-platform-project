@@ -9,7 +9,6 @@ from ..models.user import User
 
 bp_user = Blueprint("users", __name__)
 
-
 @bp_user.route("/promoters")
 @login_required
 def promoters():
@@ -69,22 +68,6 @@ def get_register_form():
     return render_template("partials/register_promoters.html")
 
 
-@bp_user.route("/edit-promoters", methods=['GET'])
-@login_required
-def get_edit_form():
-    """Route partials edit promoters and users"""
-    users = User.query.order_by(User.user_identification).all()
-    return render_template("partials/edit_promoters.html", users=users)
-
-
-@bp_user.route("/delete-promoters", methods=['GET'])
-@login_required
-def get_delete_form():
-    """Route partials delete promoters and users"""
-    users = User.query.order_by(User.user_identification).all()
-    return render_template("partials/delete_promoters.html", users=users)
-
-
 @bp_user.route("/update-promoter/<int:id>", methods=['POST'])
 @login_required
 def update_promoter(id):
@@ -92,7 +75,6 @@ def update_promoter(id):
     user = User.query.get_or_404(id)
     data = request.get_json()
     new_password = data.get('password')
-    print(new_password)
     if new_password:
         user.password = generate_password_hash(new_password)
         try:

@@ -4,6 +4,7 @@ from flask import Blueprint , render_template, request, redirect, url_for
 from flask_login import login_required
 from flask import jsonify
 from flask_login import current_user
+from flask_login import login_required
 from src import db
 from sqlalchemy.orm import joinedload
 from ..models.fynance import Banker, FinancialAgreement, TablesFinance
@@ -14,12 +15,14 @@ bp_fynance = Blueprint("fynance", __name__)
 
 
 @bp_fynance.route("/bankers")
+@login_required
 def get_register_bankers():
     """Get modal operation bankers""" 
     return render_template("fynance/register_bankers.html")
 
 
 @bp_fynance.route("/get-bankers")
+@login_required
 def get_list_bankers():
     """Get list all bankers"""
     bankers = Banker.query.options(
@@ -28,6 +31,7 @@ def get_list_bankers():
     return render_template("fynance/list_bankers.html", banks=bankers)
 
 @bp_fynance.route("/get-register-coven")
+@login_required
 def get_register_conven():
     """Register coven, return banker for register conv in banker"""
     bankers = Banker.query.order_by(Banker.name).all()
@@ -35,20 +39,15 @@ def get_register_conven():
 
 
 @bp_fynance.route("/get-report-banker")
+@login_required
 def get_register_report():
     """Report banker with report system"""
     bankers = Banker.query.options(joinedload(Banker.financial_agreements)).order_by(Banker.name).all()
     return render_template("fynance/report_bankers.html", banks=bankers)
 
 
-@bp_fynance.route("/get-delete-banker")
-def get_delete_banker():
-    """Delete banker"""
-    bankers = Banker.query.order_by(Banker.name).all()
-    return render_template("fynance/delete_bankers.html", banks=bankers)
-
-
 @bp_fynance.route("/register-convenio", methods=['POST'])
+@login_required
 def post_register_conven():
     """Register conven bankers"""
     data = request.json
@@ -75,6 +74,7 @@ def post_register_conven():
 
 
 @bp_fynance.route("/register-bankers", methods=['POST'])
+@login_required
 def post_register_bankers():
     """Register bankers unique violation"""
     data = request.json
@@ -97,6 +97,7 @@ def post_register_bankers():
 
 
 @bp_fynance.route("/register-bankers/tables", methods=['POST'])
+@login_required
 def register_tables_bankers():
     """rout api for import tables in large quantities"""
     
@@ -143,6 +144,7 @@ def register_tables_bankers():
 
 
 @bp_fynance.route("/register-bankers/tables/banker/conv/one", methods=['POST'])
+@login_required
 def register_tables_one():
     """Endpoint for registering one table for bank and conv select"""
     bank_id = request.form['bankSelectOne']
@@ -175,6 +177,7 @@ def register_tables_one():
     
 
 @bp_fynance.route("/delete-bankers/<int:id>", methods=['POST'])
+@login_required
 def delete_bankers(id):
     banker = Banker.query.get_or_404(id)
     db.session.delete(banker)
@@ -183,6 +186,7 @@ def delete_bankers(id):
     
 
 @bp_fynance.route("/delete-bankers/conv/<int:id>", methods=['POST'])
+@login_required
 def delete_conv_in_banker(id):
     convenio = FinancialAgreement.query.get_or_404(id)
     db.session.delete(convenio)
@@ -191,6 +195,7 @@ def delete_conv_in_banker(id):
 
 
 @bp_fynance.route("/delete-bankers/conv/tables/<int:id>", methods=['POST'])
+@login_required
 def delete_table_in_conv_in_banker(id):
     table = TablesFinance.query.get_or_404(id)
     db.session.delete(table)
