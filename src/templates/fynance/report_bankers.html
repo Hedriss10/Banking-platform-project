@@ -19,7 +19,7 @@
       <h4>Importar Tabela de Comissão</h4>
     </div>
     <div class="card-body">
-      <form id="importForm" method="post" enctype="multipart/form-data" action="{{url_for('fynance.get_register_bankers_tables')}}">
+      <form id="importForm" method="POST" enctype="multipart/form-data" action="/register-bankers/tables">
         <div class="mb-3">
           <label for="fileInput" class="form-label">Escolha o arquivo (.csv, .xlsx):</label>
           <input class="form-control" type="file" id="fileInput" name="file">

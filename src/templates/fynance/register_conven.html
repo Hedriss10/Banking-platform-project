@@ -5,15 +5,15 @@
             <h5 class="card-title" id="addBankModalLabel">Adicionar Novo Convênio</h5>
         </div>
         <div class="card-body">
-            <form id="addBankForm">
+            <form id="addBankConvForm">
                 <div class="form-row">
                     <div class="col-md-6 mb-3">
                         <label for="convName" class="form-label">Nome do convênio</label>
                         <input type="text" class="form-control" id="convName" name="convName" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="bankerId" class="form-label">Escolha o Banco</label>
-                        <select class="form-control" id="bankerId" name="bankSelect" required>
+                        <label for="bankerIdConv" class="form-label">Escolha o Banco</label>
+                        <select class="form-control" id="bankerIdConv" name="bankSelect" required>
                             {% for bank in banks %}
                             <option value="{{ bank.id }}">{{ bank.name }}</option>
                             {% endfor %}

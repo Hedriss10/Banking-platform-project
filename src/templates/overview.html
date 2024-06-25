@@ -11,17 +11,19 @@
             <button class="btn d-md-none d-block close-btn px-1 py-0 text-white"><i class="fal fa-stream"></i></button>
         </div>
         <ul class="list-unstyled px-2">
+            {% if 'Administrador' in session['type_user_func'] or 'Financeiro' in session['type_user_func'] %}
+            <!-- Admin e Financeiro veem todos os itens -->
             <li class="active">
                 <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".dashboard-content"><i class="fal fa-home"></i> Dashboard</a>
             </li>
             <li>
-                <a href="#"   class="text-decoration-none px-3 py-2 d-block" data-target=".financeiro-content"><i class="fal fa-money-bill-alt"></i> Financeiro</a>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".financeiro-content"><i class="fal fa-money-bill-alt"></i> Financeiro</a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".propostas-content"><i class="fal fa-newspaper"></i></i></i> Propostas</a>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".propostas-content"><i class="fal fa-newspaper"></i> Propostas</a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".campanhas-content"><i class="fal fa-mobile-alt"></i></i> Campanhas</a>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".campanhas-content"><i class="fal fa-mobile-alt"></i> Campanhas</a>
             </li>
             <li>
                 <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".promotores-content">
@@ -29,16 +31,31 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".atendimento-content"><i class="fal fa-phone-volume"></i></i> Atendimento</a>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".atendimento-content"><i class="fal fa-phone-volume"></i> Atendimento</a>
             </li>
             <hr class="h-color mx-2">
             <li>
-                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".bsponto-content"><i class="fal fa-clock"></i></i> BS Ponto</a>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".bsponto-content"><i class="fal fa-clock"></i> BS Ponto</a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".config-content"><i class="fal fa-cog"></i></i> Configuração</a>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".config-content"><i class="fal fa-cog"></i> Configuração</a>
             </li>
-            <!-- add functions sidebar -->
+            {% else %}
+            <!-- Outros usuários veem itens limitados -->
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".propostas-content"><i class="fal fa-newspaper"></i> Propostas</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".campanhas-content"><i class="fal fa-mobile-alt"></i> Campanhas</a>
+            </li>
+            <hr class="h-color mx-2">
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".bsponto-content"><i class="fal fa-clock"></i> BS Ponto</a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none px-3 py-2 d-block" data-target=".config-content"><i class="fal fa-cog"></i> Configuração</a>
+            </li>
+            {% endif %}
         </ul>
         
     </div>
@@ -77,16 +94,10 @@
             <button class="btn btn-warning" hx-get="{{url_for('fynance.get_list_bankers')}}" hx-target="#list-bankers" data-target="listBankers">
                 Gerenciamento de comissões
             </button>
-            <button class="btn btn-success" hx-get="{{url_for('fynance.get_register_bankers')}}" hx-target="#register-bankers" data-target="registerBankers">Cadastrar Bancos</button>   
-            <button class="btn btn-info" hx-get="{{url_for('fynance.get_register_conven')}}" hx-target="#conven-banker" data-target="convenBankers">Registrar Convênio</button>
-            <button class="btn btn-dark" hx-get="{{url_for('fynance.get_register_report')}}" hx-target="#report-banker" data-target="reportBankers">Importar relatório de comissão</button>
-            <button class="btn btn-danger" hx-get="{{url_for('fynance.get_delete_banker')}}" hx-target="#delete-banker" data-target="deleteBankers">Deletar Bancos</button>
+            <button class="btn btn-success" data-target="registerBankers">Pagamento de comissão</button>   
 
             <div id="register-bankers" style="display:none;"></div>
             <div id="list-bankers" style="display:none;"></div>
-            <div id="conven-banker" style="display:none;"></div>
-            <div id="report-banker" style="display:none;"></div>
-            <div id="delete-banker" style="display:none;"></div>
 
 
         </div>
@@ -102,32 +113,14 @@
 
         <div class="promotores-content content-section px-3 pt-4" style="display: none;"> <!-- Gerenciamento dos promoters -->
             <h2 class="fs-5">Promotores</h2>
-            <p class="fs-6">Gestão de promotores e vendedores:</p>
+            <p class="fs-6">Gestão de funcionários</p>
         
             <button hx-get="{{ url_for('users.promoters') }}" hx-trigger="click" hx-target="#search-promoters" 
             class="btn btn-primary" data-target="loadPromoters">
                 Carregar Promotores
             </button>
-        
-            <button hx-get="{{ url_for('users.get_register_form') }}" hx-target="#post-promoters"
-            class="btn btn-success" data-target="registerPromoters">
-                Cadastrar Promotores
-            </button>
-            
-            <button hx-get="{{ url_for('users.get_edit_form') }}" hx-target="#edit-promoters"
-            class="btn btn-warning" data-target="editPromoters">
-                Editar Promotores
-            </button>
-
-            <button hx-get="{{ url_for('users.get_delete_form') }}" hx-target="#delete-promoters"
-            class="btn btn-danger" data-target="deletePromoters">
-                Deletar Promoters
-            </button>
-
-            <div id="search-promoters" style="display:none;">{% block promoterscontent %}{% endblock %}</div>
-            <div id="post-promoters" style="display:none;">{% block promotersregistercontent %}{% endblock %}</div>
-            <div id="edit-promoters" style="display:none;">{% block promotersedit %}{% endblock %}</div>
-            <div id="delete-promoters" style="display:none;">{% block promotersdelete %}{% endblock %}</div>
+    
+            <div id="search-promoters" >{% block promoterscontent %}{% endblock %}</div>
         </div>
 
         <div class="atendimento-content content-section px-3 pt-4" style="display:none;">
