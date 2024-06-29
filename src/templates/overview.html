@@ -88,7 +88,7 @@
             <p>Sistema de dashboard dependente do sistema de finanças</p>
         </div>
 
-        <div class="financeiro-content content-section px-3 pt-4" style="display:none;">
+        <div class="financeiro-content content-section px-3 pt-4" style="display:none;"> <!--Sistema de genrenciamento de banco-->
             <h2 class="fs-5">Gerenciamento Financeiro</h2>
             <br>
             <button class="btn btn-warning" hx-get="{{url_for('fynance.get_list_bankers')}}" hx-target="#list-bankers" data-target="listBankers">
@@ -102,10 +102,21 @@
 
         </div>
         
-        <div class="propostas-content content-section px-3 pt-4" style="display:none;">
+        <div class="propostas-content content-section px-3 pt-4" style="display:none;"> <!--Gerenciamento de contratos e status-->
             <h2 class="fs-5">Propostas</h2>
-            <p>Detalhes das propostas...</p>
+            <p>Detalhes das propostas</p>
+            <button class="btn btn-warning" hx-get="{{url_for('proposal.get_proposal')}}" hx-target="#list-proposal" data-target="listProposal">
+                Gerenciamento de contratos e propostas
+            </button>
+
+            <button class="btn btn-warning" hx-get="{{url_for('proposal.get_status_proposal')}}" hx-target="#status-proposal" data-target="StatusProposal">
+                Status de contratos e propostas
+            </button>
+            
+            <div id="list-proposal" style="display:none;"></div>
+            <div id="status-proposal" style="display:none;"></div>
         </div>
+        
         <div class="campanhas-content content-section px-3 pt-4" style="display:none;">
             <h2 class="fs-5">Campanhas</h2>
             <p>Informações sobre campanhas...</p>
@@ -148,4 +159,5 @@
 <script src="{{ url_for('static', filename='js/TrasnlateEvent.js') }}"></script>
 <script src="{{ url_for('static', filename='js/point/OpenModalPoint.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/TranslateEventFynance.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proposal/TranslateEventFynance.js') }}"></script>
 {% endblock %}
