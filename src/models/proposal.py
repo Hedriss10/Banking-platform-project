@@ -38,6 +38,8 @@ class UserProposal(db.Model, UserMixin):
     phone_user = db.Column(db.String(100)) # telefone pessoal 
     benefit_user = db.Column(db.String(100)) # especie de beneficio 
     uf_benefit_user = db.Column(db.String(12)) # uf da especie do beneficio 
+    observation = db.Column(db.String(200))
+    
     
     def __init__(self, created_at, name, cpf, lastname, email, sex_user, password_against_check, naturalness, naturalness_uf, identity, organ_sender_identity, 
                  uf_sender_identity, day_uf_sender_identity, name_father, name_mother, zip_code, address, number, neighborhood, city, uf, 

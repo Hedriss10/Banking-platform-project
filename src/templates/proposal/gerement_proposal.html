@@ -1,134 +1,148 @@
 {% block proposalcontent %}
 <br>
 <div class="list-group shadow">
-    <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
-    data-bs-toggle="modal" data-bs-target="#formularioModal">
+    <button type="button"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        data-bs-toggle="modal" data-bs-target="#formularioModal">
         Cadastrar contrato
         <i class="fal fa-file-contract"></i>
     </button>
+</div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="formularioModal" tabindex="-1" aria-labelledby="formularioModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="formularioModalLabel">Cadastrar um contrato</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Tabs navs -->
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="orgao-tab" data-bs-toggle="tab" data-bs-target="#orgao"
-                                type="button" role="tab" aria-controls="orgao" aria-selected="true">Órgão e
-                                Secretaria</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="dados-pessoais-tab" data-bs-toggle="tab"
-                                data-bs-target="#dados-pessoais" type="button" role="tab" aria-controls="dados-pessoais"
-                                aria-selected="false">Dados Pessoais</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="dados-bancarios-tab" data-bs-toggle="tab"
-                                data-bs-target="#dados-bancarios" type="button" role="tab"
-                                aria-controls="dados-bancarios" aria-selected="false">Dados Bancários</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="dados-operacao-tab" data-bs-toggle="tab"
-                                data-bs-target="#dados-operacao" type="button" role="tab" aria-controls="dados-operacao"
-                                aria-selected="false">Dados da Operação</button>
-                        </li>
-                    </ul>
-                    <!-- Tabs content -->
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade show active" id="orgao" role="tabpanel" aria-labelledby="orgao-tab">
-                            <form>
-                                <div class="col-md-6 mb-3">
-                                    <label for="bankerProposal" class="form-label">Escolha o Banco</label>
-                                    <select class="form-control" id="bankerProposal" name="bankSelect" required>
-                                        {% for bank in banks %}
-                                        <option value="{{ bank.id }}">{{ bank.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="convenioSelectProposal" class="form-label">Selecione o Convênio:</label>
-                                    <select class="form-select" id="convenioSelectProposal" name="convenioSelectProposal">
-                                        <option value="">Escolha...</option>
-                                        {% for bank in banks %}
-                                        {% for convenio in bank.financial_agreements %}
-                                        <option class="convenio-options" value="{{ convenio.id }}" data-bank-id="{{ bank.id }}" style="display: none;">{{ convenio.name }}</option>
-                                        {% endfor %}
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="OperationSelect" class="form-label">Selecione a operação</label>
-                                    <select class="form-select" name="operationselect" id="OperationSelect">
-                                        <option value=""></option>
-                                        <option value="abertura_conta">Abertura de conta</option>
-                                        <option value="cartao_c_saque">Cartão c/saque</option>
-                                        <option value="cartao_c_saque_complementar_a_vista">Cartão c/saque complementar à vista</option>
-                                        <option value="cartao_c_saque_complementar_parcelado">Cartão c/saque complementar parcelado</option>
-                                        <option value="cartao_c_saque_parcelado">Cartão c/saque parcelado</option>
-                                        <option value="cartao_s_saque">Cartão s/saque</option>
-                                        <option value="compra_divida">Compra de dívida</option>
-                                        <option value="compra_divida_margem_livre">Compra de dívida + Margem Livre</option>
-                                        <option value="compra_divida_refinanciamento">Compra de dívida + Refinanciamento</option>
-                                        <option value="compra_divida_refin_margem_livre">Compra de dívida + Refinanciamento + Margem Livre</option>
-                                        <option value="emprestimo_complementar_inss">Empréstimo complementar INSS</option>
-                                        <option value="margem_livre_novo">Margem Livre (Novo)</option>
-                                        <option value="margem_livre_refinanciamento">Margem Livre + Refinanciamento</option>
-                                        <option value="portabilidade">Portabilidade</option>
-                                        <option value="portabilidade_margem_livre">Portabilidade + Margem Livre</option>
-                                        <option value="portabilidade_margem_livre_refin">Portabilidade + Margem Livre + Refin</option>
-                                        <option value="portabilidade_refin">Portabilidade + Refin</option>
-                                        <option value="refinanciamento">Refinanciamento</option>
-                                        <option value="refinanciamento_portabilidade">Refinanciamento da Portabilidade</option>
-                                        <option value="refin_portabilidade_margem_livre">Refinanciamento da Portabilidade + Margem Livre</option>
-                                        <option value="refinanciamento_rec">Refinanciamento Rec</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="matricula" class="form-label">Matrícula</label>
-                                    <input type="text" class="form-control" id="matricula">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Senha</label>
-                                    <input type="password" class="form-control" id="senha">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ddb" class="form-label">Data de Despacho</label>
-                                    <input type="date" class="form-control" id="ddb">
-                                </div>
-                            </form>
+<div class="modal fade" id="formularioModal" tabindex="-1" aria-labelledby="formularioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formularioModalLabel">Cadastrar um contrato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="proposalForm">
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="container-fluid">
+                        <label for="ProposalEmprest" class="form-label"><strong>Proposta de Empréstimo:</strong></label>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="bankerProposal" class="form-label">Escolha o Banco</label>
+                                <select class="form-control" id="bankerProposal" name="bankSelect" required>
+                                    <option value="">Escolha...</option>
+                                    {% for banker in bankers %}
+                                    <option value="{{ banker.id }}">{{ banker.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="convenioSelectProposal" class="form-label">Selecione o Convênio:</label>
+                                <select class="form-select" id="convenioSelectProposal" name="convenioSelectProposal" required>
+                                    <option value="">Escolha...</option>
+                                    {% for banker in bankers %}
+                                    {% for convenio in banker.financial_agreements %}
+                                    <option class="convenio-options"  data-bank-id="{{ banker.id }}" value="{{ convenio.id }}" >{{ convenio.name }}</option>
+                                    {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
-                        <div class="tab-pane fade" id="dados-pessoais" role="tabpanel"
-                            aria-labelledby="dados-pessoais-tab">
-                            <div class="mb-3">
-                                <label for="cpf" class="form-label">CPF</label>
-                                <input type="number" class="form-control" id="CPF"> 
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="tableSelectProposal" class="form-label">Selecione a Tabela:</label>
+                                <select class="form-select" id="tableSelectProposal" name="tableSelectProposal" required>
+                                    <option value="">Escolha...</option>
+                                    <!-- As opções são pré-carregadas aqui, mas serão controladas pelo JavaScript -->
+                                    {% for banker in bankers %}
+                                    {% for convenio in banker.financial_agreements %}
+                                    {% for table in convenio.tables_finance %}
+                                    <option class="table-options"  data-convenio-id="{{ convenio.id }}" value="{{ table.id }}"  >
+                                        <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                    </option>
+                                    {% endfor %}
+                                    {% endfor %}
+                                    {% endfor %}
+                                </select>
                             </div>
-                            <div class="mb-3">
-                                <label for="sexo" class="form-label">Sexo</label>
-                                <input type="text" class="form-control" id="matricula">
+                            <div class="col-md-6">
+                                <label for="OperationSelect" class="form-label">Selecione a operação</label>
+                                <select class="form-select" name="operationselect" id="OperationSelect" required>
+                                    <option value=""></option>
+                                    <option value="abertura_conta">Abertura de conta</option>
+                                    <option value="cartao_c_saque">Cartão c/saque</option>
+                                    <option value="cartao_c_saque_complementar_a_vista">Cartão c/saque complementar à vista</option>
+                                    <option value="cartao_c_saque_complementar_parcelado">Cartão c/saque complementar parcelado</option>
+                                    <option value="cartao_c_saque_parcelado">Cartão c/saque parcelado</option>
+                                    <option value="cartao_s_saque">Cartão s/saque</option>
+                                    <option value="compra_divida">Compra de dívida</option>
+                                    <option value="compra_divida_margem_livre">Compra de dívida + Margem Livre</option>
+                                    <option value="compra_divida_refinanciamento">Compra de dívida + Refinanciamento</option>
+                                    <option value="compra_divida_refin_margem_livre">Compra de dívida + Refinanciamento + Margem Livre</option>
+                                    <option value="emprestimo_complementar_inss">Empréstimo complementar INSS</option>
+                                    <option value="margem_livre_novo">Margem Livre (Novo)</option>
+                                    <option value="margem_livre_refinanciamento">Margem Livre + Refinanciamento</option>
+                                    <option value="portabilidade">Portabilidade</option>
+                                    <option value="portabilidade_margem_livre">Portabilidade + Margem Livre</option>
+                                    <option value="portabilidade_margem_livre_refin">Portabilidade + Margem Livre + Refin</option>
+                                    <option value="portabilidade_refin">Portabilidade + Refin</option>
+                                    <option value="refinanciamento">Refinanciamento</option>
+                                    <option value="refinanciamento_portabilidade">Refinanciamento da Portabilidade</option>
+                                    <option value="refin_portabilidade_margem_livre">Refinanciamento da Portabilidade + Margem Livre</option>
+                                    <option value="refinanciamento_rec">Refinanciamento Rec</option>
+                                </select>
                             </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="matricula" class="form-label">Matrícula</label>
+                                <input type="text" class="form-control" id="matricula" name="matricula" required>
                             </div>
-                            <div class="mb-3">
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">Senha</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="ddb" class="form-label">Data de Despacho</label>
+                                <input type="date" class="form-control" id="ddb" name="ddb" required>
+                            </div>
+                            <div class="col-md-6">
                                 <label for="senha-contracheque" class="form-label">Senha do contra-cheque</label>
-                                <input type="text" class="form-control" id="senhacontracheque">
+                                <input type="text" class="form-control" id="senhacontracheque" name="senhacontracheque" required>
                             </div>
-                            <div class="mb-3">
+                        </div>
+                        <hr>
+                        <label for="DataRegister" class="form-label"><strong>Dados Cadastrais:</strong></label>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ddb-year" class="form-label">Data de Nascimento</label>
+                                <input type="date" class="form-control" id="ddb-year" name="ddb-year" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="sexo" class="form-label">Sexo</label>
+                                <input type="text" class="form-control" id="sexo" name="sexo" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="cpf" class="form-label">CPF</label>
+                                <input type="number" class="form-control" id="CPF" name="CPF" required>  
+                            </div>
+                            <div class="col-md-6">
                                 <label for="naturalidade" class="form-label">Naturalidade</label>
-                                <input type="text" class="form-control" id="naturalidae">
+                                <input type="text" class="form-control" id="naturalidae" name="naturalidade" required>
                             </div>
-                            <div class="mb-3">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="StateSelect" class="form-label">Selecione o estado</label>
-                                <select class="form-select" name="stateselect" id="StateSelect">
+                                <select class="form-select" name="stateselect" id="StateSelect" required>
                                     <option value=""></option>
                                     <option value="AC">Acre</option>
                                     <option value="AL">Alagoas</option>
@@ -159,198 +173,19 @@
                                     <option value="TO">Tocantins</option>
                                 </select>
                             </div>
-                            <div class="mb-3">
+                            <div class="col-md-6">
                                 <label for="identidade" class="form-label">Identidade</label>
-                                <input type="text" class="form-control" id="identidade">
+                                <input type="text" class="form-control" id="identidade" name="identidade" required>
                             </div>
-                            <div class="mb-3">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="OrganSend" class="form-label">Órgão Emissor</label>
-                                <input type="text" class="form-control" id="OrganSend">
+                                <input type="text" class="form-control" id="OrganSend" name="orgao_emissor" required>
                             </div>
-                            <div class="mb-3">
+                            <div class="col-md-6">
                                 <label for="StateUfSelect" class="form-label">UF Emissão</label>
-                                <select class="form-select" name="StateUfSelect" id="StateUfSelect">
-                                    <option value=""></option>
-                                    <option value="AC">Acre</option>
-                                    <option value="AL">Alagoas</option>
-                                    <option value="AP">Amapá</option>
-                                    <option value="AM">Amazonas</option>
-                                    <option value="BA">Bahia</option>
-                                    <option value="CE">Ceará</option>
-                                    <option value="DF">Distrito Federal</option>
-                                    <option value="ES">Espírito Santo</option>
-                                    <option value="GO">Goiás</option>
-                                    <option value="MA">Maranhão</option>
-                                    <option value="MT">Mato Grosso</option>
-                                    <option value="MS">Mato Grosso do Sul</option>
-                                    <option value="MG">Minas Gerais</option>
-                                    <option value="PA">Pará</option>
-                                    <option value="PB">Paraíba</option>
-                                    <option value="PR">Paraná</option>
-                                    <option value="PE">Pernambuco</option>
-                                    <option value="PI">Piauí</option>
-                                    <option value="RJ">Rio de Janeiro</option>
-                                    <option value="RN">Rio Grande do Norte</option>
-                                    <option value="RS">Rio Grande do Sul</option>
-                                    <option value="RO">Rondônia</option>
-                                    <option value="RR">Roraima</option>
-                                    <option value="SC">Santa Catarina</option>
-                                    <option value="SP">São Paulo</option>
-                                    <option value="SE">Sergipe</option>
-                                    <option value="TO">Tocantins</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="dayOmission" class="form-label">Data de emissão</label>
-                                <input type="date" class="form-control" id="dayOmission">
-                            </div>
-                            <div class="mb-3">
-                                <label for="father" class="form-label">Nome do pai</label>
-                                <input type="text" class="form-control" id="father">
-                            </div>
-                            <div class="mb-3">
-                                <label for="mother" class="form-label">Nome do mãe</label>
-                                <input type="text" class="form-control" id="mother">
-                            </div>
-                            <div class="mb-3">
-                                <label for="zipcode" class="form-label">CEP</label>
-                                <input type="text" class="form-control" id="zipcode">
-                            </div>
-                            <div class="mb-3">
-                                <label for="address" class="form-label">Endereço</label>
-                                <input type="text" class="form-control" id="address">
-                            </div>
-                            <div class="mb-3">
-                                <label for="address-number" class="form-label">Número</label>
-                                <input type="text" class="form-control" id="address-number">
-                            </div>
-                            <div class="mb-3">
-                                <label for="address-complement" class="form-label">Complemento</label>
-                                <input type="text" class="form-control" id="address-complement">
-                            </div>
-                            <div class="mb-3">
-                                <label for="neighborhood" class="form-label">Bairro</label>
-                                <input type="text" class="form-control" id="neighborhood">
-                            </div>
-                            <div class="mb-3">
-                                <label for="city" class="form-label">Cidade</label>
-                                <input type="text" class="form-control" id="city">
-                            </div>
-                            <div class="mb-3">
-                                <label for="StateUfCitySelect" class="form-label">UF Emissão</label>
-                                <select class="form-select" name="StateUfCitySelect" id="StateUfCitySelect">
-                                    <option value=""></option>
-                                    <option value="AC">Acre</option>
-                                    <option value="AL">Alagoas</option>
-                                    <option value="AP">Amapá</option>
-                                    <option value="AM">Amazonas</option>
-                                    <option value="BA">Bahia</option>
-                                    <option value="CE">Ceará</option>
-                                    <option value="DF">Distrito Federal</option>
-                                    <option value="ES">Espírito Santo</option>
-                                    <option value="GO">Goiás</option>
-                                    <option value="MA">Maranhão</option>
-                                    <option value="MT">Mato Grosso</option>
-                                    <option value="MS">Mato Grosso do Sul</option>
-                                    <option value="MG">Minas Gerais</option>
-                                    <option value="PA">Pará</option>
-                                    <option value="PB">Paraíba</option>
-                                    <option value="PR">Paraná</option>
-                                    <option value="PE">Pernambuco</option>
-                                    <option value="PI">Piauí</option>
-                                    <option value="RJ">Rio de Janeiro</option>
-                                    <option value="RN">Rio Grande do Norte</option>
-                                    <option value="RS">Rio Grande do Sul</option>
-                                    <option value="RO">Rondônia</option>
-                                    <option value="RR">Roraima</option>
-                                    <option value="SC">Santa Catarina</option>
-                                    <option value="SP">São Paulo</option>
-                                    <option value="SE">Sergipe</option>
-                                    <option value="TO">Tocantins</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="value-salary" class="form-label">Valor do Salário</label>
-                                <input type="number" class="form-control" id="value-salary">
-                            </div>
-                            <div class="mb-3">
-                                <label for="phone-residential" class="form-label">Telefone Residencial</label>
-                                <input type="text" class="form-control" id="phone-residential">
-                            </div>
-                            <div class="mb-3">
-                                <label for="phone-comercial" class="form-label">Telefone Comerical</label>
-                                <input type="text" class="form-control" id="phone-comercial">
-                            </div>
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Telefone Celular</label>
-                                <input type="text" class="form-control" id="phone">
-                            </div>
-                            <div class="mb-3">
-                                <label for="BenefitSelect" class="form-label">Selecione o benefício</label>
-                                <select class="form-select" name="benefitselect" id="BenefitSelect">
-                                    <option value=""></option>
-                                    <option value="1">Por morte do trabalhador rural</option>
-                                    <option value="2">Pensão por morte por acidente do trabalho do trabalhador rural</option>
-                                    <option value="3">Pensão por morte do empregador rural</option>
-                                    <option value="4">Por invalidez do trabalhador rural</option>
-                                    <option value="5">Aposentadoria por invalidez, por acidente do trabalhador rural</option>
-                                    <option value="6">Por invalidez do empregador rural</option>
-                                    <option value="7">Por idade do trabalhador rural</option>
-                                    <option value="8">Por idade do empregador rural</option>
-                                    <option value="11">Amparo previdenciário invalidez - Trab. rural</option>
-                                    <option value="12">Amparo previdenciário idade - Trab. rural</option>
-                                    <option value="18">Auxílio inclusão</option>
-                                    <option value="19">Pensão de estudante (Lei 7004/82)</option>
-                                    <option value="20">Pensão por morte de ex-diplomata</option>
-                                    <option value="21">Por morte previdenciária (LOPS)</option>
-                                    <option value="22">Por morte estatutária (EPU)</option>
-                                    <option value="23">Por morte de ex-combatente</option>
-                                    <option value="24">Pensão especial (ato institucional)</option>
-                                    <option value="26">Pensão especial (Lei 593/48) (EPU)</option>
-                                    <option value="27">Por morte do servidor público federal com dupla aposentadoria</option>
-                                    <option value="28">Por morte, do Regime Geral (Decreto 20465/31)</option>
-                                    <option value="29">Por morte de ex-combatente marítimo (Lei 1756/52)</option>
-                                    <option value="30">Renda mensal vitalícia por incapacidade</option>
-                                    <option value="32">Por invalidez previdenciária (LOPS)</option>
-                                    <option value="33">Por invalidez de aeronauta</option>
-                                    <option value="34">Por invalidez de ex-combatente marítimo (Lei 1.756/52)</option>
-                                    <option value="37">Aposentadoria de extranumerário da União (EPU)</option>
-                                    <option value="38">Aposentadoria da extinta CAPIN (EPU)</option>
-                                    <option value="40">Renda mensal vitalícia por idade</option>
-                                    <option value="41">Por idade (LOPS)</option>
-                                    <option value="42">Por tempo de contribuição previdenciária</option>
-                                    <option value="43">Por tempo de contribuição de ex-combatente</option>
-                                    <option value="44">Por tempo de contribuição de aeronauta</option>
-                                    <option value="45">Por tempo de contribuição de jornalista profissional</option>
-                                    <option value="46">Por tempo de contribuição especial</option>
-                                    <option value="49">Por tempo de contribuição ordinária</option>
-                                    <option value="51">Aposentadoria por invalidez (Extinto Plano Básico)</option>
-                                    <option value="52">Por idade (Extinto plano Básico)</option>
-                                    <option value="54">Pensão especial vitalícia (Lei 9793/99) (EPU)</option>
-                                    <option value="55">Por morte (Extinto Plano Básico)</option>
-                                    <option value="56">Pensão mensal vitalícia por síndrome de talidomida (Lei 7070/82)</option>
-                                    <option value="57">Por tempo de contribuição de professores (EC/CF 18/81)</option>
-                                    <option value="58">Aposentadoria excepcional do anistiado (Lei 6683/79) (EPU)</option>
-                                    <option value="59">Por morte excepcional do anistiado (Lei 6683/79) (EPU)</option>
-                                    <option value="60">Pensão especial mensal vitalícia (Lei 10.923/04)</option>
-                                    <option value="72">Por tempo de contribuição de ex-combatente marítimo (Lei 1756/52)</option>
-                                    <option value="78">Por idade de ex-combatente marítimo (Lei 1.756/52)</option>
-                                    <option value="81">Por idade compulsória (Ex-SASSE)</option>
-                                    <option value="82">Por tempo de contribuição (Ex-SASSE)</option>
-                                    <option value="83">Aposentadoria por invalidez (Ex-SASSE)</option>
-                                    <option value="84">Por morte (Ex-SASSE)</option>
-                                    <option value="87">Amparo assistencial ao portador de deficiência (LOAS)</option>
-                                    <option value="88">Amparo assistencial ao idoso (LOAS)</option>
-                                    <option value="89">Pensão especial aos dependentes de vítimas fatais por contaminação na hemodiálise (EPU)</option>
-                                    <option value="92">Aposentadoria por invalidez por acidente do trabalho</option>
-                                    <option value="93">Pensão por morte por acidente do trabalho</option>
-                                    <option value="94">Auxílio-acidente por acidente do trabalho</option>
-                                    <option value="96">Pensão especial para pessoas atingidas por Hanseníase</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="StateBenefitUf" class="form-label">UF Emissão</label>
-                                <select class="form-select" name="StateBenefitUf" id="StateBenefitUf">
+                                <select class="form-select" name="StateUfSelect" id="StateUfSelect" required>
                                     <option value=""></option>
                                     <option value="AC">Acre</option>
                                     <option value="AL">Alagoas</option>
@@ -382,19 +217,136 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="dados-bancarios" role="tabpanel" 
-                            aria-labelledby="dados-bancarios-tab">
-                            <!-- Adicione campos de formulário para dados bancários aqui -->
-                            <div class="mb-3">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="dayOmission" class="form-label">Data de emissão</label>
+                                <input type="date" class="form-control" id="dayOmission" name="data_emissao" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="father" class="form-label">Nome do pai</label>
+                                <input type="text" class="form-control" id="father" name="pai" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="mother" class="form-label">Nome do mãe</label>
+                                <input type="text" class="form-control" id="mother" name="mae" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="zipcode" class="form-label">CEP</label>
+                                <input type="text" class="form-control" id="zipcode" name="cep" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="address" class="form-label">Endereço</label>
+                                <input type="text" class="form-control" id="address" name="endereco" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="address-number" class="form-label">Número</label>
+                                <input type="text" class="form-control" id="address-number" name="numero" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="address-complement" class="form-label">Complemento</label>
+                                <input type="text" class="form-control" id="address-complement" name="complemento" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="neighborhood" class="form-label">Bairro</label>
+                                <input type="text" class="form-control" id="neighborhood" name="bairro" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="city" class="form-label">Cidade</label>
+                                <input type="text" class="form-control" id="city" name="cidade" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="StateUfCitySelect" class="form-label">UF Cidade</label>
+                                <select class="form-select" name="StateUfCitySelect" id="StateUfCitySelect" required>
+                                    <option value=""></option>
+                                    <option value="AC">Acre</option>
+                                    <option value="AL">Alagoas</option>
+                                    <option value="AP">Amapá</option>
+                                    <option value="AM">Amazonas</option>
+                                    <option value="BA">Bahia</option>
+                                    <option value="CE">Ceará</option>
+                                    <option value="DF">Distrito Federal</option>
+                                    <option value="ES">Espírito Santo</option>
+                                    <option value="GO">Goiás</option>
+                                    <option value="MA">Maranhão</option>
+                                    <option value="MT">Mato Grosso</option>
+                                    <option value="MS">Mato Grosso do Sul</option>
+                                    <option value="MG">Minas Gerais</option>
+                                    <option value="PA">Pará</option>
+                                    <option value="PB">Paraíba</option>
+                                    <option value="PR">Paraná</option>
+                                    <option value="PE">Pernambuco</option>
+                                    <option value="PI">Piauí</option>
+                                    <option value="RJ">Rio de Janeiro</option>
+                                    <option value="RN">Rio Grande do Norte</option>
+                                    <option value="RS">Rio Grande do Sul</option>
+                                    <option value="RO">Rondônia</option>
+                                    <option value="RR">Roraima</option>
+                                    <option value="SC">Santa Catarina</option>
+                                    <option value="SP">São Paulo</option>
+                                    <option value="SE">Sergipe</option>
+                                    <option value="TO">Tocantins</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="value-salary" class="form-label">Valor do Salário</label>
+                                <input type="number" class="form-control" id="value-salary" name="salario" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone-residential" class="form-label">Telefone Residencial</label>
+                                <input type="text" class="form-control" id="phone-residential" name="telefone_residencial" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="phone-comercial" class="form-label">Telefone Comercial</label>
+                                <input type="text" class="form-control" id="phone-comercial" name="telefone_comercial" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Telefone Celular</label>
+                                <input type="text" class="form-control" id="phone" name="telefone_celular" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="BenefitSelect" class="form-label">Selecione o benefício</label>
+                                <select class="form-select" name="benefitselect" id="BenefitSelect" required>
+                                    <option value=""></option>
+                                    <!-- Opções de benefício -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="StateBenefitUf" class="form-label">UF Emissão</label>
+                                <select class="form-select" name="StateBenefitUf" id="StateBenefitUf" required>
+                                    <option value=""></option>
+                                    <!-- Opções de UF -->
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <label for="OperationBankerData" class="form-label"><h6><strong>Dados Bancários</strong></h6></label>                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="SelectBankerPayment" class="form-label">Tipo de pagamento</label>
-                                <select class="form-select" name="SelectBankerPayment" id="SelectBankerPayment">
+                                <select class="form-select" name="SelectBankerPayment" id="SelectBankerPayment" required>
                                     <option value="credito-conta">Crédito em Conta</option>
                                     <option value="pix">Pix</option>
                                     <option value="ordempagamento">Ordem de pagamento</option>
                                 </select>
-                                <br>
+                            </div>
+                            <div class="col-md-6">
                                 <label for="SelectBanker" class="form-label">Selecione o Banco</label>
-                                <select class="form-select" name="SelectBanker" id="SelectBanker">
+                                <select class="form-select" name="SelectBanker" id="SelectBanker" required>
+                                    <option value=""></option>
                                     <option value="206">N/A - +ÁGIL CASH</option>
                                     <option value="177">N/A - AATAPS</option>
                                     <option value="173">N/A - ABESP</option>
@@ -649,47 +601,134 @@
                                     <option value="217">N/A - TEGGE</option>
                                     <option value="264">N/A - TO SALVO</option>
                                 </select>
-                                <br>
-                                <input class="form-control" type="text" id="receivedCardBenefit" placeholder="Recebeu Benefício do Cartão">
-                                <hr>
-                            </div>
-                            <div class="mb-3" id="pixInputs" style="display: none;">
-                                <input class="form-control" type="text" id="bank" placeholder="Banco">
-                                <br>
-                                <input class="form-control" type="text" id="pixKeyType" placeholder="Tipo de Chave Pix">
-                            </div>
-                            <div class="mb-3" id="creditAccountInputs" style="display: none;">
-                                <input class="form-control" type="text" id="agency"  placeholder="Agência">
-                                <br>
-                                <input class="form-control" type="text" id="agencyDV" placeholder="DV-Agência">
-                                <br>
-                                <input class="form-control" type="text" id="account"  placeholder="Conta">
-                                <br>
-                                <input class="form-control" type="text" id="accountDV"  placeholder="DV">
-                                <br>
-                                <input class="form-control" type="text" id="accountType"  placeholder="Tipo de Conta">
-                            </div>
-                            <div class="mb-3" id="orderPaymentInputs" style="display: none;">
-                                <input class="form-control" type="text" id="agencyOP"  placeholder="Agência">
-                                <br>
-                                <input class="form-control" type="text" id="agencyDVOP"  placeholder="DV-Agência">
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="dados-operacao" role="tabpanel"
-                            aria-labelledby="dados-operacao-tab">
-                            <!-- Adicione campos de formulário para dados da operação aqui -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="receivedCardBenefit" name="receivedCardBenefit" placeholder="Recebeu Benefício do Cartão" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3" id="pixInputs" style="display: none;">
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="bank" name="bank" placeholder="Agencia Banco" required>
+                            </div>
+                            <br>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="pixKeyType" name="pixKeyType" placeholder="Tipo de Chave Pix" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3" id="creditAccountInputs" style="display: none;" required>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="agency" name="agency" placeholder="Agência" required>
+                            </div>
+                            <br>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="agencyDV" name="agencyDV" placeholder="DV-Agência" required>
+                            </div>
+                            <br>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="account" name="account" placeholder="Conta" required>
+                            </div>
+                            <br>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="accountDV" name="accountDV" placeholder="DV" required>
+                            </div> 
+                            <br>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="accountType" name="accountType" placeholder="Tipo de Conta" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3" id="orderPaymentInputs" style="display: none;">
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="agencyOP" name="agencyOP" placeholder="Agência" required>
+                            </div>
+                            <br>
+                            <div class="col-md-6">
+                                <input class="form-control" type="text" id="agencyDVOP" name="agencyDVOP" placeholder="DV-Agência" required>
+                            </div>
+                        </div>
+                        <hr>
+                        <label for="DataOperation" class="form-label"><strong>Dados da Operação:</strong></label>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="margemUtilizada" class="form-label">Margem utilizada</label>
+                                <input class="form-control" type="number" id="margem" name="margem" placeholder="Margem Utilizada" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ParcelaSelect" class="form-label">Parcela</label>
+                                <input class="form-control" type="text" id="parcela" name="parcela" placeholder="Parcela Selecionado" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="PrazoSelect" class="form-label">Prazo</label>
+                                <input class="form-control" type="text" id="prazo" name="prazo" placeholder="Prazor Selecionado" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ValueOperation" class="form-label">Valor Operação</label>
+                                <input class="form-control" type="text" id="valueoperation" name="valor_operacao" placeholder="Valor de operação" required>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row mb-3">
+                            <label for="ReportDocs" class="form-label"><strong>Importação de documento:</strong></label>
+                            <div class="col-md-6">
+                                <label for="rg-cnh-completo" class="form-label">RG/CNH - COMPLETO</label> <!--Frente e verso-->
+                                <input type="file" class="form-control" id="rg-cnh-completo" name="rg_cnh_completo[]" multiple>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contracheque" class="form-label">Contracheque</label>
+                                <input type="file" class="form-control" id="contracheque" name="contracheque[]" multiple>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="extrato-consignacoes" class="form-label">Extrato de consignações</label>
+                                <input type="file" class="form-control" id="extrato-consignacoes" name="extrato_consignacoes[]" multiple>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="comprovante-residencia" class="form-label">Comprovante residencial</label>
+                                <input type="file" class="form-control" id="comprovante-residencia" name="comprovante_residencia[]" multiple>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="selfie" class="form-label">Sefie</label>
+                                <input type="file" class="form-control" id="selfie" name="selfie[]" multiple>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="comprovante-bancario" class="form-label">Comprovante Bancário</label>
+                                <input type="file" class="form-control" id="comprovante-bancario" name="comprovante_bancario[]" multiple>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="detalhamento-inss" class="form-label">Detalhamento INSS</label>
+                                <input type="file" class="form-control" id="detalhamento-inss" name="detalhamento_inss[]" multiple>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="historico-consignacoes-inss" class="form-label">Histórico de consignações INSS</label>
+                                <input type="file" class="form-control" id="historico-consignacoes-inss" name="historico_consignacoes_inss[]" multiple>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="observacoes" class="form-label">Observações</label> <!--Observações -->
+                                <textarea class="form-control" id="observacoes" name="observacoes" rows="4" placeholder="Digite suas observações aqui..." required></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary">Cadastrar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 <script src="{{ url_for('static', filename='css/proposal/proposal.css') }}"></script>
 <script src="{{ url_for('static', filename='js/proposal/ToggleTable.js') }}"></script>
 <script src="{{ url_for('static', filename='js/proposal/InputsPaymentsAccounts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proposal/SendNewProposal.js') }}"></script>
 {% endblock %}

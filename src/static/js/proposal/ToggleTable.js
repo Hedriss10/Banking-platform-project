@@ -1,16 +1,42 @@
-document.getElementById('bankerProposal').addEventListener('change', function() {
-    var selectedBankId = this.value;
-    var convenioOptions = document.querySelectorAll('.convenio-options');
+document.addEventListener('DOMContentLoaded', function() {
+    var bankerSelect = document.getElementById('bankerProposal');
+    var convenioSelect = document.getElementById('convenioSelectProposal');
+    var tableSelect = document.getElementById('tableSelectProposal');
 
-    convenioOptions.forEach(function(option) {
-        option.style.display = 'none';
+    function hideOptions(options) {
+        options.forEach(option => {
+            option.style.display = 'none';
+        });
+    }
+
+    function showRelevantOptions(options, container, relevantId, dataAttribute) {
+        container.innerHTML = '<option value="">Escolha...</option>'; 
+        options.forEach(option => {
+            if (option.dataset[dataAttribute] === relevantId) {
+                option.style.display = 'block'; 
+                container.appendChild(option.cloneNode(true)); 
+            }
+        });
+    }
+
+    bankerSelect.addEventListener('change', function() {
+        var selectedBankId = this.value;
+
+        hideOptions([...document.querySelectorAll('.convenio-options'), ...document.querySelectorAll('.table-options')]);
+        
+        showRelevantOptions(document.querySelectorAll('.convenio-options'), convenioSelect, selectedBankId, 'bankId');
+
+        convenioSelect.value = '';
+        tableSelect.value = '';
     });
 
-    Array.from(convenioOptions).filter(function(option) {
-        return option.getAttribute('data-bank-id') === selectedBankId;
-    }).forEach(function(option) {
-        option.style.display = 'block';
-    });
+    convenioSelect.addEventListener('change', function() {
+        var selectedConvenioId = this.value;
 
-    document.getElementById('convenioSelect').value = '';
+        hideOptions(document.querySelectorAll('.table-options'));
+
+        showRelevantOptions(document.querySelectorAll('.table-options'), tableSelect, selectedConvenioId, 'convenioId');
+
+        tableSelect.value = '';
+    });
 });
