@@ -1,7 +1,7 @@
 # Banking-project ™️
 
 ## Export comands init platform
-Comandos para poder inicializar a plataforma e entender como funciona <a src='docs/bs-system-develop.md'>docs.</a>
+Comandos para poder inicializar a plataforma e entender como funciona <a href='docs/bs-system-develop.md'>docs</a>
 
 
 ## Technologies used on the platform 💻
