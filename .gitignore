@@ -6,6 +6,10 @@
 
 sql/
 
+## ignore proposal 
+proposta/
+.proposta
+
 
 
 ### Flask ###

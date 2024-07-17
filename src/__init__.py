@@ -11,9 +11,11 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 
-def create_app(config_class=DevelopmentConfig):  
+def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
-    
+    app.config['DEBUG'] = True
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
     env_config = {
         'development': DevelopmentConfig,
         'testing': TestingConfig,
@@ -49,7 +51,7 @@ def create_app(config_class=DevelopmentConfig):
     from .models.user import User
     from .models.hourpoint import Point, VocationBs
     from .models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat
-    from .models.proposal import UserProposal, UserProposalBanker, UserProposalOperationData
+    from .models.proposal import UserProposal
     
     @login_manager.user_loader
     def load_user(user_id):

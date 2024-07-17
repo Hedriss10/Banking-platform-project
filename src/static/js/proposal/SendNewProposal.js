@@ -1,29 +1,26 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     var proposalForm = document.getElementById('proposalForm');
 
-    proposalForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-
+    proposalForm.addEventListener('submit', function (event) {
+        event.preventDefault(); 
         var formData = new FormData(proposalForm);
-        var data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
 
         fetch('/proposal/new-proposal', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Success:', data);
+            if (data.success) {
+                alert('Contrato registrado com sucesso!');
+                window.location.reload();
+            } else {
+                alert(data.message || 'Erro ao deletar convênio.');
+            }
         })
-
-        .catch((error) => {
+        .catch(error => {
             console.error('Error:', error);
+            alert('Erro ao comunicar com o servidor.');
         });
-    });
+    })
 });
