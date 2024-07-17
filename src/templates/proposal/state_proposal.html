@@ -1,0 +1,80 @@
+{% block stateproposal %}
+
+<style>
+  .table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    /* Cor de hover para as linhas da tabela */
+  }
+
+  .pagination a {
+    margin: 0 5px;
+    /* Espaçamento entre botões de paginação */
+  }
+
+  .pagination .active a {
+    background-color: #007bff;
+    /* Cor de fundo para o item de paginação ativo */
+    border-color: #007bff;
+    /* Cor da borda para o item de paginação ativo */
+  }
+</style>
+
+
+<div class="container mt-4">
+  <div class="table-responsive">
+    <table class="table table-light table-striped table-bordered table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Corretor</th>
+          <th scope="col">Nome</th>
+          <th scope="col">CPF</th>
+          <th scope="col">Operação</th>
+          <th scope="col">Banco</th>
+          <th scope="col">Órgão</th>
+          <th scope="col">Valor da Operação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proposal in proposals %}
+        <tr>
+          <td>{{ proposal.creator.username }}</td>
+          <td>{{ proposal.name_and_lastname }}</td>
+          <td>{{ proposal.cpf }}</td>
+          <td>{{ proposal.operation_select }}</td>
+          <td>{{ proposal.banker.name }}</td>
+          <td>{{ proposal.financial_agreement.name }}</td>
+          <td>{{ proposal.value_operation }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('proposal.get_status_proposal', page=pagination.prev_num) }}">Anterior</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+      {% endif %}
+
+      {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('proposal.get_status_proposal', page=page_num) }}">{{ page_num }}</a>
+      </li>
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('proposal.get_status_proposal', page=pagination.next_num) }}">Próximo</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Próximo</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+<script src="{{ url_for('static', filename='js/proposal/DataTables.js') }}"></script>
+{% endblock stateproposal %}

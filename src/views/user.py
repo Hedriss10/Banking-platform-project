@@ -3,7 +3,7 @@ from flask import Blueprint, render_template
 from flask import url_for, jsonify, abort
 from flask import redirect, request
 from flask_login import login_required
-from src import db 
+from src import db
 from werkzeug.security import generate_password_hash
 from ..models.user import User
 
@@ -85,6 +85,7 @@ def update_promoter(id):
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'Senha não fornecida'}), 400
 
+
 @bp_user.route("/update-promoter/block/<int:id>", methods=['POST'])
 @login_required
 def update_promoter_block(id):
@@ -98,12 +99,10 @@ def update_promoter_block(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': True, 'message': str(e)}), 500
-    
-    
 
 @bp_user.route("/update-promoter/active/<int:id>", methods=['POST'])
 @login_required
-def update_promoter_ative_user(id):
+def update_prom3ter_ative_user(id):
     """Remove block and inactive user"""
     user = User.query.get_or_404(id)
     user.is_block = False
