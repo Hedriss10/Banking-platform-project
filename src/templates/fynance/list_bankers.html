@@ -259,15 +259,11 @@
         {% endfor %}
     </ul>    
 </div>
+
+<script src="{{ url_for('static', filename='js/fynance/CrudFynanceGerement.js') }}"></script> <!--Crud de gerenciamento-->
 <script src="{{ url_for('static', filename='js/fynance/ToggleTables.js') }}"></script> <!--togles tables comission in conv and banker-->
-<script src="{{ url_for('static', filename='js/fynance/DeleteConvBanker.js') }}"></script> <!--delete tables conv bankers -->
-<script src="{{ url_for('static', filename='js/fynance/GermentCrudBankers.js') }}"></script> <!--gerement crud bakers -->
-<script src="{{ url_for('static', filename='js/fynance/DeleteBanker.js') }}"></script> <!--Delete bankers-->
-<script src="{{ url_for('static', filename='js/fynance/SendNewConven.js') }}"></script> <!--SendNewConv-->
-<script src="{{ url_for('static', filename='js/fynance/SendReportTablesFynance.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/toggleReportTablesFynance.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/ToggleTablesBanker.js') }}"></script> <!--Toggle for controllers conv head-->
-<script src="{{ url_for('static', filename='js/fynance/NewTableBankerAndConv.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/toggleReportTableFynanceOne.js') }}"></script> <!--Toggle fynance todo one register tables and conv-->
 <script src="{{ url_for('static', filename='js/fynance/ToggleTableOne.js') }}"></script>
 {% endblock %}
