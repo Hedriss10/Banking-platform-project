@@ -17,7 +17,7 @@ def promoters():
     try:
         pagination = User.query.order_by(User.user_identification).paginate(page=page, per_page=per_page, error_out=True)
         users = pagination.items
-        return render_template("partials/promoters_partial.html", users=users, pagination=pagination)
+        return render_template("user/promoters_partial.html", users=users, pagination=pagination)
     except Exception as e:
         print(f"Erro ao recuperar os dados: {e}")
         abort(404)

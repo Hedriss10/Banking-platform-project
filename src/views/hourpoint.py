@@ -12,7 +12,7 @@ bp_point_hour = Blueprint("hourpoint", __name__)
 @bp_point_hour.route("/point", methods=['GET'])
 @login_required
 def get_point_hour():
-    return render_template("partials/hourpoint.html")
+    return render_template("point/hourpoint.html")
 
 
 @bp_point_hour.route("/registerpoint", methods=['POST'])

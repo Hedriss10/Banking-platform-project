@@ -7,5 +7,5 @@ bp_overview = Blueprint("overview", __name__)
 @bp_overview.route("/home")
 @login_required
 def home():
-    return render_template("overview.html")
+    return render_template("partials/overview.html")
 

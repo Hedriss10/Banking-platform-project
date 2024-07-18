@@ -24,7 +24,7 @@ def login():
         else:
             flash('Usuário não está cadastrado.', category='error')
 
-    return render_template("login.html", user=current_user)
+    return render_template("login/login.html", user=current_user)
 
 
 @bp_auth.route("/logout")

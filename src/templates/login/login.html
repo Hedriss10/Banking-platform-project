@@ -2,46 +2,6 @@
 {% extends "base.html" %}
 
 {% block formcontent %}
-<style>
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background-color: #007BFF; /* Cor de fundo azul */
-    }
-    .container {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .login-window, .flash-messages {
-        padding: 20px;
-        background: #FFF;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar efeito de elevação */
-        border-radius: 8px; /* Bordas arredondadas */
-        width: 100%;
-        max-width: 400px;
-    }
-    .flash-messages {
-        margin-bottom: 20px; /* Espaçamento entre as mensagens e o formulário de login */
-    }
-</style>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var alerts = document.querySelectorAll('.btn-close');
-        alerts.forEach(function (closeButton) {
-            closeButton.addEventListener('click', function () {
-                var alert = this.parentElement;
-                alert.style.display = 'none'; // Esconde o alerta
-                if (alert.parentElement.children.length === 1) { // Se não há mais alertas
-                    alert.parentElement.style.display = 'none'; // Esconde o contêiner dos alertas
-                }
-            });
-        });
-    });
-</script>
 <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -77,4 +37,6 @@
         </form>
     </div>
 </div>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
+<script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
 {% endblock %}
