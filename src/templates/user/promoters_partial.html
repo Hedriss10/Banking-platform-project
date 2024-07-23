@@ -172,8 +172,13 @@
       </div>
     </div>
   </div>
-
-
+  <br>
+  <div>
+    <input type="text" id="searchInput" class="form-control" placeholder="Buscar Usuário">
+    <br>
+  </div>
+  
+  <hr>
   <table class="table table-light table-striped table-bordered table-hover">
     <thead>
       <tr>
@@ -254,5 +259,6 @@
   </nav>
 </div>
 <script src="{{ url_for('static', filename='js/user/CrudUserGerement.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user/SearchUserTable.js') }}"></script>
 <script src="{{ url_for('static', filename='css/user/block.css') }}"></script>
 {% endblock %}
