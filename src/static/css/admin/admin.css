@@ -1,0 +1,4 @@
+.table-responsive {
+    display: flex;
+    justify-content: flex-start;
+}

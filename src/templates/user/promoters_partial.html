@@ -144,17 +144,13 @@
                 <label for="type_user_func" class="form-label">Cargo</label>
                 <select id="type_user_func" name="type_user_func" class="form-control">
                   <option value="Administrador">Administrador</option>
-                  <option value="Comercial">Comercial</option>
-                  <option value="Controladoria">Controladoria</option>
-                  <option value="Coordernado">Coordernador</option>
-                  <option value="Corretor Interno">Corretor Interno</option>
-                  <option value="Corretor Externo">Corretor Externo</option>
-                  <option value="Financeiro">Financeiro</option>
-                  <option value="Funcionario Geral">Funcionário Geral</option>
-                  <option value="Operacional">Operacional</option>
-                  <option value="PrestadorDe Serviço">Prestador de Serviços</option>
-                  <option value="Recursos Humano">Recursos Humanos</option>
-                  <option value="Regional">Regional</option>
+                  <option value="gerenteGeral">Gerente Geral</option>
+                  <option value="gerenteDeVendas">Gerente de vendas</option>
+                  <option value="supervisorDeVendas">Supervisor de Vendas</option>
+                  <option value="vendedor">Vendedor</option>
+                  <option value="operacional">Operacional</option>
+                  <option value="financeiro">Financeiro</option>
+                  <option value="suporteDeCampanha">Suporte de campanha</option>
                 </select>
               </div>
               <div class="mb-3">
@@ -164,6 +160,15 @@
               <div class="mb-3">
                 <label for="extension_room" class="form-label">Operação</label>
                 <input type="text" class="form-control" id="extension_room" name="extension_room" required>
+              </div>
+              <div class="mb-3">
+                <label for="type_contract">Gestão de contrato</label>
+                <select name="type_contract" id="typecontract" class="form-control" required>
+                  <option value="">Selecione...</option>
+                  <option value="funcionario">Funcionário</option>
+                  <option value="estagiario">Estagiário</option>
+                  <option value="Corretor Externo">Corretor Externo</option>
+                </select>
               </div>
               <button type="submit" class="btn btn-success">Adcionar</button>
             </form>
@@ -189,7 +194,6 @@
         <th scope="col">Email</th>
         <th scope="col">Sala</th>
         <th scope="col">Operação</th>
-        <th scope="col">Password</th>
         <th scope="col">Bloquear</th>
         <th scope="col">Ativar</th>
         <th scope="col">Deletar</th>
@@ -205,8 +209,6 @@
         <td>{{ user.email }}</td>
         <td>{{ user.extension }}</td>
         <td>{{ user.extension_room }}</td>
-        <td><i class="fad fa-unlock-alt cursor-pointer" data-userid="{{ user.id }}"
-            onclick="showUpdatePasswordModal(this)"></i></td>
         <td><i class="fas fa-ban cursor-pointer" data-userid="{{ user.id }}" onclick="showUpdateBlockModal(this)"></i>
         </td>
         <td><i class="fad fa-user-check cursor-pointer" data-userid="{{ user.id }}"

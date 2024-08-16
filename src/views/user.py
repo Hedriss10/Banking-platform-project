@@ -28,18 +28,18 @@ def promoters():
 def post_promoters():
     """Add promoters and user"""
     try:
-        print(request.form)
         username = request.form['username'].strip()
         lastname = request.form['lastname'].strip()
         email = request.form['email'].strip()
         password = request.form['password']
         user_identification = request.form['user_identification'].strip()
         type_user_func = request.form['type_user_func']
+        typecontract = request.form['type_contract']
         extension = request.form['extension'].strip()
         extension_room = request.form['extension'].strip()
         
         
-        if not (username and user_identification and password and type_user_func and type_user_func and extension and extension_room):
+        if not (username and user_identification and password and type_user_func and type_user_func and typecontract and extension and extension_room):
             return jsonify({'error': 'Todos os campos são obrigatórios'}), 400
         
         new_user = User(
@@ -49,6 +49,7 @@ def post_promoters():
             email=email, # email,
             password=password, # senha 
             type_user_func=type_user_func, # cargo do usuário
+            typecontract=typecontract, # tipo de funcuinário
             extension=extension, # sala
             extension_room=extension_room # operação
         )
@@ -102,7 +103,7 @@ def update_promoter_block(id):
 
 @bp_user.route("/update-promoter/active/<int:id>", methods=['POST'])
 @login_required
-def update_prom3ter_ative_user(id):
+def update_prometer_ative_user(id):
     """Remove block and inactive user"""
     user = User.query.get_or_404(id)
     user.is_block = False

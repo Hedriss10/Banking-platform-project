@@ -1,5 +1,4 @@
 import os 
-
 from datetime import datetime
 from flask_sqlalchemy import pagination
 from flask import Blueprint, render_template, current_app

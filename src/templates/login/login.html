@@ -2,41 +2,72 @@
 {% extends "base.html" %}
 
 {% block formcontent %}
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updatePasswordModalLabel">Atualizar Senha</h5>
+            </div>
+            <div class="modal-body">
+                <form id="updatePasswordForm">
+                    <label for="userId" class="form-label"><strong>Usuário (CPF):</strong></label>
+                    <input type="text" class="form-control" id="userId" aria-describedby="userIdHelp">
+                    <div id="userIdHelp" class="form-text">Insira seu CPF.</div>
+                    <hr>
+                    <div class="form-group">
+                        <label for="newPassword"><strong>Nova Senha:</strong></label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-primary">Salvar Nova Senha</button>
+                    <hr>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Fechar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        <div class="flash-messages">
-            {% for category, message in messages %}
-                {% if category == 'error' %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% else %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endif %}
-            {% endfor %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        {% if category == 'error' %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        {% else %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
     {% endif %}
     {% endwith %}
     <div class="login-window">
         <form method="POST">
             <div class="mb-4">
-                <label for="ID-User" class="form-label">Usuário:</label>
+                <label for="ID-User" class="form-label"><strong>Usuário:</strong></label>
                 <input type="text" class="form-control" id="ID-User" aria-describedby="UserHelp" name="user">
-                <div id="UserHelp" class="form-text">Seu usuário para realizar o login.</div>
+                <div id="UserHelp" class="form-text">Seu <strong>CPF</strong> para realizar o login.</div>
             </div>
             <div class="mb-4">
-                <label for="exampleInputPassword1" class="form-label">Senha:</label>
+                <label for="exampleInputPassword1" class="form-label"><strong>Senha:</strong></label>
                 <input type="password" class="form-control" id="exampleInputPassword1" name="password">
             </div>
             <button type="submit" class="btn btn-success">Logar</button>
         </form>
+        <hr>
+        <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+            Esqueceu sua senha?
+        </button>
     </div>
 </div>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
 <script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
+<script src="{{ url_for('static', filename='js/login/reset_token.js') }}"></script>
 {% endblock %}
