@@ -1,73 +1,88 @@
-<!-- login.html -->
-{% extends "base.html" %}
+{% extends 'base.html'%}
 
-{% block formcontent %}
-<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updatePasswordModalLabel">Atualizar Senha</h5>
-            </div>
-            <div class="modal-body">
-                <form id="updatePasswordForm">
-                    <label for="userId" class="form-label"><strong>Usuário (CPF):</strong></label>
-                    <input type="text" class="form-control" id="userId" aria-describedby="userIdHelp">
-                    <div id="userIdHelp" class="form-text">Insira seu CPF.</div>
-                    <hr>
-                    <div class="form-group">
-                        <label for="newPassword"><strong>Nova Senha:</strong></label>
-                        <input type="password" class="form-control" id="newPassword" required>
+{% block logincontent %}
+<main>
+    <div class="container">
+        <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+                        <div class="d-flex justify-content-center py-4">
+                            <a href="index.html" class="logo d-flex align-items-center w-auto">
+                                <img src="{{ url_for('static', filename ='img/logo.png') }}" alt="">
+                                <span class="d-none d-lg-block">BSMais</span>
+                            </a>
+                        </div>
+
+                        <div class="card mb-3">
+
+                            <div class="card-body">
+
+                                <div class="pt-4 pb-2">
+                                    <h5 class="card-title text-center pb-0 fs-4">Login</h5>
+                                    <p class="text-center small">Seu <strong>CPF</strong> e senha para realizar o login
+                                    </p>
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                <div class="flash-messages">
+                                    {% for category, message in messages %}
+                                    {% if category == 'error' %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                                <form class="row g-3 needs-validation" novalidate method="POST" action="{{url_for('auth.login')}}">
+
+                                    <div class="col-12">
+                                        <label for="yourUsername" class="form-label">CPF:</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text" id="inputGroupPrepend">CPF</span>
+                                            <input type="text" name="user" class="form-control" id="user"
+                                                required>
+                                            <div class="invalid-feedback">Seu CPF.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="yourPassword" class="form-label">Sennha:</label>
+                                        <input type="password" name="password" class="form-control" id="password"
+                                            required>
+                                        <div class="invalid-feedback">Sua senha.</div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="remember" value="true"
+                                                id="rememberMe">
+                                            <label class="form-check-label" for="rememberMe">Lembra-me</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button class="btn btn-primary w-100" type="submit">Login</button>
+                                    </div>
+                                    <div class="col-12"><p class="small mb-0"><a href="{{url_for('auth.update_user')}}">Esqueceu á senha?</a></p></div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <hr>
-                    <button type="submit" class="btn btn-primary">Salvar Nova Senha</button>
-                    <hr>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">Fechar</button>
-                </form>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<div class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-messages">
-        {% for category, message in messages %}
-        {% if category == 'error' %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% else %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
-        {% endfor %}
+        </section>
+
     </div>
-    {% endif %}
-    {% endwith %}
-    <div class="login-window">
-        <form method="POST">
-            <div class="mb-4">
-                <label for="ID-User" class="form-label"><strong>Usuário:</strong></label>
-                <input type="text" class="form-control" id="ID-User" aria-describedby="UserHelp" name="user">
-                <div id="UserHelp" class="form-text">Seu <strong>CPF</strong> para realizar o login.</div>
-            </div>
-            <div class="mb-4">
-                <label for="exampleInputPassword1" class="form-label"><strong>Senha:</strong></label>
-                <input type="password" class="form-control" id="exampleInputPassword1" name="password">
-            </div>
-            <button type="submit" class="btn btn-success">Logar</button>
-        </form>
-        <hr>
-        <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
-            Esqueceu sua senha?
-        </button>
-    </div>
-</div>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/login/login.css') }}">
-<script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
-<script src="{{ url_for('static', filename='js/login/reset_token.js') }}"></script>
+</main>
+<script src="{{ url_for('static', filename='login/login.js') }}"></script>
+
 {% endblock %}
