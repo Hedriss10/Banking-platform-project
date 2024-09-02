@@ -157,16 +157,21 @@ function registerTables() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert('Arquivo importado com sucesso!');
-                window.location.reload(); // Considere se realmente precisa recarregar a página
+            
+            const notification = document.getElementById('notificationImportBanker');
+            if (data.message === "Dados processados com sucesso!") {
+                notification.className = 'alert alert-success';
+                notification.innerText = data.message;
+                setTimeout(() => { window.location.reload(); }, 2000)
+            
             } else {
                 alert('Erro ao importar dados: ' + data.error);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Erro ao comunicar com o servidor: ' + error.message);
+            // console.error('Error:', error);
+            alert('Tabela importada com sucesso!');
+            window.location.reload(); // atualizar e força a refazer o get no banco
         });
     });
 

@@ -32,15 +32,15 @@ def create_app(config_class=DevelopmentConfig):
     login_manager.login_message_category = "danger"
     login_manager.init_app(app)
     
-    from src.views.user import bp_user
-    from src.views.overview import bp_overview
-    from src.auth.userManager import bp_auth
-    from src.views.hourpoint import bp_point_hour
-    from src.views.fynance import bp_fynance
-    from src.views.proposal import bp_proposal
-    from src.views.admin import bp_admin
+    from src.routes.user import bp_user
+    from src.routes.overview import bp_overview
+    from src.auth.user_manager import bp_auth
+    from src.routes.hourpoint import bp_point_hour
+    from src.routes.fynance import bp_fynance
+    from src.routes.proposal import bp_proposal
+    from src.routes.admin import bp_admin
     
-    app.register_blueprint(bp_user, url_prefix="/users")
+    app.register_blueprint(bp_user, url_prefix="/")
     app.register_blueprint(bp_overview, url_prefix="/")
     app.register_blueprint(bp_auth, url_prefix="/")
     app.register_blueprint(bp_point_hour, url_prefix="/")
@@ -51,7 +51,7 @@ def create_app(config_class=DevelopmentConfig):
     
     from src.models.user import User
     from src.models.hourpoint import Point, VocationBs
-    from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat
+    from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat, ReportBankerTransactionData
     from src.models.proposal import UserProposal
     
     @login_manager.user_loader

@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_login import UserMixin
 from src import db
-from src.models.user import User
+
 
 class Point(db.Model, UserMixin):
     __tablename__ = 'point'

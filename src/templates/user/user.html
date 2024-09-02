@@ -1,0 +1,50 @@
+{% extends "base.html"%}
+
+{% block userall %}
+<div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Table with stripped rows</h5>
+
+      <!-- Table with stripped rows -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nome</th>
+            <th scope="col">Sobrenome</th>
+            <th scope="col">Funcinário</th>
+            <th scope="col">Tipo de funcionário</th>
+            <th scope="col">Email</th>
+            <th scope="col">Equipe Sala</th>
+            <th scope="col">Data da Criação</th>
+
+          </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+        <tr class="{{ 'table-danger' if user.is_block else '' }}">
+            <td>{{ user.username }}</td>
+            <td>{{ user.lastname }}</td>
+            <td>{{ user.user_identification }}</td>
+            <td>{{ user.type_user_func }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.extension }}</td>
+            <td>{{ user.extension_room }}</td>
+            <td><i class="fas fa-ban cursor-pointer" data-userid="{{ user.id }}" onclick="showUpdateBlockModal(this)"></i>
+            </td>
+            <td><i class="fad fa-user-check cursor-pointer" data-userid="{{ user.id }}"
+                onclick="showUpdateActiveModal(this)"></i></td>
+            <td><i class="fad fa-trash-alt cursor-pointer" data-userid="{{ user.id }}" onclick="showDeleteModal(this)"></i>
+            </td>
+          </tr>    
+        {% endfor %}
+        </tbody>
+      </table>
+      <!-- End Table with stripped rows -->
+    </div>
+  </div>
+
+<script src="{{ url_for('static', filename='js/user/CrudUserGerement.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user/SearchUserTable.js') }}"></script>
+<script src="{{ url_for('static', filename='css/user/block.css') }}"></script>
+{% endblock %}

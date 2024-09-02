@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
     setupDeleteUser();
     setupUpdatePassword();
     setupSearchUser();
+    showUpdateBlockModal();
+
 });
 
 function setupUserRegistration() {
@@ -34,7 +36,8 @@ function setupUserRegistration() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Erro ao comunicar com o servidor: ' + error.message);
+                alert('Cadastrado com sucesso!');
+                window.location.reload();
             });
     });
 }
@@ -163,7 +166,6 @@ function showDeleteModal(element) {
     document.getElementById('userIdDelete').value = userId;
     $('#showDeleteModal').modal('show');
 }
-
 
 
 // Event for new password or generator password for user 

@@ -6,30 +6,41 @@ function setupUpdatePassword() {
         formData.append("userId", document.getElementById('userId').value);
         formData.append("newPassword", document.getElementById('newPassword').value);
 
-        fetch('/update-promoter', {
+        fetch('/update-user', {
             method: 'POST',
             body: formData
         })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.error || 'Erro na resposta do servidor.');
-                });
-            }
-            return response.json();
-        })
+        .then(response => response.json())  // Diretamente processa o JSON
         .then(data => {
+            const notification = document.getElementById('notification');
             if (data.success) {
-                alert('Senha atualizada com sucesso!');
-                window.location.reload;
+                // Exibir a notificação de sucesso
+                notification.className = 'alert alert-success';
+                notification.innerText = data.message;
+                setTimeout(() => { window.location.reload();}, 3000)
             } else {
-                alert('Erro ao atualizar senha: ' + data.error);
+                // Exibir a notificação de erro
+                notification.className = 'alert alert-danger';
+                notification.innerText = data.error || 'Erro ao atualizar a senha';
             }
+            notification.style.display = 'block'; // Exibe a notificação
+            
+            // Opcional: Ocultar a notificação após 3 segundos
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         })
         .catch(error => {
             console.error('Erro ao atualizar senha', error);
-            alert('Erro ao comunicar com o servidor: ' + error.message);
+            const notification = document.getElementById('notification');
+            notification.className = 'alert alert-danger';
+            notification.innerText = 'Erro ao comunicar com o servidor: ' + error.message;
+            notification.style.display = 'block'; // Exibe a notificação
+            
+            // Opcional: Ocultar a notificação após 3 segundos
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         });
     });
 }

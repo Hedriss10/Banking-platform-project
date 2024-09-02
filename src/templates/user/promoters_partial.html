@@ -119,7 +119,7 @@
         <div class="modal-body">
           <div class="card-body">
             <form id="importUser" enctype="multipart/form-data" method="POST"
-              action="{{ url_for('users.post_promoters') }}">
+              action="{{ url_for('users.add_users') }}">
               <div class="mb-3">
                 <label for="username" class="form-label">Nome</label>
                 <input type="text" class="form-control" id="username" name="username" required>
@@ -225,7 +225,7 @@
     <ul class="pagination">
       {% if pagination.has_prev %}
       <li class="page-item">
-        <a class="page-link" href="{{ url_for('bp_user.promoters', page=pagination.page-1) }}">Previous</a>
+        <a class="page-link" href="{{ url_for('user.users', page=pagination.page-1) }}">Previous</a>
       </li>
       {% else %}
       <li class="page-item disabled">
