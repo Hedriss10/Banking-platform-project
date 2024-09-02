@@ -2,7 +2,6 @@ from sqlalchemy import func
 from flask_login import UserMixin
 from datetime import datetime
 from werkzeug.security import generate_password_hash
-
 from src import db
 
 class User(db.Model, UserMixin):
@@ -24,6 +23,8 @@ class User(db.Model, UserMixin):
     extension_room = db.Column(db.String(100), nullable=False)  # sala
     created_on = db.Column(db.DateTime, nullable=False)
     date_created = db.Column(db.DateTime(timezone=True), default=func.now())
+    
+    # relationship
     points = db.relationship('Point', back_populates='user', lazy='dynamic')
     vacations = db.relationship('VocationBs', back_populates='user', lazy='dynamic')
     permissions = db.relationship('UserPermission', backref='user', lazy='dynamic')
