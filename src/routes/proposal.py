@@ -1,18 +1,17 @@
 import os 
+
 from datetime import datetime
 from flask_sqlalchemy import pagination
-from flask import Blueprint, render_template, current_app
-from flask import url_for, jsonify, abort
-from flask import redirect, request
-from flask_login import login_required
-from sqlalchemy.orm import joinedload
+from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app)
+from flask_login import login_required, current_user 
 from src import db
-from flask_login import current_user
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
-from ..utils.proposal import UploadProposal
-from ..models.proposal import UserProposal
-from ..models.fynance import Banker, FinancialAgreement, TablesFinance
+from src.utils.proposal import UploadProposal
+from src.models.proposal import UserProposal
+from src.models.fynance import Banker, FinancialAgreement, TablesFinance
+
 
 
 bp_proposal = Blueprint("proposal", __name__)
@@ -20,11 +19,11 @@ bp_proposal = Blueprint("proposal", __name__)
 
 @bp_proposal.route("/proposal")
 @login_required
-def get_proposal():
+def manage_proposal():
     bankers = Banker.query.options(
         joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)
     ).order_by(Banker.name).all()
-    return render_template("proposal/gerement_proposal.html", bankers=bankers)
+    return render_template("proposal/manage_proposal.html", bankers=bankers)
 
 
 @bp_proposal.route('/proposal/status', methods=['GET', 'POST'])

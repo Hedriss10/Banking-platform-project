@@ -40,7 +40,7 @@ def create_app(config_class=DevelopmentConfig):
     from src.routes.proposal import bp_proposal
     from src.routes.admin import bp_admin
     
-    app.register_blueprint(bp_user, url_prefix="/users")
+    app.register_blueprint(bp_user, url_prefix="/")
     app.register_blueprint(bp_overview, url_prefix="/")
     app.register_blueprint(bp_auth, url_prefix="/")
     app.register_blueprint(bp_point_hour, url_prefix="/")
@@ -51,7 +51,7 @@ def create_app(config_class=DevelopmentConfig):
     
     from src.models.user import User
     from src.models.hourpoint import Point, VocationBs
-    from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat
+    from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat, ReportBankerTransactionData
     from src.models.proposal import UserProposal
     
     @login_manager.user_loader

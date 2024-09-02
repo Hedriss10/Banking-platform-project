@@ -1,7 +1,5 @@
 from flask_sqlalchemy import pagination
-from flask import Blueprint, render_template
-from flask import url_for, jsonify, abort
-from flask import redirect, request
+from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request)
 from flask_login import login_required
 from src import db
 from werkzeug.security import generate_password_hash
@@ -15,13 +13,36 @@ bp_user = Blueprint("users", __name__)
 def users():
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    try:
-        pagination = User.query.order_by(User.user_identification).paginate(page=page, per_page=per_page, error_out=True)
-        users = pagination.items
-        return render_template("user/promoters_partial.html", users=users, pagination=pagination)
-    except Exception as e:
-        print(f"Erro ao recuperar os dados: {e}")
-        abort(404)
+    search_term = request.args.get('search', '').lower()
+    query = User.query
+
+    if search_term:
+        query = query.filter(
+            User.username.ilike(f'%{search_term}%') |
+            User.lastname.ilike(f'%{search_term}%') |
+            User.email.ilike(f'%{search_term}%') | 
+            User.user_identification.ilike(f'%{search_term}%') | 
+            User.type_user_func.ilike(f'%{search_term}%') |
+            User.extension.ilike(f'%{search_term}%') | 
+            User.extension_room.ilike(f'%{search_term}%')
+        )
+        
+    tables_paginated = query.order_by(User.username.desc()).paginate(page=page, per_page=per_page)
+
+    user_data = [{
+        'username': user.username,
+        'lastname': user.lastname,
+        'type_user_func': user.type_user_func,
+        'email': user.email,
+        'user_identification': user.user_identification,
+        'extension': user.extension,
+        'extension_room': user.extension_room
+    } for user in tables_paginated.items]
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(user_data)
+    
+    return render_template("user/user_manager.html", users=tables_paginated.items, pagination=tables_paginated)
 
 
 @bp_user.route("/registerpromoters", methods=['POST'])

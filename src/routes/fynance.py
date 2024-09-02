@@ -1,55 +1,133 @@
 import pandas as pd
 
 from flask import Blueprint , render_template, request, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask import jsonify
-from flask_login import current_user
-from flask_login import login_required
 from src import db
 from sqlalchemy.orm import joinedload
-from ..models.fynance import Banker, FinancialAgreement, TablesFinance
+from src.models.fynance import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData
 from werkzeug.utils import secure_filename
 
 
 bp_fynance = Blueprint("fynance", __name__)
 
 
-@bp_fynance.route("/bankers")
+@bp_fynance.route("/gerement-fynance")
 @login_required
-def get_register_bankers():
-    """Get modal operation bankers""" 
-    return render_template("fynance/register_bankers.html")
-
-
-@bp_fynance.route("/get-bankers")
-@login_required
-def get_list_bankers():
-    """Get list all bankers"""
+def gerement_finance():
+    """manager banker 
+        Registration of tables, management of banks, and agreements, 
+        the bank and the agreement are in dynamic mode, where you create either one, 
+        it will be presented according to the action and database search.
+    Returns:
+        _type_: _manager banker_
+    """
     bankers = Banker.query.options(
         db.joinedload(Banker.financial_agreements).subqueryload(FinancialAgreement.tables_finance)
     ).order_by(Banker.name).all()
-    return render_template("fynance/list_bankers.html", banks=bankers)
+    return render_template("fynance/manager_banker.html", banks=bankers)
 
-@bp_fynance.route("/get-register-coven")
+@bp_fynance.route("/report-banker")
 @login_required
-def get_register_conven():
-    """Register coven, return banker for register conv in banker"""
-    bankers = Banker.query.order_by(Banker.name).all()
-    return render_template("fynance/register_conven.html", banks=bankers)
+def controllers_report_banker_comission():
+    bankers = Banker.query.options(
+        db.joinedload(Banker.financial_agreements).subqueryload(FinancialAgreement.tables_finance)
+    ).order_by(Banker.name).all()
+    return render_template("fynance/report_banker.html", banks=bankers)
 
 
-@bp_fynance.route("/get-report-banker")
+@bp_fynance.route("/manage-comission")
 @login_required
-def get_register_report():
-    """Report banker with report system"""
-    bankers = Banker.query.options(joinedload(Banker.financial_agreements)).order_by(Banker.name).all()
-    return render_template("fynance/report_bankers.html", banks=bankers)
+def manage_comission():
+    """Function para rank de comissão associando a tabela Flat da coluna TablesFinance"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    search_term = request.args.get('search', '').lower()
+    
+    query = TablesFinance.query.join(FinancialAgreement).join(Banker)
+    
+    try:
+        search_rate = float(search_term)
+    except ValueError:
+        search_rate = None
+
+    if search_term:
+        query = query.filter(
+            TablesFinance.name.ilike(f'%{search_term}%') |   # Filtro pelo nome da tabela
+            TablesFinance.table_code.ilike(f'%{search_term}%') |  # Filtro pelo código da tabela
+            Banker.name.ilike(f'%{search_term}%') |   # Filtro pelo nome do banco
+            FinancialAgreement.name.ilike(f'%{search_term}%') |  # Filtro pelo nome do convênio
+            (TablesFinance.rate == search_rate if search_rate is not None else False)  # Filtro pela taxa de comissão
+        )
+
+    tables_paginated = query.order_by(TablesFinance.rate.desc()).paginate(page=page, per_page=per_page)
+
+    banks_data = [{
+        'bank_name': table.financial_agreement.banker.name,
+        'agreement_name': table.financial_agreement.name,
+        'table_name': table.name,
+        'table_code': table.table_code,
+        'rate': table.rate
+    } for table in tables_paginated.items]
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(banks_data)
+    
+    return render_template("fynance/controllers_comission.html", banks=banks_data, pagination=tables_paginated)
+
+
+@bp_fynance.route("/process-data", methods=['POST'])
+@login_required
+def process_data():
+    """
+        Carried out to generate the commission report, dynamically and sent to the bank
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Nenhum dado recebido"}), 400
+        
+        bank_id = data.get('bankID')
+        conv_id = data.get('convID')
+        columns = data.get('columns', [])
+
+        column_names = columns[0]
+        rows = columns[1:]
+        row_list = []
+
+        for row in rows:
+            row_data = {column_names[i]: row[i] for i in range(len(row))}
+            row_list.append(row_data)
+        
+        data_to_save = {
+            'columns': row_list,
+            'bankID': bank_id,
+            'convID': conv_id
+        }
+        new_entry = ReportBankerTransactionData(
+            banker_id=bank_id,
+            conv_id=conv_id,
+            data=data_to_save
+        )
+        db.session.add(new_entry)
+        db.session.commit()
+
+        return jsonify({"message": "Dados processados com sucesso!"}), 200
+
+    except Exception as e:
+        print(f"Erro ao processar dados: {e}")
+        return jsonify({"error": "Erro ao processar os dados"}), 500
 
 
 @bp_fynance.route("/register-convenio", methods=['POST'])
 @login_required
 def post_register_conven():
-    """Register conven bankers"""
+    """Api`s 
+        modular api system within the monolithic
+    Returns:
+        _type_: _post_
+        _data_: _bank and name in database_
+    """
     data = request.json
     conv_name = data.get('name')
     bank_id = data.get('bank_id')
@@ -76,7 +154,12 @@ def post_register_conven():
 @bp_fynance.route("/register-bankers", methods=['POST'])
 @login_required
 def post_register_bankers():
-    """Register bankers unique violation"""
+    """Api`s 
+        modular api system within the monolithic
+    Returns:
+        _type_: _post_
+        _data_: _bank unique and name in database_
+    """
     data = request.json
     bank_name = data.get('name')
     if not bank_name:
@@ -137,7 +220,9 @@ def register_tables_bankers():
             )
             db.session.add(new_table)
         db.session.commit()
-        return redirect(url_for("overview.home"))
+
+        return jsonify({"message": "Dados processados com sucesso!"}), 200
+    
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -174,7 +259,6 @@ def register_tables_one():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-    
 
 @bp_fynance.route("/delete-bankers/<int:id>", methods=['POST'])
 @login_required

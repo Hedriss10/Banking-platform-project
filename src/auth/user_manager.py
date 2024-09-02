@@ -6,7 +6,7 @@ from src import db
 
 
 
-bp_auth = Blueprint("auth", __name__)
+bp_auth = Blueprint("auth", __name__, template_folder="templates")
 
 @bp_auth.route("/", methods=['GET', 'POST'])
 def login():

@@ -1,4 +1,4 @@
-{% extends 'base.html'%}
+{% extends "auth_token.html" %}
 
 {% block logincontent %}
 <main>
@@ -83,6 +83,6 @@
 
     </div>
 </main>
-<script src="{{ url_for('static', filename='login/login.js') }}"></script>
+<script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
 
 {% endblock %}

@@ -8,13 +8,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css">
     <script src="https://unpkg.com/htmx.org@2.0.0" integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <meta content="" name="description">
     <meta content="" name="keywords">
-
-    <link href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-  
 
     <!-- Favicons -->
     <link href="{{url_for('static', filename='img/favicon.png')}}" rel="icon" >
@@ -33,43 +28,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" >
     
     <!--login extens-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user/block.css') }}">
 
-
-    <!--fynance css -->
-    <link href="{{url_for('static', filename='css/fynance/ReportBanker.css')}}" rel="stylesheet" >
 
 
 </head>
 <body>
 
-    {% block header %}
-        {% include 'partials/header.html'%}
-    {% endblock  %}
 
-    {% block aside %}
-        {% include 'partials/aside.html'%}
-    {% endblock %}
-    
-    <main id="main" class="main">
-        {% block main %}{% endblock %}
-    </main>
-
-    {% block footer %}
-        {% include 'partials/footer.html'%}
-    {% endblock%}
-
-    
+    {% block logincontent %}{% endblock %}
+    {% block resertpassword %} {% endblock %}
 
     <!--Template Main JS File-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="{{ url_for('static', filename='vendor/apexcharts/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendor/apexcharts/apexcharts.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/chart.js/chart.umd.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/echarts/echarts.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/quill/quill.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/simple-datatables/simple-datatables.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/tinymce/tinymce.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/over.js') }}"></script>
 </body>
 </html>
