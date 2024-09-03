@@ -11,6 +11,13 @@ bp_overview = Blueprint("overview", __name__, template_folder="templates")
 @login_required
 def home():
     """Function for process overview system"""
+    return render_template("partials/home.html")
+
+
+@bp_overview.route("/dashboard")
+@login_required
+def dashboard():
+    """Function for processing dash board"""
     return render_template("partials/dashboard.html")
 
 
