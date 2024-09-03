@@ -3,13 +3,8 @@
 """
 
 import random
-
 from src.models.user import User
 from src import db
-
-
-
-
 from faker import Faker
 
 
