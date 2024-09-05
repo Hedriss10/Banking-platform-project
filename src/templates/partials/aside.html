@@ -51,7 +51,7 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-minecart-loaded"></i><span>Controle de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-minecart-loaded"></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -60,17 +60,17 @@
             </a>
           </li>
           <li>
-            <a href="forms-layouts.html">
-              <i class="bi bi-circle"></i><span>Salas de Vendas </span>
-            </a>
-          </li>
-          <li>
-            <a href="forms-editors.html">
+            <a href="{{url_for('proposal.state_proposal')}}">
               <i class="bi bi-circle"></i><span>Esteira de Vendas</span>
             </a>
           </li>
+          <li>
+            <a href="{{url_for('proposal.room_proposal')}}">
+              <i class="bi bi-circle"></i><span>Sala de Vendas</span>
+            </a>
+          </li>
         </ul>
-      </li><!-- Controle de vendas -->
+      </li><!-- Area Comercial -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
@@ -92,17 +92,17 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="ri-vip-diamond-line"></i></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="charts-chartjs.html">
-              <i class="bi bi-circle"></i><span>Gerenciamento dos Vendedores</span>
+            <a href="{{url_for('rooms.room')}}">
+              <i class="bi bi-circle"></i><span>Criar Sala</span>
             </a>
           </li>
           <li>
-            <a href="charts-apexcharts.html">
-              <i class="bi bi-circle"></i><span>Criar Contratos</span>
+            <a href="{{url_for('rooms.list_rooms')}}">
+              <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
             </a>
           </li>
           <li>
@@ -111,7 +111,7 @@
             </a>
           </li>
         </ul>
-      </li><!-- Area Comercial -->
+      </li><!-- Gerenciamento de vendas  -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
@@ -170,27 +170,27 @@
       </li><!-- Operacional  -->
 
       <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-minecart-loaded"></i><span>Controle de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
+        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="{{url_for('proposal.manage_proposal')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Proposta</span>
+            <a href="charts-chartjs.html">
+              <i class="bi bi-circle"></i><span>Gerenciamento dos Vendedores</span>
             </a>
           </li>
           <li>
-            <a href="forms-layouts.html">
-              <i class="bi bi-circle"></i><span>Salas de Vendas </span>
+            <a href="charts-apexcharts.html">
+              <i class="bi bi-circle"></i><span>Criar Sala</span>
             </a>
           </li>
           <li>
-            <a href="forms-editors.html">
-              <i class="bi bi-circle"></i><span>Esteira de Vendas</span>
+            <a href="charts-apexcharts.html">
+              <i class="bi bi-circle"></i><span>Discadora</span>
             </a>
           </li>
         </ul>
-      </li><!-- Controle de vendas -->
+      </li><!-- Gerenciamento de vendas -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
@@ -213,8 +213,31 @@
       {% elif 'Gerente de Vendas' in session['type_user_func']%}
       
       <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="charts-chartjs.html">
+              <i class="bi bi-circle"></i><span>Gerenciamento dos Vendedores</span>
+            </a>
+          </li>
+          <li>
+            <a href="charts-apexcharts.html">
+              <i class="bi bi-circle"></i><span>Criar Sala</span>
+            </a>
+          </li>
+          <li>
+            <a href="charts-apexcharts.html">
+              <i class="bi bi-circle"></i><span>Discadora</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- Gerenciamento de vendas  -->
+
+      <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-minecart-loaded"></i><span>Controle de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-minecart-loaded"></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -233,36 +256,13 @@
             </a>
           </li>
         </ul>
-      </li><!-- Controle de vendas -->
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="ri-vip-diamond-line"></i></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="charts-chartjs.html">
-              <i class="bi bi-circle"></i><span>Gerenciamento dos Vendedores</span>
-            </a>
-          </li>
-          <li>
-            <a href="charts-apexcharts.html">
-              <i class="bi bi-circle"></i><span>Criar Contratos</span>
-            </a>
-          </li>
-          <li>
-            <a href="charts-apexcharts.html">
-              <i class="bi bi-circle"></i><span>Discadora</span>
-            </a>
-          </li>
-        </ul>
       </li><!-- Area Comercial -->
 
       {% elif 'Supervisor de Vendas' in session['type_user_func']%}
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="ri-vip-diamond-line"></i></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -272,7 +272,7 @@
           </li>
           <li>
             <a href="charts-apexcharts.html">
-              <i class="bi bi-circle"></i><span>Criar Contratos</span>
+              <i class="bi bi-circle"></i><span>Criar Sala</span>
             </a>
           </li>
           <li>
@@ -281,7 +281,7 @@
             </a>
           </li>
         </ul>
-      </li><!-- Area Comercial -->
+      </li><!-- Gerenciamento de vendas  -->
 
       {% elif 'Financeiro' in session['type_user_func'] %}
       <li class="nav-item">
