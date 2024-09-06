@@ -4,8 +4,8 @@
 
 - Flask 
 - PostgreSQL
-- HTMX
 - Flask-SQLAlchemy
+- Flask Alembic
 
 ## Project Architecture
 
@@ -19,11 +19,8 @@ The project's directory structure is organized as follows:
 
 ```
 docs/
-instance/
 LICENSE
 local.py
-migrations/
-proposta/
 README.md
 requirements.txt
 src/
@@ -35,7 +32,7 @@ src/
     static/
     templates/
     utils/
-    views/
+    routes/
     wsgi.py
 test/
 ```
@@ -59,9 +56,11 @@ test/
   - **static/**: Directory for static files such as CSS, JavaScript, and images.
   - **templates/**: Directory for HTML templates to be rendered by views.
   - **utils/**: Module with utility functions and helpers used across different parts of the application.
-  - **views/**: Module containing the application's views where routes are defined.
+  - **routes/**: Module containing the application's views where routes are defined.
   - **wsgi.py**: Entry point for WSGI servers, used to deploy the application.
 - **test/**: Directory for unit and integration tests.
+
+
 
 ### Factory Pattern
 
@@ -93,7 +92,3 @@ def create_app():
 - **Reusability**: Modules can be reused in different parts of the application or in other projects.
 
 ---
-
-## Issues 🚀
-
-User Stories (US) and Bugs are being created, along with Issues for the platform's development. These contribute to improvements and new ideas from the CEO.
