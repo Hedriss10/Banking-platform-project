@@ -2,7 +2,7 @@ import os
 
 from datetime import datetime
 from flask_sqlalchemy import pagination
-from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app)
+from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app, flash)
 from flask_login import login_required, current_user 
 from src import db
 from werkzeug.utils import secure_filename
@@ -11,8 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.utils.proposal import UploadProposal
 from src.models.proposal import UserProposal
 from src.models.fynance import Banker, FinancialAgreement, TablesFinance
-
-
+from src.models.user import User
 
 bp_proposal = Blueprint("proposal", __name__)
 
@@ -20,20 +19,90 @@ bp_proposal = Blueprint("proposal", __name__)
 @bp_proposal.route("/proposal")
 @login_required
 def manage_proposal():
+    """Function para rank de comissão associando a tabela Flat da coluna TablesFinance"""
+    
     bankers = Banker.query.options(
         joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)
     ).order_by(Banker.name).all()
-    return render_template("proposal/manage_proposal.html", bankers=bankers)
-
-
-@bp_proposal.route('/proposal/status', methods=['GET', 'POST'])
-def get_status_proposal():
+    
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    pagination = UserProposal.query.order_by(UserProposal.name_and_lastname.desc()).paginate(page=page, per_page=per_page, error_out=False)
-    return render_template("proposal/state_proposal.html", proposals=pagination.items, pagination=pagination)
+    search_term = request.args.get('search', '').lower()
+    
+    query = TablesFinance.query.join(FinancialAgreement).join(Banker)
+    
+    try:
+        search_rate = float(search_term)
+    except ValueError:
+        search_rate = None
+
+    if search_term:
+        query = query.filter(
+            TablesFinance.name.ilike(f'%{search_term}%') |   # Filtro pelo nome da tabela
+            TablesFinance.table_code.ilike(f'%{search_term}%') |  # Filtro pelo código da tabela
+            Banker.name.ilike(f'%{search_term}%') |   # Filtro pelo nome do banco
+            FinancialAgreement.name.ilike(f'%{search_term}%') |  # Filtro pelo nome do convênio
+            (TablesFinance.rate == search_rate if search_rate is not None else False)  # Filtro pela taxa de comissão
+        )
+
+    tables_paginated = query.order_by(TablesFinance.rate.desc()).paginate(page=page, per_page=per_page)
+
+    banks_data = [{
+        'bank_name': table.financial_agreement.banker.name,
+        'agreement_name': table.financial_agreement.name,
+        'table_name': table.name,
+        'table_code': table.table_code,
+        'rate': table.rate
+    } for table in tables_paginated.items]
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(banks_data)
+    return render_template("proposal/manage_proposal.html", bankers=bankers ,banks=banks_data, pagination=tables_paginated)
 
 
+@bp_proposal.route('/proposal-status')
+@login_required
+def state_proposal():
+    """
+        state proposal
+        return state proposal status actual
+    Returns:
+        _type_:  return state proposal
+    """
+    query = UserProposal.query
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    search_term = request.args.get('search', '').lower()
+    
+    try:
+        search_rate = float(search_term)
+    except ValueError:
+        search_rate = None
+
+    if search_term:
+        query = query.filter(
+            UserProposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtrar pelo o nome da campanha
+            UserProposal.created_at.ilike(f'%{search_term}%') # Filtro pelo código da tabela
+        )
+    
+    tables_paginated = query.order_by(UserProposal.created_at.desc()).paginate(page=page, per_page=per_page)
+
+    proposal_data = [{
+        'id': p.id,
+        'name_and_lastname': p.name_and_lastname,
+        'created_at': p.created_at.strftime('%d/%m/%Y'),
+        'active': p.active,
+        'block': p.block,
+        'is_status': p.is_status
+    } for p in tables_paginated.items]
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(proposal_data)
+    
+    return render_template("proposal/state_proposal.html", proposal=proposal_data, pagination=tables_paginated)
+    
+    
 @bp_proposal.route("/proposal/new-proposal", methods=['POST'])
 @login_required
 def add_proposal():
@@ -113,11 +182,40 @@ def add_proposal():
                 setattr(new_proposal, field, ','.join(image_paths))
 
         db.session.commit()
-        # return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'})
-        return redirect(url_for('overview.home'))
+        return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'}), 200
 
     except Exception as e:
         db.session.rollback()
         print(f"{str(e)}")
         current_app.logger.error("Erro ao processar o formulário: %s", e)
         return jsonify({'error': str(e)}), 500
+    
+    
+@bp_proposal.route("/proposal/edit-proposal/<int:id>", methods=['GET', 'POST'])
+@login_required
+def state_details(id):
+    """Edit proposal"""
+    proposal = UserProposal.query.get_or_404(id)
+
+    if request.method == 'POST':
+        proposal.name_and_lastname = request.form.get('name_and_lastname')
+        proposal.created_at = request.form.get('created_at') 
+        proposal.active = 'active' in request.form
+        proposal.block = 'block' in request.form
+        proposal.is_status = 'is_status' in request.form
+        
+
+        db.session.commit()
+        flash('Proposta atualizada com sucesso!', 'success')
+        return redirect(url_for('proposal.state_proposal'))
+    
+    return render_template("proposal/edit_proposal.html", proposal=proposal)
+
+@bp_proposal.route("/proposal/rom-selles")
+@login_required
+def room_proposal():
+    user = User.query.filter_by(id=current_user.id).first()
+
+    extension = user.extension
+    extension_room = user.extension_room
+    return render_template("proposal/room_proposal.html", user=user, extension=extension, extension_room=extension_room)

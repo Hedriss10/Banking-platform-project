@@ -34,3 +34,11 @@
         {% block footer %} {% endblock %}
     </footer>
     {% endif %}
+
+
+
+
+<td row="row">
+    <!-- Ajustar para passar o token criptografado -->
+    <a href="{{ url_for('proposal.state_details', token=generate_token(p.id)) }}" class="btn btn-info btn-sm">Editar</a>
+</td>

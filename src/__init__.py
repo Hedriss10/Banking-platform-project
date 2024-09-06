@@ -39,6 +39,9 @@ def create_app(config_class=DevelopmentConfig):
     from src.routes.fynance import bp_fynance
     from src.routes.proposal import bp_proposal
     from src.routes.admin import bp_admin
+    from src.routes.rooms import bp_room
+    from src.routes.compaing import bp_campaign
+    from src.routes.operational import bp_operational
     
     app.register_blueprint(bp_user, url_prefix="/")
     app.register_blueprint(bp_overview, url_prefix="/")
@@ -47,6 +50,9 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(bp_fynance, url_prefix="/")
     app.register_blueprint(bp_proposal, url_prefix="/")
     app.register_blueprint(bp_admin, url_prefix="/")
+    app.register_blueprint(bp_room, url_prefix="/")
+    app.register_blueprint(bp_campaign, url_prefix="/")
+    app.register_blueprint(bp_operational, url_prefix="/")
     
     
     from src.models.user import User

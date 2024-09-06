@@ -625,7 +625,7 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Propostas</h5>
+        <h5 class="card-title">Gerenciamento de proposta</h5>
         <p>Gerenciamento de <strong>proposta</strong>. Segue o fluxo de atividade!</p>
 
         <!-- Full Screen Modal -->
@@ -633,38 +633,94 @@
             Cadastrar Proposta
         </button>
 
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#">
-            Esteira Proposta
-        </button>
-        
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#">
-            Rank de Comissão
-        </button>
-
-
-        <div class="modal fade" id="fullscreenModal" tabindex="-1">
-            <div class="modal-dialog modal-fullscreen">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Full Screen Modal</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Non omnis incidunt qui sed occaecati magni asperiores est mollitia. Soluta at et reprehenderit.
-                        Placeat autem numquam et fuga numquam. Tempora in facere consequatur sit dolor ipsum.
-                        Consequatur nemo amet incidunt est facilis. Dolorem neque recusandae quo sit molestias sint
-                        dignissimos.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div><!-- End Full Screen Modal-->
     </div>
+
 </div>
 
+<section>
+<div class="card mx-auto" style="width: 100%; max-width: 1200px; margin: 0 auto;">
+    <div class="card-body">
+      <h5 class="card-title">Gerenciamento de comissão</h5>
+      <p>Tabelas classificadas por <code>rank</code> de comissão</p>
+      <br><br>
+      <div class="d-flex justify-length-center mb-3">
+        <input type="text" id="searchInput" class="form-control w-50" placeholder="Buscar...">
+      </div>
+
+      <!-- Tabela Bordered -->
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Banco</th>
+            <th scope="col">Convênio</th>
+            <th scope="col">Tabela</th>
+            <th scope="col">Código da tabela</th>
+            <th scope="col">Valor da Comissão</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bank in banks %}
+            <tr>
+              <th scope="row">{{ loop.index }}</th>
+              <td>{{ bank.bank_name }}</td>
+              <td>{{ bank.agreement_name }}</td>
+              <td>{{ bank.table_name }}</td>
+              <td>{{ bank.table_code }}</td>
+              <td>{{ bank.rate }}%</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center">Nenhuma comissão encontrada</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <nav aria-label="Paginação de comissões">
+        <ul class="pagination">
+          {% if pagination.has_prev %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('proposal.manage_proposal', page=pagination.prev_num) }}">Anterior</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Páginas</a>
+            </li>
+          {% endif %}
+
+          {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+              {% if page_num == pagination.page %}
+                <li class="page-item active" aria-current="page">
+                  <a class="page-link" href="#">{{ page_num }}</a>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('proposal.manage_proposal', page=page_num) }}">{{ page_num }}</a>
+                </li>
+              {% endif %}
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('proposal.manage_proposal', page=pagination.next_num) }}">Próximo</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Próximo</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+</div>
+</section>
+
+
+<script src="{{ url_for('static', filename='js/proposal/Searchinput.js') }}"></script> <!--listagem de comissão-->
 <script src="{{ url_for('static', filename='css/proposal/proposal.css') }}"></script>
 <script src="{{ url_for('static', filename='js/proposal/ToggleTable.js') }}"></script>
 <script src="{{ url_for('static', filename='js/proposal/InputsPaymentsAccounts.js') }}"></script>

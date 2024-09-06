@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+
+{% block main %} <!-- room selles -->
+
+
+<section>
+    <!-- Default Card -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Sala de Vendas</h5>
+            <div class="detalis">
+                <h6 class="card-title mb-0">Nome: {{ user.username }}</h6>
+                <p class="text-muted mb-0">Email:{{ user.email }}</p>
+                <p class="text-muted mb-0"><strong>Sala:</strong>{{ extension }}</p>
+                <p class="text-muted mb-0"><strong>Operacão:</strong> {{ extension_room }}</p>
+            </div>
+        </div>
+    </div><!-- End Default Card -->
+</section>
+
+{% endblock %}

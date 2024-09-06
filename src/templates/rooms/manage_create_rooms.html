@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+
+{% block main %}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg border-0 card-custom">
+        <div class="card-body">
+            <h5 class="card-title text-center mb-4">Gerenciamento de Salas</h5>
+            <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                        type="button" role="tab" aria-controls="profile" aria-selected="false">Salas Criadas</button>
+                </li>
+            </ul>
+            <div class="tab-content pt-3" id="myTabContent">
+                <!-- Formulário de Criação de Sala -->
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <form id="createRoomForm">
+                        <div class="mb-3">
+                            <label for="create_room" class="form-label">Nome da Sala</label>
+                            <input type="text" class="form-control" id="create_room" name="create_room"
+                                placeholder="Digite o nome da sala" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status da Sala</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Ativa">Ativa</option>
+                                <option value="Inativa">Inativa</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="createRoom()">Criar Sala</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rooms/manage_create_rooms.css') }}">
+<script src="{{ url_for('static', filename='js/room/room.js') }}"></script>
+{% endblock %}

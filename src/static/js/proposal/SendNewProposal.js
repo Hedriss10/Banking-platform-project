@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Erro ao comunicar com o servidor.');
+            alert('estou aqui.');
         });
     })
 });

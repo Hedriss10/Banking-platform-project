@@ -64,7 +64,8 @@ class UserProposal(db.Model, UserMixin):
     value_operation = db.Column(db.String(30), nullable=False)
     obeserve = db.Column(db.String(500), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False) # status proposal 
-    block = db.Column(db.Boolean, nullable=False, default=False) #  status block for active 
+    block = db.Column(db.Boolean, nullable=False, default=False) #  status block for active
+    is_status = db.Column(db.Boolean, nullable=True, default=False)
      
     # Relationship
     creator = db.relationship('User', backref='created_proposals', foreign_keys=[creator_id])
