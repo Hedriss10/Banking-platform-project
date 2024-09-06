@@ -76,6 +76,27 @@ def manage_comission():
     return render_template("fynance/controllers_comission.html", banks=banks_data, pagination=tables_paginated)
 
 
+@bp_fynance.route("/controls-box")
+@login_required
+def controllers_box():
+    """function for controllers box MaisBS"""
+    return render_template("fynance/controllers_box.html")
+
+
+@bp_fynance.route("/manage-payment")
+@login_required
+def manage_payment():
+    """Function for payment"""
+    return render_template("fynance/manage_payment.html")
+
+
+@bp_fynance.route("/manage-analytics")
+@login_required
+def manage_analytics():
+    """function for analytcis"""
+    return render_template("fynance/manage_analytics.html")
+
+
 @bp_fynance.route("/process-data", methods=['POST'])
 @login_required
 def process_data():
@@ -263,6 +284,7 @@ def register_tables_one():
 @bp_fynance.route("/delete-bankers/<int:id>", methods=['POST'])
 @login_required
 def delete_bankers(id):
+    """Function for delete id banker"""
     banker = Banker.query.get_or_404(id)
     db.session.delete(banker)
     db.session.commit()
@@ -272,6 +294,7 @@ def delete_bankers(id):
 @bp_fynance.route("/delete-bankers/conv/<int:id>", methods=['POST'])
 @login_required
 def delete_conv_in_banker(id):
+    """Function for delete conv in banker"""
     convenio = FinancialAgreement.query.get_or_404(id)
     db.session.delete(convenio)
     db.session.commit()
@@ -281,8 +304,10 @@ def delete_conv_in_banker(id):
 @bp_fynance.route("/delete-bankers/conv/tables/<int:id>", methods=['POST'])
 @login_required
 def delete_table_in_conv_in_banker(id):
+    """Function for delete table in conv in banker"""
     table = TablesFinance.query.get_or_404(id)
     db.session.delete(table)
     db.session.commit()
     return jsonify({"success": True, 'message': 'Tabela deletada com sucesso!'}), 200
+
 

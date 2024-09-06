@@ -28,8 +28,6 @@ document.getElementById('searchInput').addEventListener('input', function() {
         data.forEach((p, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <th scope="row">${index + 1}</th>
-                <td>${p.id}</td>
                 <td>${p.name_and_lastname}</td>
                 <td>${p.created_at}</td>
                 <td>

@@ -1,0 +1,65 @@
+{% extends "base.html"%}
+
+
+{% block main %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Associar Vendedores às Salas</h2>
+    <form id="association-form">
+        <div class="row">
+            <div class="col-md-7 table-container">
+                <h4>Vendedores</h4>
+                <table id="vendor-table" class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for vendor in user %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input vendor-checkbox" value="{{ vendor.id }}">
+                        </td>
+                        <td>{{ vendor.username }}</td>
+                        <td>{{ vendor.email }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <div class="col-md-7 table-container">
+                <h4>Salas</h4>
+                <table id="room-table" class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Nome da Sala</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for room in room %}
+                    <tr>
+                        <td>
+                            <input type="radio" class="form-check-input room-checkbox" name="room" value="{{ room.id }}">
+                        </td>
+                        <td>{{ room.create_room }}</td>
+                        <td>{{ room.status }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mt-4 text-center">
+            <button type="submit" class="btn btn-primary">Associar Selecionados</button>
+        </div>
+    </form>
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rooms/list_rooms.css') }}">
+<script src="{{ url_for('static', filename='js/room/list_rooms.js') }}"></script>
+{% endblock %}

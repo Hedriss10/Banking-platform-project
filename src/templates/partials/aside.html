@@ -32,17 +32,17 @@
             </a>
           </li>
           <li>
-            <a href="components-badges.html">
+            <a href="{{url_for('fynance.controllers_box')}}">
               <i class="bi bi-circle"></i><span>Controle de Caixa</span>
             </a>
           </li>
           <li>
-            <a href="components-breadcrumbs.html">
+            <a href="{{url_for('fynance.manage_payment')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Pagamento</span>
             </a>
           </li>
           <li>
-            <a href="components-buttons.html">
+            <a href="{{url_for('fynance.manage_analytics')}}">
               <i class="bi bi-circle"></i><span>Analise de risco</span>
             </a>
           </li>
@@ -78,13 +78,18 @@
         </a>
         <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="tables-general.html">
-              <i class="bi bi-circle"></i><span>General Tables</span>
+            <a href="{{url_for('operational.manage_operational')}}">
+              <i class="bi bi-circle"></i><span>Gerenciamento Operacional</span>
             </a>
           </li>
           <li>
-            <a href="tables-data.html">
-              <i class="bi bi-circle"></i><span>Data Tables</span>
+            <a href="{{url_for('operational.manage_list_contract')}}">
+              <i class="bi bi-circle"></i><span>Contrato Digital</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{url_for('operational.manage_state_contract')}}">
+              <i class="bi bi-circle"></i><span>Esteira de Contratos</span>
             </a>
           </li>
         </ul>
@@ -105,11 +110,6 @@
               <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
             </a>
           </li>
-          <li>
-            <a href="charts-apexcharts.html">
-              <i class="bi bi-circle"></i><span>Discadora</span>
-            </a>
-          </li>
         </ul>
       </li><!-- Gerenciamento de vendas  -->
 
@@ -119,12 +119,12 @@
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="icons-bootstrap.html">
+            <a href="{{url_for('campaign.manage_campaign')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
             </a>
           </li>
           <li>
-            <a href="icons-remix.html">
+            <a href="{{url_for('campaign.add_campaing')}}">
               <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
             </a>
           </li>

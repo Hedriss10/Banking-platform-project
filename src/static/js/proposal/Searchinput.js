@@ -13,9 +13,8 @@ document.getElementById('searchInput').addEventListener('input', function() {
         return response.json();
     })
     .then(data => {
-        // Atualiza a tabela com os novos dados
         const tbody = document.querySelector('tbody');
-        tbody.innerHTML = ''; // Limpa as linhas existentes
+        tbody.innerHTML = '';
   
         data.forEach((bank, index) => {
             const row = document.createElement('tr');
@@ -28,8 +27,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
             `;
             tbody.appendChild(row);
         });
-  
-        // Exibe mensagem se nenhum resultado for encontrado
+
         if (data.length === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `

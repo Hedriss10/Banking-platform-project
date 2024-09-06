@@ -1,16 +1,7 @@
-import os 
-
-from datetime import datetime
 from flask_sqlalchemy import pagination
 from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app, flash)
 from flask_login import login_required, current_user 
 from src import db
-from werkzeug.utils import secure_filename
-from sqlalchemy.orm import joinedload
-from sqlalchemy.exc import SQLAlchemyError
-from src.utils.proposal import UploadProposal
-from src.models.proposal import UserProposal
-from src.models.fynance import Banker, FinancialAgreement, TablesFinance
 from src.models.user import User
 from src.models.rooms import Roomns
 
@@ -44,20 +35,26 @@ def create_room():
 
 @bp_room.route('/list_rooms', methods=['GET'])
 def list_rooms():
+    """
+        Function list rooms for active associete users
+    """
     rooms = Roomns.query.all()
+    user = User.query.all()
     rooms_data = [{
         'id': room.id,
         'create_room': room.create_room,
         'status': room.status,
-        'vendors': [{'name': user.name, 'email': user.email} for user in room.users]
+        'vendors': [{'name': user.username, 'email': user.email} for user in room.users]
     } for room in rooms]
-    return jsonify({'rooms': rooms_data}), 200
+
+    return render_template("rooms/list_rooms.html", room=rooms_data, user=user)
+
 
 
 @bp_room.route('/list_vendors', methods=['GET'])
 def list_vendors():
     vendors = User.query.filter_by(type_user_func='Vendedor').all()
-    vendors_data = [{'id': vendor.id, 'name': vendor.name, 'email': vendor.email} for vendor in vendors]
+    vendors_data = [{'id': vendor.id, 'name': vendor.username, 'email': vendor.email} for vendor in vendors]
     return jsonify({'vendors': vendors_data}), 200
 
 
