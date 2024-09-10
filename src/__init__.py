@@ -56,9 +56,9 @@ def create_app(config_class=DevelopmentConfig):
     
     
     from src.models.user import User
-    from src.models.hourpoint import Point, VocationBs
-    from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat, ReportBankerTransactionData
-    from src.models.proposal import UserProposal
+    # from src.models.hourpoint import Point, VocationBs
+    # from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat, ReportBankerTransactionData
+    # from src.models.proposal import UserProposal
     
     @login_manager.user_loader
     def load_user(user_id):

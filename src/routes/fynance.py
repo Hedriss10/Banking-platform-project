@@ -6,6 +6,7 @@ from flask import jsonify
 from src import db
 from sqlalchemy.orm import joinedload
 from src.models.fynance import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData
+from src.models.proposal import UserProposal
 from werkzeug.utils import secure_filename
 
 
@@ -30,6 +31,11 @@ def gerement_finance():
 @bp_fynance.route("/report-banker")
 @login_required
 def controllers_report_banker_comission():
+    """
+        Function for adjust comission of banker 
+    Returns:
+        comission: return render_template bankers 
+    """
     bankers = Banker.query.options(
         db.joinedload(Banker.financial_agreements).subqueryload(FinancialAgreement.tables_finance)
     ).order_by(Banker.name).all()
@@ -75,6 +81,52 @@ def manage_comission():
     
     return render_template("fynance/controllers_comission.html", banks=banks_data, pagination=tables_paginated)
 
+
+@bp_fynance.route("/manage-report", methods=['GET'])
+def manage_report():
+    """Função para gerenciar relatórios"""
+
+    banker_id = request.args.get('banker_id', type=int)
+    banks = Banker.query.all()
+
+    manage_report = []
+    report_status = []
+
+    if banker_id:
+        manage_report = ReportBankerTransactionData.query.filter_by(banker_id=banker_id).all()
+        proposals = UserProposal.query.all()
+        proposal_cpf_map = {proposal.cpf: proposal for proposal in proposals}
+
+        if not manage_report:
+            return render_template("fynance/manage_report.html", 
+                                   banks=banks, 
+                                   selected_banker_id=banker_id,
+                                   message="Nenhum relatório encontrado para o banco selecionado. Cadastre um novo relatório.")
+
+        for report in manage_report:
+            data = report.data
+            columns = data.get('columns', [])
+            valid_columns = [col for col in columns if col.get('CPF') in proposal_cpf_map]
+            invalid_columns = [col for col in columns if col.get('CPF') not in proposal_cpf_map]
+            status = 'OK' if not invalid_columns else 'Incorreto'
+
+            valid_proposals = [proposal_cpf_map[col['CPF']] for col in valid_columns]
+
+            report_status.append({
+                'report_id': report.id,
+                'bankID': data.get('bankID'),
+                'convID': data.get('convID'),
+                'status': status,
+                'valid_columns_count': len(valid_columns),
+                'invalid_columns_count': len(invalid_columns),
+                'valid_columns': valid_columns,
+                'valid_proposals': valid_proposals
+            })
+
+    return render_template("fynance/manage_report.html", 
+                           report_status=report_status, 
+                           selected_banker_id=banker_id, 
+                           banks=banks)
 
 @bp_fynance.route("/controls-box")
 @login_required
@@ -311,3 +363,38 @@ def delete_table_in_conv_in_banker(id):
     return jsonify({"success": True, 'message': 'Tabela deletada com sucesso!'}), 200
 
 
+@bp_fynance.route("/save-report-template", methods=['GET'])
+def save_template_report_comission():
+    """
+        Coleta todos os dados do relatório e faz associação com o template.
+    """
+    banker_id = request.args.get('banker_id', type=int)
+    conv_id = request.args.get('conv_id', type=int)
+
+    try:
+        if not banker_id or not conv_id:
+            return jsonify({'error': 'Os campos Banco e Orgão são necessários.'}), 400
+        
+        report_comission = ReportBankerTransactionData.query.filter_by(
+            banker_id=banker_id, 
+            conv_id=conv_id
+        ).all()
+        
+        banker = Banker.query.filter_by(id=banker_id).first()
+        convenio = FinancialAgreement.query.filter_by(id=conv_id).first()
+
+        if not report_comission:
+            return jsonify({'message': 'Nenhum template de relatório encontrado para os parâmetros fornecidos.'}), 404
+
+        templates = [{
+            'Último template importado': index + 1,
+            'Banco': banker.name if banker else 'Desconhecido',
+            'Convênio': convenio.name if convenio else 'Desconhecido',
+            'Colunas': report.data.get('columns', []) 
+        } for index, report in enumerate(report_comission)]
+
+        return jsonify(templates), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

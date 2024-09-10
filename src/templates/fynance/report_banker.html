@@ -2,45 +2,61 @@
 
 
 {% block main %}
+<section>
+    <div class="container mt-4">
+        <h2 class="details">Layout de Relatório de Comissão</h2>
+        <p class="details">Importante lembrar que o <code>Layout</code> é 
+            capturado após você importar um relatório de comissão do banco, 
+            dado essa ação será salvo e quando for a próxima vez, para importação 
+            do mesmo banco será necessário seguir a mesma regra.</p>
+        <div id="feedback" class="alert alert-info" style="display: none;">
+        </div>
+        <div id="template-list" class="list-group">
+            <!-- Os templates serão inseridos aqui via JavaScript -->
+        </div>
+    </div>
+    <br><br>
+    <div class="mb-3">
+        <label for="bankSelect" class="form-label">Selecione o Banco:</label>
+        <select class="form-select" id="bankSelect" name="bankSelect">
+            <option value="">Escolha...</option>
+            {% for bank in banks %}
+            <option value="{{ bank.id }}">{{ bank.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-<div class="mb-3">
-    <label for="bankSelect" class="form-label">Selecione o Banco:</label>
-    <select class="form-select" id="bankSelect" name="bankSelect">
-        <option value="">Escolha...</option>
-        {% for bank in banks %}
-        <option value="{{ bank.id }}">{{ bank.name }}</option>
-        {% endfor %}
-    </select>
-</div>
-<div class="mb-3">
-    <label for="convenioSelect" class="form-label">Selecione o Convênio:</label>
-    <select class="form-select" id="convenioSelect" name="convenioSelect">
-        <option value="">Escolha...</option>
-        {% for bank in banks %}
-        {% for convenio in bank.financial_agreements %}
-        <option class="convenio-options" value="{{ convenio.id }}" data-bank-id="{{ bank.id }}" style="display: none;">
-            {{ convenio.name }}
-        </option>
-        {% endfor %}
-        {% endfor %}
-    </select>
-</div>
+    <div class="mb-3">
+        <label for="convenioSelect" class="form-label">Selecione o Convênio:</label>
+        <select class="form-select" id="convenioSelect" name="convenioSelect">
+            <option value="">Escolha...</option>
+            {% for bank in banks %}
+            {% for convenio in bank.financial_agreements %}
+            <option class="convenio-options" value="{{ convenio.id }}" data-bank-id="{{ bank.id }}" style="display: none;">
+                {{ convenio.name }}
+            </option>
+            {% endfor %}
+            {% endfor %}
+        </select>
+    </div>
 
-<div class="controls">
-    <input type="file" id="upload" accept=".xlsx, .xls, .csv" />
-    <br>
-    <i>Planilhas na tabela<i><select id="sheet-selector" style="display: none;"></select>
-</div>
+    <div class="controls mb-3">
+        <input type="file" id="upload" accept=".xlsx, .xls, .csv" class="form-control" />
+        <br>
+        <label for="sheet-selector" class="form-label" style="display: none;">Planilhas na tabela:</label>
+        <select id="sheet-selector" class="form-select" style="display: none;"></select>
+    </div>
 
-<div id="table-container"></div>
-<button id="process" disabled>Processar</button>
+    <div id="table-container" class="mb-3"></div>
 
+    <button id="process" class="btn btn-primary" disabled>Processar</button>
+    <button class="btn btn-secondary" onclick="window.location.reload();">Resetar <i class="bi bi-x-circle"></i></button>
 
-<button class="btn btn-secondary" onclick="window.location.reload();">Resetar <i class="bi bi-x-circle"></i></button>
+    <hr>
 
-<hr>
-<div id="notification" class="alert" style="display: none;"></div>
+    <div id="notification" class="alert" style="display: none;"></div>
 
+</section>
 <script src="{{ url_for('static', filename='js/fynance/ToggleTables.js') }}"></script>
 <!--togles tables comission in conv and banker-->
 <script src="{{ url_for('static', filename='js/fynance/toggleReportTablesFynance.js') }}"></script>
@@ -50,4 +66,5 @@
 <!--Toggle fynance todo one register tables and conv-->
 <script src="{{ url_for('static', filename='js/fynance/ToggleTableOne.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/ReportBanker.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fynance/TemplateBankerComission.js') }}"></script>
 {% endblock%}
