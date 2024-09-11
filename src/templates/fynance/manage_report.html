@@ -57,6 +57,20 @@
                                     </li>
                                 {% endfor %}
                             </ul>
+                            <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#details-{{ report.report_id }}">
+                                Ver Detalhes
+                            </button>
+                            
+                            <div class="collapse" id="details-{{ report.report_id }}">
+                                {% if report.status == 'OK' %}
+                                    <!-- Conteúdo dos detalhes -->
+                                    <button class="btn btn-primary mt-2" onclick="window.location.href='{{ url_for('fynance.download_report', report_id=report.report_id) }}'">
+                                        Gerar Relatório CSV
+                                    </button>
+                                {% else %}
+                                    <p class="text-danger">Algumas colunas não foram validadas!</p>
+                                {% endif %}
+                            </div>
                         {% else %}
                             <p class="text-danger">Algumas colunas não foram validadas!</p>
                         {% endif %}

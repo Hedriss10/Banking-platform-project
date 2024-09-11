@@ -1,6 +1,6 @@
 import pandas as pd
-
-from flask import Blueprint , render_template, request, redirect, url_for
+import io
+from flask import Blueprint , render_template, request, redirect, url_for, make_response
 from flask_login import login_required, current_user
 from flask import jsonify
 from src import db
@@ -80,7 +80,6 @@ def manage_comission():
     return render_template("fynance/controllers_comission.html", banks=banks_data, pagination=tables_paginated)
 
 
-
 @bp_fynance.route("/comission-calc", methods=['GET', 'POST'])
 def comission_calc():
     """
@@ -155,8 +154,6 @@ def comission_calc():
                            calculated_commissions=calculated_commissions)
 
 
-
-
 @bp_fynance.route("/manage-report", methods=['GET'])
 def manage_report():
     """Função para gerenciar relatórios"""
@@ -203,11 +200,59 @@ def manage_report():
                            selected_banker_id=banker_id, 
                            banks=banks)
 
-@bp_fynance.route("/controls-box")
+
+@bp_fynance.route("/download-report/<int:report_id>", methods=['GET'])
+def download_report(report_id):
+    """Função para gerar o CSV do relatório com propostas relacionadas"""
+    report = ReportBankerTransactionData.query.get(report_id)
+    if not report:
+        return "Relatório não encontrado", 404
+
+    columns = report.data.get('columns', [])
+    df = pd.DataFrame(columns)
+
+    proposals = UserProposal.query.all()
+    proposal_cpf_map = {proposal.cpf: proposal for proposal in proposals}
+
+    proposal_names = []
+    proposal_emails = []
+    proposal_operations = []
+
+    for col in columns:
+        cpf = col.get('CPF')
+        proposal = proposal_cpf_map.get(cpf)
+        if proposal:
+            proposal_names.append(proposal.name_and_lastname)
+            proposal_emails.append(proposal.email)
+            proposal_operations.append(proposal.operation_select)
+        else:
+            proposal_names.append('N/A')
+            proposal_emails.append('N/A')
+            proposal_operations.append('N/A')
+
+    df['Nome da Proposta'] = proposal_names
+    df['Email da Proposta'] = proposal_emails
+    df['Operação da Proposta'] = proposal_operations
+
+    output = io.StringIO()
+    df.to_csv(output, index=False, sep=";")
+    output.seek(0)
+
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = f"attachment; filename=relatorio_{report_id}.csv"
+    response.headers["Content-type"] = "text/csv"
+    return response
+
+
+@bp_fynance.route("/controls-box", methods=['GET'])
 @login_required
 def controllers_box():
-    """function for controllers box MaisBS"""
-    return render_template("fynance/controllers_box.html")
+    """function for controllers box approved"""
+    # Consultar todas as comissões pagas
+    paid_commissions = CalcComissionRate.query.all()    
+    total_paid = sum(calc.repasse_comissao for calc in paid_commissions)
+    print(total_paid)  
+    return render_template("fynance/controllers_box.html", total_paid=total_paid)
 
 
 @bp_fynance.route("/manage-payment")
