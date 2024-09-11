@@ -9,9 +9,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 from src.utils.proposal import UploadProposal
-from src.models.proposal import UserProposal
-from src.models.fynance import Banker, FinancialAgreement, TablesFinance
-from src.models.user import User
+from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, UserProposal
 
 bp_proposal = Blueprint("proposal", __name__)
 

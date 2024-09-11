@@ -1,11 +1,8 @@
-from flask import Blueprint , render_template, request, redirect, url_for
-from flask_login import login_required
-from flask_login import current_user
+from flask import Blueprint , render_template, request, redirect, url_for, jsonify
+from flask_login import login_required, current_user
 from src import db 
-from flask import jsonify
 from datetime import datetime
-from ..models.hourpoint import Point, VocationBs
-
+from src.models.bsmodels import Point, VocationBs
 
 bp_point_hour = Blueprint("hourpoint", __name__)
 

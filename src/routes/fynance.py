@@ -5,10 +5,8 @@ from flask_login import login_required, current_user
 from flask import jsonify
 from src import db
 from sqlalchemy.orm import joinedload
-from src.models.fynance import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData
-from src.models.proposal import UserProposal
 from werkzeug.utils import secure_filename
-
+from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData, CalcComissionRate, UserProposal
 
 bp_fynance = Blueprint("fynance", __name__)
 
@@ -80,6 +78,83 @@ def manage_comission():
         return jsonify(banks_data)
     
     return render_template("fynance/controllers_comission.html", banks=banks_data, pagination=tables_paginated)
+
+
+
+@bp_fynance.route("/comission-calc", methods=['GET', 'POST'])
+def comission_calc():
+    """
+        Rota para calcular e gerenciar o repasse de comissão.
+    """
+    bankers = Banker.query.all()
+    tables = TablesFinance.query.all()
+    proposals = None
+    selected_table = None
+    calculated_commissions = []
+
+    if request.method == 'POST':
+        banker_id = request.form.get('banker_id', type=int)
+        table_id = request.form.get('table_id', type=int)
+        repasse_percentage = request.form.get('repasse_percentage', type=float)  # Captura o repasse do form
+
+        if not banker_id or not table_id or repasse_percentage is None:
+            return jsonify({"error": "Selecione um banco, uma tabela e o percentual de repasse para calcular a comissão."}), 400
+
+        selected_banker = Banker.query.get(banker_id)
+        selected_table = TablesFinance.query.get(table_id)
+
+        if not selected_banker or not selected_table:
+            return jsonify({"error": "Banco ou tabela de comissão não encontrados."}), 404
+
+        # Buscar a taxa de comissão da tabela TablesBanker
+        table_banker = TablesFinance.query.filter_by(banker_id=banker_id).all()
+        if not table_banker:
+            return jsonify({"error": "Tabela de comissão não encontrada para o banco selecionado."}), 404
+
+        # Buscar as propostas
+        proposals = UserProposal.query.filter_by(banker_id=banker_id).all()
+
+        for proposal in proposals:
+            # Assumindo que há apenas uma taxa para cada banco, ajuste conforme necessário
+            table = next((t for t in table_banker if t.id == selected_table.id), None)
+            if not table:
+                continue
+
+            valor_comissao = table.rate  # Obtém a taxa da tabela, não da proposta
+            rate = float(valor_comissao.replace('%', ''))  # Remove o '%' e converte para float
+
+            # Calcula a comissão a ser repassada
+            repasse_comissao = (rate * repasse_percentage) / 100
+            cpf = proposal.cpf
+            nome_vendedor = proposal.name_and_lastname
+
+            # Salva o cálculo no banco de dados
+            calc = CalcComissionRate(
+                banker_id=banker_id,
+                table_finance_id=table_id,
+                proposal_id=proposal.id,
+                user_id=proposal.creator_id,
+                valor_comissao=valor_comissao,
+                repasse_comissao=repasse_comissao,
+                percentage_applied=repasse_percentage
+            )
+
+            db.session.add(calc)
+            db.session.commit()
+
+            calculated_commissions.append({
+                "cpf": cpf,
+                "valor_comissao": valor_comissao,
+                "repasse_comissao": repasse_comissao,
+                "nome_vendedor": nome_vendedor,
+                "status": "OK"
+            })
+
+    return render_template('fynance/manage_comission.html', bankers=bankers, tables=tables, 
+                           proposals=proposals, selected_table=selected_table, 
+                           calculated_commissions=calculated_commissions)
+
+
 
 
 @bp_fynance.route("/manage-report", methods=['GET'])

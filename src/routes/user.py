@@ -3,8 +3,7 @@ from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect
 from flask_login import login_required, current_user
 from src import db
 from werkzeug.security import generate_password_hash
-from src.models.user import User
-
+from src.models.bsmodels import User
 
 bp_user = Blueprint("users", __name__)
 
@@ -23,9 +22,7 @@ def users():
             User.lastname.ilike(f'%{search_term}%') |
             User.email.ilike(f'%{search_term}%') | 
             User.user_identification.ilike(f'%{search_term}%') | 
-            User.type_user_func.ilike(f'%{search_term}%') |
-            User.extension.ilike(f'%{search_term}%') | 
-            User.extension_room.ilike(f'%{search_term}%')
+            User.type_user_func.ilike(f'%{search_term}%') 
         )
         
     tables_paginated = query.order_by(User.username.desc()).paginate(page=page, per_page=per_page)
@@ -36,8 +33,6 @@ def users():
         'type_user_func': user.type_user_func,
         'email': user.email,
         'user_identification': user.user_identification,
-        'extension': user.extension,
-        'extension_room': user.extension_room
     } for user in tables_paginated.items]
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -63,9 +58,7 @@ def permission_users():
             User.lastname.ilike(f'%{search_term}%') |
             User.email.ilike(f'%{search_term}%') | 
             User.user_identification.ilike(f'%{search_term}%') | 
-            User.type_user_func.ilike(f'%{search_term}%') |
-            User.extension.ilike(f'%{search_term}%') | 
-            User.extension_room.ilike(f'%{search_term}%')
+            User.type_user_func.ilike(f'%{search_term}%') 
         )
         
     tables_paginated = query.order_by(User.username.desc()).paginate(page=page, per_page=per_page)
@@ -76,8 +69,6 @@ def permission_users():
         'type_user_func': user.type_user_func,
         'email': user.email,
         'user_identification': user.user_identification,
-        'extension': user.extension,
-        'extension_room': user.extension_room
     } for user in tables_paginated.items]
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -119,11 +110,9 @@ def add_users():
         user_identification = request.form['user_identification'].strip()
         type_user_func = request.form['type_user_func']
         typecontract = request.form['type_contract']
-        extension = request.form['extension'].strip()
-        extension_room = request.form['extension'].strip()
         
         
-        if not (username and user_identification and password and type_user_func and type_user_func and typecontract and extension and extension_room):
+        if not (username and user_identification and password and type_user_func and type_user_func and typecontract):
             return jsonify({'error': 'Todos os campos são obrigatórios'}), 400
         
         new_user = User(
@@ -134,8 +123,6 @@ def add_users():
             password=password, # senha 
             type_user_func=type_user_func, # cargo do usuário
             typecontract=typecontract, # tipo de funcuinário
-            extension=extension, # sala
-            extension_room=extension_room # operação
         )
         db.session.add(new_user)
         db.session.commit()

@@ -55,10 +55,7 @@ def create_app(config_class=DevelopmentConfig):
     app.register_blueprint(bp_operational, url_prefix="/")
     
     
-    from src.models.user import User
-    # from src.models.hourpoint import Point, VocationBs
-    # from src.models.fynance import Banker, FinancialAgreement, TablesFinance, RankFlat, ReportBankerTransactionData
-    # from src.models.proposal import UserProposal
+    from src.models.bsmodels import User
     
     @login_manager.user_loader
     def load_user(user_id):

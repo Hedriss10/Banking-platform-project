@@ -2,8 +2,7 @@ from flask_sqlalchemy import pagination
 from flask import Blueprint, render_template, flash, jsonify, abort, request, redirect, url_for
 from flask_login import login_required
 from src import db
-from src.models.user import UserPermission , User, Permission
-
+from src.models.bsmodels import UserPermission , User, Permission
 
 bp_admin = Blueprint("admin", __name__)
 

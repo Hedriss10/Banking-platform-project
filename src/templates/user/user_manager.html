@@ -161,15 +161,6 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="extension" class="form-label">Sala</label>
-                                <input type="text" class="form-control" id="extension" name="extension" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="extension_room" class="form-label">Operação</label>
-                                <input type="text" class="form-control" id="extension_room" name="extension_room"
-                                    required>
-                            </div>
-                            <div class="mb-3">
                                 <label for="type_contract">Gestão de contrato</label>
                                 <select name="type_contract" id="typecontract" class="form-control" required>
                                     <option value="">Selecione...</option>
@@ -202,8 +193,6 @@
                 <th scope="col">CPF</th>
                 <th scope="col">Cargo</th>
                 <th scope="col">Email</th>
-                <th scope="col">Sala</th>
-                <th scope="col">Operação</th>
                 <th scope="col">Bloquear</th>
                 <th scope="col">Ativar</th>
                 <th scope="col">Deletar</th>
@@ -217,8 +206,6 @@
                 <td>{{ user.user_identification }}</td>
                 <td>{{ user.type_user_func }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.extension }}</td>
-                <td>{{ user.extension_room }}</td>
                 <td>
                     <i class="fas fa-ban cursor-pointer" data-userid="{{ user.id }}"
                         onclick="showUpdateBlockModal(this)"></i>

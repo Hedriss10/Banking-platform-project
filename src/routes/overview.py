@@ -1,7 +1,6 @@
 from flask import Blueprint , render_template
-from flask_login import login_required
-from src.models.user import User
-from flask_login import current_user, login_required
+from flask_login import login_required, current_user
+from src.models.bsmodels import User
 
 
 bp_overview = Blueprint("overview", __name__, template_folder="templates")

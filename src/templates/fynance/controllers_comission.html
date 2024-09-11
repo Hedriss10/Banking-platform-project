@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 
 {% block main %} 
-
-
 <section>
   <div class="card mx-auto" style="width: 100%; max-width: 1200px; margin: 0 auto;">
     <div class="card-body">
       <h5 class="card-title">Gerenciamento de comissão</h5>
-      <p>Tabelas classificadas por <code>rank</code> de comissão</p>
+      <p>Tabelas classificadas e ordenadas por <code>rank</code> de comissão</p>
+            
       <br><br>
       <div class="d-flex justify-length-center mb-3">
         <input type="text" id="searchInput" class="form-control w-50" placeholder="Buscar...">
@@ -84,9 +83,5 @@
     </div>
   </div>
 </section>
-
-
-
-
 <script src="{{ url_for('static', filename='js/fynance/Searchinput.js') }}"></script>
 {% endblock %}

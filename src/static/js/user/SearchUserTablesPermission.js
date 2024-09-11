@@ -23,14 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.forEach((user, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <th scope="row">${index + 1}</th>
                         <td>${user.username}</td>
                         <td>${user.lastname}</td>
                         <td>${user.user_identification}</td>
                         <td>${user.type_user_func}</td>
                         <td>${user.email}</td>
-                        <td>${user.extension ||  ''}</td> <!-- Substitua por '' caso não exista -->
-                        <td>${user.extension_room || '' }</td> <!-- Substitua por '' caso não exista -->
                         <td><button class="btn btn-primary btn-sm p-1 btn-update-permission" data-user-id=${ user.id }>Alterar Permissão</button></td> <!-- Substitua por '' caso não exista -->
                         
                     `;

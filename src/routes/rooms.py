@@ -2,8 +2,9 @@ from flask_sqlalchemy import pagination
 from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app, flash)
 from flask_login import login_required, current_user 
 from src import db
-from src.models.user import User
-from src.models.rooms import Roomns
+from src.models.bsmodels import User, Roomns
+
+
 
 bp_room = Blueprint("rooms", __name__)
 

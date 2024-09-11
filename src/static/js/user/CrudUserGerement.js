@@ -18,8 +18,6 @@ function setupUserRegistration() {
         formData.append('password', document.getElementById('password').value);
         formData.append('email', document.getElementById('email').value);
         formData.append('type_user_func', document.getElementById('type_user_func').value);
-        formData.append('extension', document.getElementById('extension').value);
-        formData.append('extension_room', document.getElementById('extension_room').value);
 
         fetch('/registerpromoters', {
             method: 'POST',

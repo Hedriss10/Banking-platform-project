@@ -5,8 +5,7 @@ from flask_login import login_required, current_user
 from flask import jsonify
 from src import db
 from sqlalchemy.orm import joinedload
-from src.models.fynance import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData
-
+from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData
 
 bp_campaign = Blueprint("campaign", __name__)
 

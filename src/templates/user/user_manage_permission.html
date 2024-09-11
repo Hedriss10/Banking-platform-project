@@ -34,8 +34,6 @@
                 <th scope="col">CPF</th>
                 <th scope="col">Cargo</th>
                 <th scope="col">Email</th>
-                <th scope="col">Sala</th>
-                <th scope="col">Operação</th>
                 <th scope="col">Ação</th>
             </tr>
         </thead>
@@ -47,8 +45,6 @@
                 <td>{{ user.user_identification }}</td>
                 <td>{{ user.type_user_func }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.extension }}</td>
-                <td>{{ user.extension_room }}</td>
                 <td>
                     <button class="btn btn-primary btn-sm p-1 btn-update-permission" data-user-id="{{ user.id }}">Alterar Permissão</button>
                 </td>
