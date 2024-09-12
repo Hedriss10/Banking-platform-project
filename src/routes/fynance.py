@@ -24,6 +24,11 @@ def gerement_finance():
     bankers = Banker.query.options(
         db.joinedload(Banker.financial_agreements).subqueryload(FinancialAgreement.tables_finance)
     ).order_by(Banker.name).all()
+    for banker in bankers:
+        for agreement in banker.financial_agreements:
+            agreement.tables_finance = [
+                table for table in agreement.tables_finance if table.is_status is None
+            ]
     return render_template("fynance/manager_banker.html", banks=bankers)
 
 @bp_fynance.route("/report-banker")
@@ -447,7 +452,8 @@ def register_tables_one():
         )
         db.session.add(new_table)
         db.session.commit()
-        return redirect(url_for("overview.home"))
+        return redirect(url_for("fynance.gerement_finance"))
+    
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
@@ -478,9 +484,37 @@ def delete_conv_in_banker(id):
 def delete_table_in_conv_in_banker(id):
     """Function for delete table in conv in banker"""
     table = TablesFinance.query.get_or_404(id)
-    db.session.delete(table)
+    table.is_status = True
     db.session.commit()
     return jsonify({"success": True, 'message': 'Tabela deletada com sucesso!'}), 200
+
+
+@bp_fynance.route("/clean-tables", methods=['POST'])
+@login_required
+def desativar_tabelas():
+    """
+        routes commits for tables for column  is_status for true.
+    """
+    data = request.get_json()
+    table_ids = data.get('table_ids', [])
+
+    if not table_ids:
+        return jsonify({"success": False, "message": "Nenhuma tabela selecionada."}), 400
+
+    try:
+        tables = TablesFinance.query.filter(TablesFinance.id.in_(table_ids)).all()
+        if not tables:
+            return jsonify({"success": False, "message": "Tabelas não encontradas."}), 404
+
+        for table in tables:
+            table.is_status = True
+        
+        db.session.commit()
+        return jsonify({"success": True, "message": "Tabelas desativadas com sucesso!"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Erro ao desativar as tabelas: {str(e)}"}), 500
+
 
 
 @bp_fynance.route("/save-report-template", methods=['GET'])

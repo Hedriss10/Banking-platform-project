@@ -225,9 +225,9 @@ function setupImportForm() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.message === "Tabela cadastrada com sucesso!") {
                 alert('Arquivo importado com sucesso!');
-                window.location.reload();  // Considerar atualizar dinamicamente sem recarregar
+                // window.location.reload();  // Considerar atualizar dinamicamente sem recarregar
             } else {
                 alert('Erro ao importar dados: ' + data.error);
             }
@@ -239,6 +239,41 @@ function setupImportForm() {
     });
 }
 
+
+// Função para desativar as tabelas selecionadas
+function deactivateSelected() {
+    const selectedTables = [];
+    
+    document.querySelectorAll('.table-checkbox:checked').forEach(checkbox => {
+        selectedTables.push(checkbox.getAttribute('data-id'));
+    });
+    
+    if (selectedTables.length === 0) {
+        alert('Nenhuma tabela selecionada.');
+        return;
+    }
+
+    // Enviar uma requisição para desativar as tabelas selecionadas
+    fetch('/clean-tables', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ table_ids: selectedTables }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Tabelas desativadas com sucesso!');
+            location.reload();
+        } else {
+            alert('Erro ao desativar as tabelas.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
+}
 
 // Evento para submissão do formulário de deleção de banqueiro
 document.getElementById('deleteBanker').addEventListener('submit', function (event) {

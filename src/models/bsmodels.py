@@ -12,8 +12,6 @@ class Banker(db.Model, UserMixin):
     name = db.Column(db.String, nullable=False)
     financial_agreements = db.relationship('FinancialAgreement', back_populates='banker')
     comissions = db.relationship('CalcComissionRate', back_populates='banker')
-    
-
 
 class FinancialAgreement(db.Model, UserMixin):
     """Convenio do banco especifico"""
@@ -35,6 +33,7 @@ class TablesFinance(db.Model, UserMixin):
     start_term = db.Column(db.String(100), nullable=False)
     end_term = db.Column(db.String(100), nullable=False)
     rate = db.Column(db.String(100), nullable=False)
+    is_status = db.Column(db.Boolean, nullable=True, default=None)
     banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id'), nullable=False)
     conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id', ondelete='CASCADE'))
     financial_agreement = db.relationship('FinancialAgreement', back_populates='tables_finance')

@@ -279,44 +279,46 @@
                     </div>
                 </div>
             </div>
-
-
+            
             <hr>
             <!-- List bankers with conv and tables fynance -->
             <p class="details">Bancos cadastrados:</p>
             <ul id="bankList" class="list-group mt-4">
                 {% for bank in banks %}
-                <li class="list-group-item" onclick="toggleConvenios('{{ bank.id }}', event)">
-                    <strong>{{ bank.name }}</strong>
-                    <ul id="convenios-{{ bank.id }}" class="list-group mt-2" style="display:none;">
-                        {% for convenio in bank.financial_agreements %}
-                        <li class="list-group-item convenio-item"
-                            onclick="toggleConveniosBankersTables('{{ convenio.id }}', event)">
-                            <strong>{{ convenio.name }}</strong>
-                            <i class="fal fa-trash" data-id="{{ convenio.id }}"
-                                onclick="deleteConvenio(event, this)"></i>
-                        </li>
-                        <ul id="tables-{{ convenio.id }}" class="list-group nested-list">
-                            {% for table in convenio.tables_finance %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center"
-                                style="display:none;">
-                                <div>
-                                    <span class="details"><strong>Tabela</strong>: {{table.name}} - <strong>Tipo</strong>: {{ table.type_table }} - <strong>Cod</strong>: {{ table.table_code }} -
-                                        <strong>Prazo Início</strong>: {{ table.start_term }} - <strong>Prazo Fim</strong>: {{ table.end_term }} -
-                                        <strong>Comissão</strong>: {{ table.rate }}%</span>
-                                </div>
-                                <i class="fas fa-trash" data-id="{{table.id}}"
-                                    onclick="deleteTableInCovInBanker(event, this)"></i>
-                            </li>
+                    <li class="list-group-item" onclick="toggleConvenios('{{ bank.id }}', event)">
+                        <strong>{{ bank.name }}</strong>
+                        <ul id="convenios-{{ bank.id }}" class="list-group mt-2" style="display:none;">
+                            {% for convenio in bank.financial_agreements %}
+                                <li class="list-group-item convenio-item" onclick="toggleConveniosBankersTables('{{ convenio.id }}', event)">
+                                    <strong>{{ convenio.name }}</strong>
+                                    <i class="fal fa-trash" data-id="{{ convenio.id }}" onclick="deleteConvenio(event, this)"></i>
+                                    <i class="bi bi-archive-fill" onclick="deactivateSelected()"></i>
+                                </li>
+                                <ul id="tables-{{ convenio.id }}" class="list-group nested-list">
+                                    <li class="list-group-item">
+                                        <input type="checkbox" id="select-all-{{ convenio.id }}" onclick="toggleSelectAll('{{ convenio.id }}', event)">
+                                        <label for="select-all-{{ convenio.id }}">Selecionar Todos</label>
+                                    </li>
+                                    {% for table in convenio.tables_finance %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center" style="display:none;">
+                                            <div>
+                                                <input type="checkbox" class="table-checkbox" data-id="{{ table.id }}" data-convenio-id="{{ convenio.id }}">
+                                                <span class="details">
+                                                    <strong>Tabela</strong>: {{table.name}} - <strong>Tipo</strong>: {{ table.type_table }} - 
+                                                    <strong>Cod</strong>: {{ table.table_code }} - <strong>Prazo Início</strong>: {{ table.start_term }} - 
+                                                    <strong>Prazo Fim</strong>: {{ table.end_term }} - <strong>Comissão</strong>: {{ table.rate }}%
+                                                </span>
+                                            </div>
+                                            <i class="fas fa-trash" data-id="{{ table.id }}" onclick="deleteTableInCovInBanker(event, this)"></i>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
                             {% endfor %}
                         </ul>
-                        {% endfor %}
-                    </ul>
-                </li>
+                    </li>
                 {% endfor %}
-            </ul>
+            </ul>            
         </div>
-
     </div>
 </div>
 </section>
@@ -333,4 +335,5 @@
 <script src="{{ url_for('static', filename='js/fynance/toggleReportTableFynanceOne.js') }}"></script>
 <!--Toggle fynance todo one register tables and conv-->
 <script src="{{ url_for('static', filename='js/fynance/ToggleTableOne.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fynance/ToggleAllTablesFynance.js') }}"></script>
 {% endblock %}
