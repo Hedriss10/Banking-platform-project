@@ -19,6 +19,7 @@
                 <tr>
                     <th>Nome do contrato</th>
                     <th>Data de Criação</th>
+                    <th>CPF do contrato</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -27,6 +28,7 @@
                 <tr>
                     <td scope="row">{{ p.name_and_lastname }}</td>
                     <td scope="row">{{ p.created_at }}</td>
+                    <td scope="row">{{ p.cpf }}</td>
                     <td scope="row">
                         {% if p.active %}
                         <span class="badge bg-success">Aprovado</span>

@@ -189,8 +189,6 @@ def search_promoters():
     return jsonify([{
         'username': user.name,
         'type_user_func': user.type_user_func,
-        'extension': user.extension,
-        'extension_room': user.extension_room
     } for user in users]), 200
 
 

@@ -11,12 +11,31 @@
             <h5 class="card-title">Sala de Vendas</h5>
             <div class="detalis">
                 <h6 class="card-title mb-0">Nome: {{ user.username }}</h6>
-                <p class="text-muted mb-0">Email:{{ user.email }}</p>
-                <p class="text-muted mb-0"><strong>Sala:</strong>{{ extension }}</p>
-                <p class="text-muted mb-0"><strong>Operacão:</strong> {{ extension_room }}</p>
+                <p class="text-muted mb-0">Email: {{ user.email }}</p>
+                
+                <p class="text-muted mb-0"><strong>Salas:</strong></p>
+                <ul class="list-group">
+                    {% for room_name in extension %}
+                        <li class="list-group-item">{{ room_name }}</li>
+                    {% else %}
+                        <li class="list-group-item">Nenhuma sala encontrada</li>
+                    {% endfor %}
+                </ul>
+
+                <p class="text-muted mb-0 mt-2"><strong>Operações:</strong></p>
+                <ul class="list-group">
+                    {% for room in extension_room %}
+                        <li class="list-group-item">
+                            <strong>ID:</strong> {{ room.id }} - <strong>Nome:</strong> {{ room.name }}
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">Nenhuma operação encontrada</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
-    </div><!-- End Default Card -->
+    </div>
+    <!-- End Default Card -->
 </section>
 
 {% endblock %}

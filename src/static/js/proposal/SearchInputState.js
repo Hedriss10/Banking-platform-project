@@ -30,6 +30,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
             row.innerHTML = `
                 <td>${p.name_and_lastname}</td>
                 <td>${p.created_at}</td>
+                <td>${p.cpf}</td>
                 <td>
                     ${p.active ? '<span class="badge bg-success">Aprovado</span>' : ''}
                     ${p.block ? '<span class="badge bg-danger">Recusado</span>' : ''}

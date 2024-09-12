@@ -268,6 +268,30 @@
         </ul>
       </li><!-- Area Comercial -->
 
+      {% elif 'Vendedor' in session['type_user_func']%} <!-- Area Comercial -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-minecart-loaded"></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{{url_for('proposal.manage_proposal')}}">
+              <i class="bi bi-circle"></i><span>Rank de Comissão</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{url_for('proposal.state_proposal')}}">
+              <i class="bi bi-circle"></i><span>Esteira de Vendas</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{url_for('proposal.creat_proposal')}}">
+              <i class="bi bi-circle"></i><span>Criar Proposta</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- Area Comercial -->
+
       {% elif 'Supervisor de Vendas' in session['type_user_func']%}
 
       <li class="nav-item">

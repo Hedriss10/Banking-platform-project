@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 from src.utils.proposal import UploadProposal
-from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, UserProposal
+from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, UserProposal, Roomns, room_user_association
 
 bp_proposal = Blueprint("proposal", __name__)
 
@@ -58,7 +58,23 @@ def manage_proposal():
     return render_template("proposal/manage_proposal.html", bankers=bankers ,banks=banks_data, pagination=tables_paginated)
 
 
-@bp_proposal.route('/proposal-status')
+@bp_proposal.route("/creat-proposal", methods=['GET'])
+@login_required
+def creat_proposal():
+    """ function for create proposal
+
+    Returns:
+        proppsal: create 
+    """
+    bankers = Banker.query.options(
+        joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)
+    ).order_by(Banker.name).all()
+    
+    return render_template("proposal/creat_proposal.html", bankers=bankers)
+
+
+
+@bp_proposal.route("/proposal-status")
 @login_required
 def state_proposal():
     """
@@ -67,7 +83,7 @@ def state_proposal():
     Returns:
         _type_:  return state proposal
     """
-    query = UserProposal.query
+    query = UserProposal.query.filter_by(creator_id=current_user.id)
     
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -81,7 +97,8 @@ def state_proposal():
     if search_term:
         query = query.filter(
             UserProposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtrar pelo o nome da campanha
-            UserProposal.created_at.ilike(f'%{search_term}%') # Filtro pelo código da tabela
+            UserProposal.created_at.ilike(f'%{search_term}%') |# Filtro pelo código da tabela
+            UserProposal.cpf.ilike(f'%{search_term}') #  filtrando pelo o cpf do contrato
         )
     
     tables_paginated = query.order_by(UserProposal.created_at.desc()).paginate(page=page, per_page=per_page)
@@ -90,6 +107,7 @@ def state_proposal():
         'id': p.id,
         'name_and_lastname': p.name_and_lastname,
         'created_at': p.created_at.strftime('%d/%m/%Y'),
+        'cpf': p.cpf,
         'active': p.active,
         'block': p.block,
         'is_status': p.is_status
@@ -99,8 +117,8 @@ def state_proposal():
         return jsonify(proposal_data)
     
     return render_template("proposal/state_proposal.html", proposal=proposal_data, pagination=tables_paginated)
-    
-    
+
+
 @bp_proposal.route("/proposal/new-proposal", methods=['POST'])
 @login_required
 def add_proposal():
@@ -180,7 +198,8 @@ def add_proposal():
                 setattr(new_proposal, field, ','.join(image_paths))
 
         db.session.commit()
-        return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'}), 200
+        # return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'}), 200
+        return redirect(url_for("fynance.state_proposal"))
 
     except Exception as e:
         db.session.rollback()
@@ -214,6 +233,14 @@ def state_details(id):
 def room_proposal():
     user = User.query.filter_by(id=current_user.id).first()
 
-    extension = user.extension
-    extension_room = user.extension_room
-    return render_template("proposal/room_proposal.html", user=user, extension=extension, extension_room=extension_room)
+    rooms = Roomns.query.join(room_user_association).filter(room_user_association.c.user_id == user.id).all()
+
+    extension = [room.create_room for room in rooms]
+    extension_room = [{"id": room.id, "name": room.create_room} for room in rooms]
+
+    return render_template(
+        "proposal/room_proposal.html",
+        user=user,
+        extension=extension,
+        extension_room=extension_room,
+    )
