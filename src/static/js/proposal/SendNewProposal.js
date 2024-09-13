@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             if (data.success) {
                 alert('Contrato registrado com sucesso!');
+                window.location.href = "/home";
             } else {
                 alert(data.message || 'Erro ao deletar convênio.');
             }

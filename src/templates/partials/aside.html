@@ -74,11 +74,6 @@
               <i class="bi bi-circle"></i><span>Esteira de Vendas</span>
             </a>
           </li>
-          <li>
-            <a href="{{url_for('proposal.room_proposal')}}">
-              <i class="bi bi-circle"></i><span>Sala de Vendas</span>
-            </a>
-          </li>
         </ul>
       </li><!-- Area Comercial -->
 
@@ -159,7 +154,7 @@
         </ul>
       </li><!-- Usuários  -->
 
-      {% elif 'Gerente Geral' in session['type_user_func'] %}
+      {% elif 'Gerente Geral' in session['type_user_func'] %} <!-- Gerente Geral -->
       
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
@@ -292,7 +287,7 @@
         </ul>
       </li><!-- Area Comercial -->
 
-      {% elif 'Supervisor de Vendas' in session['type_user_func']%}
+      {% elif 'Supervisor de Vendas' in session['type_user_func']%} <!-- Supervisor de Vendas -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
@@ -317,7 +312,7 @@
         </ul>
       </li><!-- Gerenciamento de vendas  -->
 
-      {% elif 'Financeiro' in session['type_user_func'] %}
+      {% elif 'Financeiro' in session['type_user_func'] %} <!-- Finacneiro -->
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-piggy-bank"></i><span>Financeiro</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -374,7 +369,7 @@
         </ul>
       </li><!-- Campanhas  -->
 
-      {% elif 'Operacional' in session['type_user_func']%}
+      {% elif 'Operacional' in session['type_user_func']%} <!-- Operacional  -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
@@ -382,19 +377,24 @@
         </a>
         <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="tables-general.html">
-              <i class="bi bi-circle"></i><span>General Tables</span>
+            <a href="{{url_for('operational.manage_operational')}}">
+              <i class="bi bi-circle"></i><span>Gerenciamento Operacional</span>
             </a>
           </li>
           <li>
-            <a href="tables-data.html">
-              <i class="bi bi-circle"></i><span>Data Tables</span>
+            <a href="{{url_for('operational.manage_list_contract')}}">
+              <i class="bi bi-circle"></i><span>Contrato Digital</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{url_for('operational.manage_state_contract')}}">
+              <i class="bi bi-circle"></i><span>Esteira de Contratos</span>
             </a>
           </li>
         </ul>
       </li><!-- Operacional  -->
 
-      {% elif 'Suporte de Campanha' in session['type_user_func']%}
+      {% elif 'Suporte de Campanha' in session['type_user_func']%} <!-- Suporte de Campanha  -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">

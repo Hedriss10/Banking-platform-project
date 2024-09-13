@@ -189,7 +189,7 @@ def add_proposal():
             'detalhamento_inss', 'historico_consignacoes_inss'
         ]
 
-        paths = UploadProposal().create_directory_structure(proposal_id=f"Número do contrato -> {new_proposal.id}", image_fields=image_fields)
+        paths = UploadProposal().create_directory_structure(proposal_id=f"number_contrato_{new_proposal.id}_Digitador_{current_user.id}", image_fields=image_fields)
 
         for field in image_fields:
             field_files = request.files.getlist(f'{field}[]')
@@ -198,8 +198,8 @@ def add_proposal():
                 setattr(new_proposal, field, ','.join(image_paths))
 
         db.session.commit()
-        # return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'}), 200
-        return redirect(url_for("fynance.state_proposal"))
+        return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'}), 200
+        # return redirect(url_for("proposal.state_proposal"))
 
     except Exception as e:
         db.session.rollback()
