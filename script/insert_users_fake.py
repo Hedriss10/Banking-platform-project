@@ -3,7 +3,7 @@
 """
 
 import random
-from src.models.user import User
+from src.models.bsmodels import User
 from src import db
 from faker import Faker
 
