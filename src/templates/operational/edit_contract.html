@@ -13,22 +13,22 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="name_and_lastname" class="form-label">Nome Completo:</label>
-                        <input type="text" class="form-control" id="name_and_lastname" name="name_and_lastname" value="{{ proposal.name_and_lastname }}" required>
+                        <input type="text" class="form-control" id="name_and_lastname" name="name_and_lastname" value="{{ proposal.name_and_lastname }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="created_at" class="form-label">Data de Criação:</label>
-                        <input type="date" class="form-control" id="created_at" name="created_at" value="{{ proposal.created_at.strftime('%Y-%m-%d') }}" required>
+                        <input type="date" class="form-control" id="created_at" name="created_at" value="{{ proposal.created_at.strftime('%Y-%m-%d') }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="email" class="form-label">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ proposal.email }}" required>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ proposal.email }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="cpf" class="form-label">CPF:</label>
-                        <input type="text" class="form-control" id="cpf" name="cpf" value="{{ proposal.cpf }}" required>
+                        <input type="text" class="form-control" id="cpf" name="cpf" value="{{ proposal.cpf }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -46,64 +46,66 @@
                 </div>
 
                 <!-- Endereço -->
-                <h5 class="mt-4 mb-3">Endereço</h5>
+                <h5 class="mt-4 mb-3">Endereço:</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="address" class="form-label">Endereço:</label>
-                        <input type="text" class="form-control" id="address" name="address" value="{{ proposal.address }}" required>
+                        <input type="text" class="form-control" id="address" name="address" value="{{ proposal.address }}" >
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label for="address_number" class="form-label">Número:</label>
-                        <input type="text" class="form-control" id="address_number" name="address_number" value="{{ proposal.address_number }}" required>
+                        <input type="text" class="form-control" id="address_number" name="address_number" value="{{ proposal.address_number }}" >
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label for="zipcode" class="form-label">CEP:</label>
-                        <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ proposal.zipcode }}" required>
+                        <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ proposal.zipcode }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="neighborhood" class="form-label">Bairro:</label>
-                        <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="{{ proposal.neighborhood }}" required>
+                        <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="{{ proposal.neighborhood }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="city" class="form-label">Cidade:</label>
-                        <input type="text" class="form-control" id="city" name="city" value="{{ proposal.city }}" required>
+                        <input type="text" class="form-control" id="city" name="city" value="{{ proposal.city }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="state_uf_city" class="form-label">Estado:</label>
-                        <input type="text" class="form-control" id="state_uf_city" name="state_uf_city" value="{{ proposal.state_uf_city }}" required>
+                        <input type="text" class="form-control" id="state_uf_city" name="state_uf_city" value="{{ proposal.state_uf_city }}" >
                     </div>
                 </div>
 
                 <!-- Informações Financeiras -->
-                <h5 class="mt-4 mb-3">Informações Financeiras</h5>
+                <h5 class="mt-4 mb-3">Informações Financeiras:</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="value_salary" class="form-label">Salário:</label>
-                        <input type="text" class="form-control" id="value_salary" name="value_salary" value="{{ proposal.value_salary }}" required>
+                        <input type="text" class="form-control" id="value_salary" name="value_salary" value="{{ proposal.value_salary }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="value_operation" class="form-label">Valor da Operação:</label>
-                        <input type="text" class="form-control" id="value_operation" name="value_operation" value="{{ proposal.value_operation }}" required>
+                        <input type="text" class="form-control" id="value_operation" name="value_operation" value="{{ proposal.value_operation }}" >
                     </div>
 
                     <div class="col-md-12 mb-3">
                         <label for="operation_select" class="form-label">Operação:</label>
-                        <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select }}" required>
+                        <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select }}" >
                     </div>
                 </div>
+                
 
                 <!-- Fotos Relacionadas do contratos -->
+                <h5 class="mt-4 mb-3">Imagens do Contrato:</h5>
                 <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Visualizar Imagem</h5>
+                                <h5 class="modal-title">Visualizar Imagem:</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body text-center">
@@ -112,50 +114,49 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="row">
                     {% for field, paths in image_paths.items() %}
                     <div class="col-md-6">
-                        <h4>{{ field | replace('_', ' ') }}</h4>
+                        <h5 class="mt-4 mb-3">{{ field | replace('_', ' ') }}</h5>
                         {% for path in paths %}
-                        <img src="{{ url_for('operational.serve_image', filename=path) }}" 
-                             alt="{{ field }}" 
-                             class="img-thumbnail" 
-                             style="max-width: 150px; cursor: pointer;">
+                            <img src="{{ url_for('operational.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
                         {% endfor %}
                     </div>
                     {% endfor %}
-                </div>
-                
-            
-
+                </div>                                                           
                 <!-- Observações -->
-                <h5 class="mt-4 mb-3">Observações</h5>
+                <h5 class="mt-4 mb-3">Observações:</h5>
                 <div class="mb-3">
                     <label for="obeserve" class="form-label">Observações:</label>
                     <textarea class="form-control" id="obeserve" name="obeserve" rows="3">{{ proposal.obeserve }}</textarea>
                 </div>
 
                 <!-- Checkboxes de Status -->
-                <h5 class="mt-4 mb-3">Status da Proposta</h5>
+                <h5 class="mt-4 mb-3">Status da Proposta:</h5>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="active" name="active" {% if proposal.active %}checked{% endif %}>
-                    <label class="form-check-label" for="active">Ativo</label>
+                    <label class="form-check-label" for="active">Contrato Digitado</label>
                 </div>
 
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="block" name="block" {% if proposal.block %}checked{% endif %}>
-                    <label class="form-check-label" for="block">Bloqueado</label>
+                    <label class="form-check-label" for="block">Contrato Bloqueado</label>
                 </div>
 
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="is_status" name="is_status" {% if proposal.is_status %}checked{% endif %}>
-                    <label class="form-check-label" for="is_status">Em Andamento</label>
+                    <label class="form-check-label" for="is_status">Digitação Pendente</label>
                 </div>
 
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="progess_check" name="progess_check" {% if proposal.progress_check %}checked{% endif %}>
+                    <label class="form-check-label" for="progess_check">Em Andamento</label>
+                </div>
                 <!-- Botões de Ação -->
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Salvar Alterações</button>
-                    <a href="{{ url_for('proposal.state_proposal') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
+                    <a href="{{ url_for('operational.manage_state_contract') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
                 </div>
             </form>
         </div>

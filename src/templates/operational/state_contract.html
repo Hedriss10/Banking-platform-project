@@ -6,23 +6,54 @@
 <div class="card">
     <div class="card-body">
         <br>
+        <div class="d-flex justify-content-between mb-3">
+            <h5 class="card-title">Esteira de Contratos</h5>
+        
+            <!-- Notification Icon -->
+            <li class="nav-item dropdown" style="list-style-type: none;">
+                <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell"></i>
+                    <span id="notification-badge" class="badge bg-primary badge-number">0</span> <!-- Número de contratos disponíveis -->
+                </a>
+        
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
+                    <li class="dropdown-header">
+                        <span id="notification-title">Você tem 0 contratos disponíveis para digitar</span>
+                        <a href="#"><span class="badge rounded-pill bg-primary p-2 ms-2">Ver todos</span></a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <!-- Notificações individuais -->
+                    <ul id="notification-list"></ul> <!-- Certifique-se de que o ID está correto -->
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="dropdown-footer">
+                        <a href="#">Mostrar todas as notificações</a>
+                    </li>
+                </ul>
+            </li>
+            <!-- End Notification Icon -->
+        </div>
+                
         <div class="d-flex justify-length-center mb-3">
             <input type="text" id="searchInput" class="form-control w-50" placeholder="Buscar...">
         </div>
-    
-        <h5 class="card-title">Esteira de Contratos</h5>
-        <p>Status das propostas listado e ordenado pela <code>data de criação</code>.</p>
+
+        <p>Esteira de contrato listado e ordenado pela <code>data de criação</code>.</p>
 
         <!-- Small tables -->
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>Nome do digitador</th>
-                    <th>Nome do contrato</th>
+                    <th>Nome do Digitador</th>
+                    <th>Nome do Cliente</th>
                     <th>Data de Criação</th>
-                    <th>CPF do contrato</th>
+                    <th>CPF do Cliente</th>
+                    <th>Tipo de Operação</th>
                     <th>Status</th>
                     <th>Editar</th>
+                    <th>Excluir</th>
+                    <th>Digitar Contrato</th>
+                    <th>Editado às</th> <!-- Mudando para indicar que mostra o horário da última edição -->
+                    <th>Digitado às</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,15 +63,18 @@
                     <td scope="row">{{ p.name_and_lastname }}</td>
                     <td scope="row">{{ p.created_at }}</td>
                     <td scope="row">{{ p.cpf }}</td>
+                    <td scope="row">{{ p.operation_select}}</td>
                     <td scope="row">
                         {% if p.active %}
-                        <span class="badge bg-success">Aprovado</span>
+                        <span class="badge bg-success">Contrato Digitado</span>
                         {% elif p.block %}
-                        <span class="badge bg-danger">Recusado</span>
+                        <span class="badge bg-danger">Contrato Bloqueado</span>
                         {% elif p.is_status %}
-                        <span class="badge bg-warning">Em Andamento</span>
+                        <span class="badge bg-warning">Contrato Pendente</span>
+                        {% elif p.progress_check %}
+                        <span class="badge bg-secondary">Contrato Em Andamento</span>
                         {% else %}
-                        <span class="badge bg-secondary">Pendente</span>
+                        <span class="badge bg-dark">Contrato Disponivel Para digitar</span>
                         {% endif %}
                     </td>
                     <td>
@@ -48,10 +82,18 @@
                             <a href="{{ url_for('operational.manage_edit_contract', id=p.id) }}">Editar</a>
                         </span>
                     </td>
+                    <td>
+                        <span class="badge bg-danger delete-proposal" data-id="{{ p.id }}" style="cursor:pointer;">Excluir</span>
+                    </td>
+                    <td scope="row">{{ p.edit_at }}</td>
+                    <td><span class="badge bg-primary"><a href="{{ url_for('operational.manage_details_contract', id=p.id) }}">Digitar o Contrato</a></span></td>
+                    <td scope="row">{{p.completed_at}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <div id="baseUrl" data-url="{{ url_for('operational.manage_edit_contract', id=0) }}"></div>
+        <div id="baseUrlDetails" data-url="{{ url_for('operational.manage_details_contract', id=0) }}"></div>
 
         <nav aria-label="Paginação de comissões">
             <ul class="pagination">
@@ -96,4 +138,6 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/operational/SearchInputState.js') }}"></script>
+<script src="{{ url_for('static', filename='js/operational/notificationCount.js') }}"></script>
+
 {% endblock %}

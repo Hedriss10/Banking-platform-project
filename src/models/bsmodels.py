@@ -183,7 +183,6 @@ class UserProposal(db.Model, UserMixin):
     operation_select = db.Column(db.String(40))
     matricula = db.Column(db.String(100))
     text_password_server = db.Column(db.String(100))
-    ddb = db.Column(db.DateTime(timezone=True), default=func.now())
     passowrd_chek = db.Column(db.String(50))
     name_and_lastname = db.Column(db.String(100))
     dd_year = db.Column(db.DateTime(timezone=True), default=func.now())
@@ -233,7 +232,9 @@ class UserProposal(db.Model, UserMixin):
     block = db.Column(db.Boolean, nullable=False, default=False) #  status block for active
     is_status = db.Column(db.Boolean, nullable=True, default=False)
     progress_check = db.Column(db.Boolean, nullable=True, default=False) # proegss contract
-    
+    edit_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    completed_at = db.Column(db.DateTime(timezone=True), nullable=True)
+ 
     # Relationship
     creator = db.relationship('User', backref='created_proposals', foreign_keys=[creator_id])
     banker = db.relationship('Banker', foreign_keys=[banker_id])

@@ -1,11 +1,13 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 
 {% block main %}
+
 <div class="container mt-5">
     <h2 class="text-center mb-4">Editar Proposta</h2>
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="POST">
+            <form method="POST"  enctype="multipart/form-data">
                 <!-- Informações Pessoais -->
                 <br>
                 <h5 class="mb-3">Informações Pessoais:</h5>
@@ -45,7 +47,7 @@
                 </div>
 
                 <!-- Endereço -->
-                <h5 class="mt-4 mb-3">Endereço</h5>
+                <h5 class="mt-4 mb-3">Endereço:</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="address" class="form-label">Endereço:</label>
@@ -79,7 +81,7 @@
                 </div>
 
                 <!-- Informações Financeiras -->
-                <h5 class="mt-4 mb-3">Informações Financeiras</h5>
+                <h5 class="mt-4 mb-3">Informações Financeiras:</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="value_salary" class="form-label">Salário:</label>
@@ -96,35 +98,39 @@
                         <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select }}" >
                     </div>
                 </div>
+                
 
-                <!-- Observações -->
-                <h5 class="mt-4 mb-3">Observações</h5>
-                <div class="mb-3">
-                    <label for="obeserve" class="form-label">Observações:</label>
-                    <textarea class="form-control" id="obeserve" name="obeserve" rows="3">{{ proposal.obeserve }}</textarea>
+                <!-- Fotos Relacionadas do contratos -->
+                <h5 class="mt-4 mb-3">Imagens do Contrato:</h5>
+                <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Visualizar Imagem:</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img id="expandedImage" src="" alt="Imagem Expandida" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Checkboxes de Status -->
-                <h5 class="mt-4 mb-3">Status da Proposta</h5>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="active" name="active" {% if proposal.active %}checked{% endif %}>
-                    <label class="form-check-label" for="active">Ativo</label>
-                </div>
-
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="block" name="block" {% if proposal.block %}checked{% endif %}>
-                    <label class="form-check-label" for="block">Bloqueado</label>
-                </div>
-
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="is_status" name="is_status" {% if proposal.is_status %}checked{% endif %}>
-                    <label class="form-check-label" for="is_status">Em Andamento</label>
-                </div>
+                
+                <div class="row">
+                    {% for field, paths in image_paths.items() %}
+                    <div class="col-md-6">
+                        <h5 class="mt-4 mb-3">{{ field | replace('_', ' ') }}</h5>
+                        {% for path in paths %}
+                            <img src="{{ url_for('operational.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>                                                           
 
                 <!-- Botões de Ação -->
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Salvar Alterações</button>
-                    <a href="{{ url_for('proposal.state_proposal') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
+                    <a href="{{ url_for('operational.manage_state_contract') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
                 </div>
             </form>
         </div>
@@ -137,8 +143,8 @@
         const field = document.getElementById(fieldId);
         field.disabled = false;
         field.focus();
-        field.required = false;
     }
 </script>
 
+<script src="{{ url_for('static', filename='js/proposal/edit_operational.js') }}"></script>
 {% endblock %}

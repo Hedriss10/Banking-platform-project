@@ -12,39 +12,58 @@
     
         <h5 class="card-title">Status das Propostas</h5>
         <p>Status das propostas listado e ordenado pela <code>data de criação</code>.</p>
-
+        <p><div class="icon">Se o operacional coletar o contrato, não estará mais disponivel a <strong>edição do contrato.</strong> <i class="bi bi-file-earmark-lock2-fill"></i></div></p>
+        
         <!-- Small tables -->
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>Nome do contrato</th>
+                    <th>Nome do Digitador</th>
+                    <th>Nome do Cliente</th>
                     <th>Data de Criação</th>
-                    <th>CPF do contrato</th>
+                    <th>CPF do Cliente</th>
+                    <th>Tipo de Operação</th>
                     <th>Status</th>
+                    <th>Editar</th>
+                    <th>Excluir</th>
+                    <th>Editado às</th>
                 </tr>
             </thead>
             <tbody>
                 {% for p in proposal %}
                 <tr>
+                    <td scope="row">{{ p.creator_name }}</td>
                     <td scope="row">{{ p.name_and_lastname }}</td>
                     <td scope="row">{{ p.created_at }}</td>
                     <td scope="row">{{ p.cpf }}</td>
+                    <td scope="row">{{p.operation_select}}</td>
                     <td scope="row">
                         {% if p.active %}
-                        <span class="badge bg-success">Aprovado</span>
+                        <span class="badge bg-success">Contrato Disponivel</span>
                         {% elif p.block %}
-                        <span class="badge bg-danger">Recusado</span>
+                        <span class="badge bg-danger">Contrato Bloqueado</span>
                         {% elif p.is_status %}
-                        <span class="badge bg-warning">Em Andamento</span>
+                        <span class="badge bg-warning">Contrato Pendente</span>
+                        {% elif p.progress_check %}
+                        <span class="badge bg-secondary">Contrato Em Andamento</span>
                         {% else %}
-                        <span class="badge bg-secondary">Aguardando a Digitação</span>
+                        <span class="badge bg-light">Contrato Disponivel Para digitar</span>
                         {% endif %}
                     </td>
+                    <td>
+                        <span class="badge bg-warning">
+                            <a href="{{ url_for('operational.manage_edit_contract', id=p.id) }}">Editar</a>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-danger delete-proposal" data-id="{{ p.id }}" style="cursor:pointer;">Excluir</span>
+                    </td>
+                    <td scope="row">{{ p.edit_at }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-
+        <div id="baseUrl" data-url="{{ url_for('proposal.edit_proposal', id=0) }}"></div>
         <nav aria-label="Paginação de comissões">
             <ul class="pagination">
                 {% if pagination.has_prev %}

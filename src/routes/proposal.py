@@ -115,18 +115,23 @@ def state_proposal():
 
     proposal_data = [{
         'id': p.id,
+        'creator_name': p.creator.username if p.creator else 'Desconhecido',
         'name_and_lastname': p.name_and_lastname,
-        'created_at': p.created_at.strftime('%d/%m/%Y'),
+        'created_at': p.created_at,
+        'operation_select': p.operation_select,
         'cpf': p.cpf,
         'active': p.active,
         'block': p.block,
-        'is_status': p.is_status
+        'is_status': p.is_status,
+        'progress_check': p.progress_check,
+        'edit_at': p.edit_at if p.edit_at else "Esperando Digitação"
     } for p in tables_paginated.items]
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(proposal_data)
     
     return render_template("proposal/state_proposal.html", proposal=proposal_data, pagination=tables_paginated)
+
 
 @bp_proposal.route("/proposal/new-proposal", methods=['POST'])
 @login_required
@@ -160,10 +165,12 @@ def add_proposal():
 
         json_string = data_bytes.decode('utf-8')
         form_data = json.loads(json_string)
+        
     except Exception as e:
         current_app.logger.error(f"Erro ao descriptografar os dados: {e}")
         return jsonify({'error': 'Erro ao descriptografar os dados do formulário'}), 400
     
+
     try:
         new_proposal = UserProposal(
         creator_id=current_user.id,
@@ -173,10 +180,9 @@ def add_proposal():
         operation_select=form_data.get('operationselect', None),
         matricula=form_data.get('matricula', None),
         text_password_server=form_data.get('TextPasswordServer', None),
-        ddb=datetime.strptime(form_data.get('ddb'), '%Y-%m-%d') if form_data.get('ddb') else None,
         passowrd_chek=form_data.get('senhacontracheque', None),
         name_and_lastname=form_data.get('nameRegisterProposal', None),
-        dd_year=datetime.strptime(form_data.get('ddb-year'), '%Y-%m-%d') if form_data.get('ddb-year') else None,
+        dd_year=datetime.strptime(form_data.get('ddb-year'), '%Y-%m-%d') if form_data.get('ddb-year') else datetime.now(),
         sex=form_data.get('SexSelect', None),
         select_state=form_data.get('stateselect', None),
         email=form_data.get('email', None),
@@ -185,7 +191,7 @@ def add_proposal():
         identify=form_data.get('identidade', None),
         organ_emissor=form_data.get('orgao_emissor', None),
         uf_emissor=form_data.get('StateUfSelect'),
-        day_emissor=datetime.strptime(form_data.get('data_emissao'), '%Y-%m-%d') if form_data.get('data_emissao') else None,
+        day_emissor = datetime.strptime(form_data.get('data_emissao'), '%Y-%m-%d') if form_data.get('data_emissao') else datetime.now(),
         name_father=form_data.get('father', None),
         name_mother=form_data.get('mother', None),
         zipcode=form_data.get('zipcode', None),
@@ -218,27 +224,22 @@ def add_proposal():
         parcela=form_data.get('parcela', None),
         prazo=form_data.get('prazo', None),
         value_operation=form_data.get('valor_operacao', None),
-        obeserve=form_data.get('observacoes', None))
-        
+        obeserve=form_data.get('observacoes', None),
+        edit_at=form_data.get('', None))
+
+                
         db.session.add(new_proposal)
         db.session.flush()
 
-        image_fields = [
-            'rg_cnh_completo[]', 'contracheque[]', 'extrato_consignacoes[]',
-            'comprovante_residencia[]', 'selfie[]', 'comprovante_bancario[]',
-            'detalhamento_inss[]', 'historico_consignacoes_inss[]'
-        ]
-
-        paths = UploadProposal().create_directory_structure(
-            proposal_id=f"number_contrato_{new_proposal.id}_Digitador_{current_user.id}",
-            image_fields=image_fields
-        )
-
+        image_fields = ['rg_cnh_completo', 'rg_frente', 'rg_verso', 'contracheque', 'extrato_consignacoes','comprovante_residencia', 'selfie', 'comprovante_bancario','detalhamento_inss', 'historico_consignacoes_inss']
+        paths = UploadProposal(proposal_id=new_proposal.id, creator_id=current_user.id, image_fields=image_fields, created_at=new_proposal.created_at).create_directory_structure()
+        
         for field in image_fields:
             field_files = request.files.getlist(field)
+            print(field_files)
             if field_files:
-                image_paths = UploadProposal().save_images(field_files, paths[field])
-                setattr(new_proposal, field.rstrip('[]'), ','.join(image_paths))
+                image_paths = UploadProposal(proposal_id=new_proposal.id, creator_id=current_user.id, image_fields=image_fields, created_at=new_proposal.created_at).save_images(field_files, paths[field])
+                setattr(new_proposal, field.rstrip(''), ','.join(image_paths))
 
         db.session.commit()
         return jsonify({'success': True, 'message': 'Contrato registrado com sucesso'}), 200
@@ -247,40 +248,84 @@ def add_proposal():
         db.session.rollback()
         current_app.logger.error("Erro ao processar o formulário: %s", e)
         return jsonify({'error': str(e)}), 500
-    
+
+
 @bp_proposal.route("/proposal/edit-proposal/<int:id>", methods=['GET', 'POST'])
 @login_required
-def state_details(id):
-    """Edit proposal"""
-    proposal = UserProposal.query.get_or_404(id)
+def edit_proposal(id):
+    proposal= UserProposal.query.get_or_404(id) 
+        
+    if proposal.active != 0 or proposal.block != 0 or proposal.is_status != 0:
+        flash('Você não pode editar esta proposta. Verifique se ela está bloqueada ou já foi finalizada.', 'danger')
+        return redirect(url_for('proposal.state_proposal'))
+    
+    image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
+
+    if isinstance(proposal.created_at, str):
+        proposal.created_at = datetime.strptime(proposal.created_at, "%Y-%m-%d %H:%M:%S")
+
+    image_paths = UploadProposal(proposal_id=proposal.id, creator_id=proposal.creator_id, image_fields=image_fields, created_at=proposal.created_at).list_images()
 
     if request.method == 'POST':
         proposal.name_and_lastname = request.form.get('name_and_lastname')
-        proposal.created_at = request.form.get('created_at') 
-        proposal.active = 'active' in request.form
-        proposal.block = 'block' in request.form
-        proposal.is_status = 'is_status' in request.form
+        proposal.email = request.form.get('email')
+        proposal.cpf = request.form.get('cpf')
+        proposal.sex = request.form.get('sex')
+        proposal.phone = request.form.get('phone')
+        proposal.address = request.form.get('address')
+        proposal.zipcode = request.form.get('zipcode')
+        proposal.neighborhood = request.form.get('neighborhood')
+        proposal.city = request.form.get('city')
+        proposal.state_uf_city = request.form.get('state_uf_city')
+        proposal.value_salary = request.form.get('value_salary')
+        proposal.obeserve = request.form.get('obeserve')
         
+        identifier = f"number_contrato_{proposal.id}_digitador_{proposal.creator_id}"
 
+        base_path = os.path.join('proposta', proposal.created_at.strftime('%Y'), proposal.created_at.strftime('%m'), proposal.created_at.strftime('%d'), identifier)
+
+        for field in image_fields:
+            field_files = request.files.getlist(field)
+            if field_files:
+                field_base_path = os.path.join(base_path, field)
+                image_paths = UploadProposal().save_images(field_files, field_base_path)
+                setattr(proposal, field, ','.join(image_paths))
+        
         db.session.commit()
+
         flash('Proposta atualizada com sucesso!', 'success')
         return redirect(url_for('proposal.state_proposal'))
+
+    return render_template("proposal/edit_proposal.html", proposal=proposal, image_paths=image_paths)
     
-    return render_template("proposal/edit_proposal.html", proposal=proposal)
-
-@bp_proposal.route("/proposal/rom-selles")
+    
+@bp_proposal.route("/proposal/delete-proposal/<int:id>", methods=['GET', 'POST'])
 @login_required
-def room_proposal():
-    user = User.query.filter_by(id=current_user.id).first()
+def delete_proposal(id):
+    """
+        Função para deletar proposta e remover os arquivos relacionados.
+    """
+    proposal = UserProposal.query.get_or_404(id)
+    
+    image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
+    
+    try:
+        if isinstance(proposal.created_at, str):
+            proposal.created_at = datetime.strptime(proposal.created_at, "%Y-%m-%d %H:%M:%S")
+        
+        image_paths = UploadProposal(proposal_id=proposal.id, creator_id=proposal.creator_id, image_fields=image_fields, created_at=proposal.created_at).list_images()
+        
+        for field, paths in image_paths.items():
+            for path in paths:
+                full_path = os.path.join('proposta', path)
+                if os.path.exists(full_path):
+                    os.remove(full_path)
 
-    rooms = Roomns.query.join(room_user_association).filter(room_user_association.c.user_id == user.id).all()
+        db.session.delete(proposal)
+        db.session.commit()
 
-    extension = [room.create_room for room in rooms]
-    extension_room = [{"id": room.id, "name": room.create_room} for room in rooms]
-
-    return render_template(
-        "proposal/room_proposal.html",
-        user=user,
-        extension=extension,
-        extension_room=extension_room,
-    )
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Erro ao excluir a proposta: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500

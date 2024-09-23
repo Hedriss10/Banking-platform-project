@@ -7,14 +7,16 @@ document.addEventListener('DOMContentLoaded', function () {
         var formData = new FormData(proposalForm);
 
         var fileFields = [
-            'rg_cnh_completo[]',
-            'contracheque[]',
-            'extrato_consignacoes[]',
-            'comprovante_residencia[]',
-            'selfie[]',
-            'comprovante_bancario[]',
-            'detalhamento_inss[]',
-            'historico_consignacoes_inss[]'
+            'rg_cnh_completo',
+            'rg_frente',
+            'rg_verso',
+            'contracheque',
+            'extrato_consignacoes',
+            'comprovante_residencia',
+            'selfie',
+            'comprovante_bancario',
+            'detalhamento_inss',
+            'historico_consignacoes_inss'
         ];
 
         var fileData = new FormData();

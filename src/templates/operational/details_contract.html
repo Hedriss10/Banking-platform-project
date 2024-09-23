@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block main %} 
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Contrato Digital</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST"  enctype="multipart/form-data">
+                <!-- Informações Pessoais -->
+                <br>
+                <div class="border-bottom pb-3 mb-4">
+                    <h5 class="mb-3">Informações Pessoais</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nome Completo:</strong> {{ proposal.name_and_lastname }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Data de Criação:</strong> {{ proposal.created_at.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> {{ proposal.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>CPF:</strong> {{ proposal.cpf }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Sexo:</strong> {{ proposal.sex }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Telefone:</strong> {{ proposal.phone }}</p>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Endereço -->
+                <div class="border-bottom pb-3 mb-4">
+                    <h5 class="mb-3">Endereço</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Endereço:</strong> {{ proposal.address }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Número:</strong> {{ proposal.address_number }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>CEP:</strong> {{ proposal.zipcode }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Bairro:</strong> {{ proposal.neighborhood }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Cidade:</strong> {{ proposal.city }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Estado:</strong> {{ proposal.state_uf_city }}</p>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Informações Financeiras -->
+                <div class="border-bottom pb-3 mb-4">
+                    <h5 class="mb-3">Informações Financeiras</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Salário:</strong> {{ proposal.value_salary }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Valor da Operação:</strong> {{ proposal.value_operation }}</p>
+                        </div>
+                        <div class="col-md-12">
+                            <p><strong>Tipo de Operação:</strong> {{ proposal.operation_select }}</p>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Fotos Relacionadas do contrato -->
+                <div class="border-bottom pb-3 mb-4">
+                    <h5 class="mb-3">Imagens do Contrato</h5>
+                    <div class="row">
+                        {% for field, paths in image_paths.items() %}
+                        <div class="col-md-6">
+                            <h6>{{ field | replace('_', ' ') }}</h6>
+                            <div class="d-flex flex-wrap">
+                                {% for path in paths %}
+                                <img src="{{ url_for('operational.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail me-2 mb-2" style="max-width: 150px; cursor: pointer;">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+    
+                <!-- Observações -->
+                <div class="border-bottom pb-3 mb-4">
+                    <h5 class="mb-3">Observações</h5>
+                    <p>{{ proposal.obeserve }}</p>
+                </div>
+
+                <!-- Fotos Relacionadas do contratos -->
+                <h5 class="mt-4 mb-3">Imagens do Contrato:</h5>
+                <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Visualizar Imagem:</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img id="expandedImage" src="" alt="Imagem Expandida" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                <!-- Checkboxes de Status -->
+                <h5 class="mt-4 mb-3">Status da Proposta:</h5>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="active" name="active" {% if proposal.active %}checked{% endif %}>
+                    <label class="form-check-label" for="active">Contrato Digitado</label>
+                </div>
+
+
+                <!-- Botões de Ação -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Salvar Alterações</button>
+                    <a href="{{ url_for('operational.manage_state_contract') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script para habilitar campos -->
+<script>
+    function enableField(fieldId) {
+        const field = document.getElementById(fieldId);
+        field.disabled = false;
+        field.focus();
+    }
+</script>
+
+<link href="{{url_for('static', filename='css/opeational/edit_operational')}}" rel="stylesheet" >
+<script src="{{ url_for('static', filename='js/operational/edit_operational.js') }}"></script>
+{% endblock %}
