@@ -7,7 +7,7 @@
     <h2 class="text-center mb-4">Editar Proposta</h2>
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="POST"  enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" data-proposal-id="{{ proposal.id }}">
                 <!-- Informações Pessoais -->
                 <br>
                 <h5 class="mb-3">Informações Pessoais:</h5>
@@ -18,8 +18,8 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="created_at" class="form-label">Data de Criação:</label>
-                        <input type="date" class="form-control" id="created_at" name="created_at" value="{{ proposal.created_at.strftime('%Y-%m-%d') }}" >
+                        <label for="dd_year" class="form-label">Data de Nascimento:</label>
+                        <input type="date" class="form-control" id="dd_year" name="dd_year" value="{{ proposal.dd_year.strftime('%Y-%m-%d') }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -96,12 +96,75 @@
                     <div class="col-md-12 mb-3">
                         <label for="operation_select" class="form-label">Operação:</label>
                         <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select }}" >
+                    </div> 
+
+                    <div class="col-md-12 mb-3">
+                        <label for="table_id" class="form-label">Tabela Cadastrada:</label>
+                        <div class="form-control-plaintext">
+                            {% for banker in bankers %}
+                                {% for convenio in banker.financial_agreements %}
+                                    {% for table in convenio.tables_finance %}
+                                        {% if proposal.table_id == table.id %}
+                                            <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="tableSearchInput" class="form-label">Buscar Tabela:</label>
+                            <input type="text" id="tableSearchInput" class="form-control" placeholder="Digite o código da tabela...">
+                        </div>
+                    
+                        <div class="col-md-6">
+                            <label for="tableSelectProposal" class="form-label">Selecione a Tabela:</label>
+                            <select class="form-select" id="tableSelectProposal" name="tableSelectProposal">
+                                <option value="">Escolha...</option>
+                                {% for banker in bankers %}
+                                    {% for convenio in banker.financial_agreements %}
+                                        {% for table in convenio.tables_finance %}
+                                            <option class="table-options" data-convenio-id="{{ convenio.id }}" value="{{ table.id }}">
+                                                <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                            </option>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <br><br>
+                    <div class="col-md-12 mb-3">
+                        <label for="conv_id" class="form-label">Convenio Cadastrado:</label>
+                        <select class="form-select" id="conv_id" name="conv_id">
+                            {% for banker in bankers %}
+                                {% for convenio in banker.financial_agreements %}
+                                    <option value="{{ convenio.id }}" {% if proposal.conv_id == convenio.id %}selected{% endif %}>
+                                        {{ convenio.name }}
+                                    </option>
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="select_banker_payment_type" class="form-label">Operação de Pagamento:</label>
+                        <input type="text" class="form-control" id="select_banker_payment_type" name="select_banker_payment_type" value="{{ proposal.select_banker_payment_type }}" >
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="select_banker_payment" class="form-label">Operação de Pagamento:</label>
+                        <input type="text" class="form-control" id="select_banker_payment" name="select_banker_payment" value="{{ proposal.select_banker_payment }}" >
                     </div>
                 </div>
                 
 
                 <!-- Fotos Relacionadas do contratos -->
-                <h5 class="mt-4 mb-3">Imagens do Contrato:</h5>
+                <h5 class="mt-4 mb-3">Imagens Registradas do Contrato:</h5>
                 <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
@@ -118,19 +181,88 @@
                 
                 <div class="row">
                     {% for field, paths in image_paths.items() %}
-                    <div class="col-md-6">
-                        <h5 class="mt-4 mb-3">{{ field | replace('_', ' ') }}</h5>
-                        {% for path in paths %}
-                            <img src="{{ url_for('operational.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
-                        {% endfor %}
-                    </div>
+                        <div class="col-md-6">
+                            <h5 class="mt-4 mb-3">{{ field | replace('_', ' ') }}</h5>
+                            {% for path in paths %}
+                                <div class="img-wrapper">
+                                    <img src="{{ url_for('proposal.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
+                                    <button type="button" class="btn btn-danger btn-sm remove-image" data-field="{{ field }}" data-path="{{ path }}">Remover</button>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% endfor %}
-                </div>                                                           
+                </div>                                                         
+            
+                <hr>
+                <h5 class="mt-4 mb-3">Registrar imagens:</h5>
+                <div class="row mb-3">
+                    <label for="ReportDocs" class="form-label"><strong>Importação de
+                            documento:</strong></label>
+                    <div class="col-md-6">
+                        <label for="rg-cnh-completo" class="form-label">RG/CNH - COMPLETO</label>
+                        <!--Frente e verso-->
+                        <input type="file" class="form-control" id="rg-cnh-completo" name="rg_cnh_completo" multiple>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="rg_frente" class="form-label">RG - Frente</label>
+                        <!--Frente -->
+                        <input type="file" class="form-control" id="rg-cnh-completo" name="rg_frente" multiple>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="rg_verso" class="form-label">RG - Verso</label>
+                        <!--Frente-->
+                        <input type="file" class="form-control" id="rg-cnh-completo" name="rg_verso" multiple>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contracheque" class="form-label">Contracheque</label>
+                        <input type="file" class="form-control" id="contracheque" name="contracheque" multiple>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="extrato-consignacoes" class="form-label">Extrato de consignações</label>
+                        <input type="file" class="form-control" id="extrato-consignacoes" name="extrato_consignacoes"
+                            multiple>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="comprovante-residencia" class="form-label">Comprovante
+                            residencial</label>
+                        <input type="file" class="form-control" id="comprovante-residencia"
+                            name="comprovante_residencia" multiple>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="selfie" class="form-label">Sefie</label>
+                        <input type="file" class="form-control" id="selfie" name="selfie" multiple>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="comprovante-bancario" class="form-label">Comprovante Bancário</label>
+                        <input type="file" class="form-control" id="comprovante-bancario" name="comprovante_bancario"
+                            multiple>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="detalhamento-inss" class="form-label">Detalhamento INSS</label>
+                        <input type="file" class="form-control" id="detalhamento-inss" name="detalhamento_inss"
+                            multiple>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="historico-consignacoes-inss" class="form-label">Histórico de
+                            consignações
+                            INSS</label>
+                        <input type="file" class="form-control" id="historico-consignacoes-inss"
+                            name="historico_consignacoes_inss" multiple>
+                    </div>
+                </div>
+
+
 
                 <!-- Botões de Ação -->
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Salvar Alterações</button>
-                    <a href="{{ url_for('operational.manage_state_contract') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
+                    <a href="{{ url_for('proposal.state_proposal') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
                 </div>
             </form>
         </div>
@@ -146,5 +278,9 @@
     }
 </script>
 
-<script src="{{ url_for('static', filename='js/proposal/edit_operational.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/proposal/EditProposal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proposal/removeImage.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proposal/EditNewProposal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proposal/SearchTables.js') }}"></script>
 {% endblock %}

@@ -47,12 +47,12 @@
                         {% elif p.progress_check %}
                         <span class="badge bg-secondary">Contrato Em Andamento</span>
                         {% else %}
-                        <span class="badge bg-light">Contrato Disponivel Para digitar</span>
+                        <span class="badge bg-dark">Contrato Disponivel Para digitar</span>
                         {% endif %}
                     </td>
                     <td>
                         <span class="badge bg-warning">
-                            <a href="{{ url_for('operational.manage_edit_contract', id=p.id) }}">Editar</a>
+                            <a href="{{ url_for('proposal.edit_proposal', id=p.id) }}">Editar</a>
                         </span>
                     </td>
                     <td>
@@ -64,6 +64,7 @@
             </tbody>
         </table>
         <div id="baseUrl" data-url="{{ url_for('proposal.edit_proposal', id=0) }}"></div>
+        
         <nav aria-label="Paginação de comissões">
             <ul class="pagination">
                 {% if pagination.has_prev %}

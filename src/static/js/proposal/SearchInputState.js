@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${p.block ? '<span class="badge bg-danger">Contrato Bloqueado</span>' : ''}
                         ${p.is_status ? '<span class="badge bg-warning">Contrato Pendente</span>' : ''}
                         ${p.progress_check ? '<span class="badge bg-secondary">Contrato Em Andamento</span>': ''}
-                        ${!p.active && !p.block && !p.is_status && !p.progress_check ? '<span class="badge bg-light">Contrato Disponivel Para digitar</span>' : ''}
+                        ${!p.active && !p.block && !p.is_status && !p.progress_check ? '<span class="badge bg-dark">Contrato Disponivel Para digitar</span>' : ''}
                     </td>
                     <td>
                         <span class="badge bg-warning">

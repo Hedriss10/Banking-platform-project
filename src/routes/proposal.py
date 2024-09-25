@@ -3,12 +3,12 @@ import base64
 import json
 
 from datetime import datetime
-from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app, flash)
+from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect, request, current_app, flash, send_from_directory)
 from flask_login import login_required, current_user 
 from src import db
 from sqlalchemy.orm import joinedload
 from src.utils.proposal import UploadProposal
-from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, UserProposal, Roomns, room_user_association
+from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, UserProposal
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -75,6 +75,7 @@ def creat_proposal():
 @bp_proposal.route("/search-tables", methods=['GET'])
 @login_required
 def search_tables():
+    """Function for search tables"""
     search_term = request.args.get('query', '')
     if search_term:
         tables = TablesFinance.query.filter(TablesFinance.table_code.ilike(f'%{search_term}%')).all()
@@ -136,6 +137,7 @@ def state_proposal():
 @bp_proposal.route("/proposal/new-proposal", methods=['POST'])
 @login_required
 def add_proposal():
+    """Function for register proposal"""
     encrypted_data = request.form.get('encrypted_data')
     encrypted_key = request.form.get('encrypted_key')
     iv_base64 = request.form.get('iv')
@@ -144,14 +146,7 @@ def add_proposal():
         return jsonify({'error': 'Dados criptografados faltando'}), 400
 
     try:
-        aes_key = load_private_key().decrypt(
-            base64.b64decode(encrypted_key),
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
+        aes_key = load_private_key().decrypt(base64.b64decode(encrypted_key),padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(),label=None))
     except Exception as e:
         current_app.logger.error(f"Erro ao descriptografar a chave AES: {e}")
         return jsonify({'error': 'Erro ao descriptografar a chave AES'}), 400
@@ -236,7 +231,6 @@ def add_proposal():
         
         for field in image_fields:
             field_files = request.files.getlist(field)
-            print(field_files)
             if field_files:
                 image_paths = UploadProposal(proposal_id=new_proposal.id, creator_id=current_user.id, image_fields=image_fields, created_at=new_proposal.created_at).save_images(field_files, paths[field])
                 setattr(new_proposal, field.rstrip(''), ','.join(image_paths))
@@ -253,58 +247,92 @@ def add_proposal():
 @bp_proposal.route("/proposal/edit-proposal/<int:id>", methods=['GET', 'POST'])
 @login_required
 def edit_proposal(id):
-    proposal= UserProposal.query.get_or_404(id) 
-        
+    """Função para editar proposta"""
+    
+    bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
+    proposal = UserProposal.query.get_or_404(id)
+
     if proposal.active != 0 or proposal.block != 0 or proposal.is_status != 0:
         flash('Você não pode editar esta proposta. Verifique se ela está bloqueada ou já foi finalizada.', 'danger')
         return redirect(url_for('proposal.state_proposal'))
     
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
 
-    if isinstance(proposal.created_at, str):
-        proposal.created_at = datetime.strptime(proposal.created_at, "%Y-%m-%d %H:%M:%S")
+    upload_manager = UploadProposal(proposal_id=proposal.id, creator_id=proposal.creator_id, image_fields=image_fields, created_at=proposal.created_at)
+    
+    # Certifique-se de que a estrutura de diretórios está criada
+    upload_manager.create_directory_structure()
 
-    image_paths = UploadProposal(proposal_id=proposal.id, creator_id=proposal.creator_id, image_fields=image_fields, created_at=proposal.created_at).list_images()
+    image_paths = upload_manager.list_images()
 
     if request.method == 'POST':
         proposal.name_and_lastname = request.form.get('name_and_lastname')
         proposal.email = request.form.get('email')
+        proposal.dd_year = datetime.strptime(request.form.get('dd_year'), "%Y-%m-%d").date()
         proposal.cpf = request.form.get('cpf')
         proposal.sex = request.form.get('sex')
         proposal.phone = request.form.get('phone')
         proposal.address = request.form.get('address')
+        proposal.address_number = request.form.get('address_number')
         proposal.zipcode = request.form.get('zipcode')
         proposal.neighborhood = request.form.get('neighborhood')
         proposal.city = request.form.get('city')
         proposal.state_uf_city = request.form.get('state_uf_city')
         proposal.value_salary = request.form.get('value_salary')
         proposal.obeserve = request.form.get('obeserve')
+        proposal.table_id = request.form.get('tableSelectProposal')
+        proposal.conv_id = request.form.get('convenioSelectProposal')
         
         identifier = f"number_contrato_{proposal.id}_digitador_{proposal.creator_id}"
-
         base_path = os.path.join('proposta', proposal.created_at.strftime('%Y'), proposal.created_at.strftime('%m'), proposal.created_at.strftime('%d'), identifier)
 
         for field in image_fields:
             field_files = request.files.getlist(field)
+            
             if field_files:
+                # Se houver novos arquivos, salvar sem excluir os antigos
                 field_base_path = os.path.join(base_path, field)
-                image_paths = UploadProposal().save_images(field_files, field_base_path)
-                setattr(proposal, field, ','.join(image_paths))
+                new_images = upload_manager.save_images(field_files, field_base_path)
+                # Manter as imagens já salvas, adicionando as novas
+                existing_images = getattr(proposal, field, '').split(',')
+                all_images = existing_images + new_images
+                setattr(proposal, field, ','.join([img for img in all_images if img]))  # Remover vazios
         
         db.session.commit()
-
-        flash('Proposta atualizada com sucesso!', 'success')
         return redirect(url_for('proposal.state_proposal'))
 
-    return render_template("proposal/edit_proposal.html", proposal=proposal, image_paths=image_paths)
-    
-    
+    return render_template("proposal/edit_proposal.html", bankers=bankers, proposal=proposal, image_paths=image_paths)
+
+
+@bp_proposal.route('/proposal/<path:filename>')
+@login_required
+def serve_image(filename):
+    """Serve a imagem da proposta."""
+    base_dir = os.path.join(os.getcwd(), 'proposta')
+
+    full_path = os.path.join(base_dir, filename)
+
+    if not os.path.exists(full_path):
+        print(f"Caminho não encontrado: {full_path}")
+        return abort(404)
+
+    if not os.path.isfile(full_path):
+        print(f"O caminho não é um arquivo: {full_path}")
+        return abort(404)
+
+    try:
+        directory = os.path.dirname(full_path)
+        file_name = os.path.basename(full_path)
+        return send_from_directory(directory, file_name)
+    except Exception as e:
+        print(f"Erro ao servir a imagem: {e}")
+        return abort(500)
+
+
 @bp_proposal.route("/proposal/delete-proposal/<int:id>", methods=['GET', 'POST'])
 @login_required
 def delete_proposal(id):
-    """
-        Função para deletar proposta e remover os arquivos relacionados.
-    """
+    """Função para deletar uma proposta e remover todas as imagens associadas."""
     proposal = UserProposal.query.get_or_404(id)
     
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
@@ -313,13 +341,23 @@ def delete_proposal(id):
         if isinstance(proposal.created_at, str):
             proposal.created_at = datetime.strptime(proposal.created_at, "%Y-%m-%d %H:%M:%S")
         
-        image_paths = UploadProposal(proposal_id=proposal.id, creator_id=proposal.creator_id, image_fields=image_fields, created_at=proposal.created_at).list_images()
-        
-        for field, paths in image_paths.items():
-            for path in paths:
-                full_path = os.path.join('proposta', path)
-                if os.path.exists(full_path):
-                    os.remove(full_path)
+        year = proposal.created_at.strftime("%Y")
+        month = proposal.created_at.strftime("%m")
+        day = proposal.created_at.strftime("%d")
+        identifier = f"number_contrato_{proposal.id}_digitador_{proposal.creator_id}"
+        base_path = os.path.join('proposta', year, month, day, identifier)
+
+        for field in image_fields:
+            field_path = os.path.join(base_path, field)
+            if os.path.exists(field_path):
+                for img_file in os.listdir(field_path):
+                    full_image_path = os.path.join(field_path, img_file)
+                    if os.path.isfile(full_image_path):
+                        os.remove(full_image_path)
+                os.rmdir(field_path)
+
+        if os.path.exists(base_path):
+            os.rmdir(base_path)
 
         db.session.delete(proposal)
         db.session.commit()
@@ -329,3 +367,21 @@ def delete_proposal(id):
         db.session.rollback()
         current_app.logger.error(f"Erro ao excluir a proposta: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp_proposal.route('/proposal/remove-image/<int:proposal_id>', methods=['POST'])
+@login_required
+def remove_image(proposal_id):
+    data = request.get_json()
+    field = data.get('field')
+    path = data.get('path')
+
+    # Verifica se a imagem existe e remove do diretório
+    full_path = os.path.join(os.getcwd(), 'proposta', path)
+    if os.path.exists(full_path):
+        os.remove(full_path)
+        # Retorne uma resposta de sucesso
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'message': 'Imagem não encontrada.'}), 404
+
