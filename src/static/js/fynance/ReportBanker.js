@@ -2,9 +2,7 @@ let workbook;
 let tableData = [];
 let selectedColumns = [];
 
-document.getElementById('upload').addEventListener('change', handleFile);
-
-function handleFile(event) {
+document.getElementById('upload').addEventListener('change', function(event) {
     const reader = new FileReader();
     const file = event.target.files[0];
 
@@ -16,7 +14,7 @@ function handleFile(event) {
     };
 
     reader.readAsArrayBuffer(file);
-}
+});
 
 function populateSheetSelector(sheetNames) {
     const selector = document.getElementById('sheet-selector');
@@ -80,15 +78,13 @@ function handleColumnSelection(event, columnIndex) {
     }
 }
 
-document.getElementById('process').addEventListener('click', () => {
+document.getElementById('process').addEventListener('click', function() {
     const selectedData = tableData.map(row => selectedColumns.map(colIndex => row[colIndex]));
     const bankID = document.getElementById("bankSelect").value;
-    const convID = document.getElementById("convenioSelect").value;
 
     const dataToSend = {
         columns: selectedData,
         bankID,
-        convID
     };
 
     fetch('/process-data', {
@@ -98,24 +94,57 @@ document.getElementById('process').addEventListener('click', () => {
         },
         body: JSON.stringify(dataToSend),
     })
+    .then(response => response.json())
+    .then(data => {
+        const notification = document.getElementById('notification');
+        if (data.message ===  "Dados processados com sucesso!") {
+            notification.className = 'alert alert-success';
+            notification.innerText = data.message;
+            setTimeout(() => { window.location.reload(); }, 2000);
+        } else {
+            notification.className = 'alert alert-danger';
+            notification.innerText = data.error || 'Erro ao processar';
+        }
+
+        notification.style.display = 'block';
+        setTimeout(() => { notification.style.display = 'none'; }, 3000);
+    })
+    .catch(error => {
+        console.error('Erro ao enviar dados:', error);
+    });
+});
+
+document.getElementById('delete-report').addEventListener('click', function() {
+    const bankID = document.getElementById("bankSelect").value;
+
+    if (bankID) {
+        fetch(`/delete-report/${bankID}`, {
+            method: 'DELETE',
+        })
         .then(response => response.json())
         .then(data => {
-
             const notification = document.getElementById('notification');
-            if (data.message ===  "Dados processados com sucesso!") {
+            if (data.message) {
                 notification.className = 'alert alert-success';
                 notification.innerText = data.message;
                 setTimeout(() => { window.location.reload(); }, 2000);
-            
             } else {
                 notification.className = 'alert alert-danger';
-                notification.innerText = data.error || 'Estou aqui';
+                notification.innerText = data.error;
             }
 
             notification.style.display = 'block';
             setTimeout(() => { notification.style.display = 'none'; }, 3000);
         })
         .catch(error => {
-            console.error('Erro ao enviar dados:', error);
+            console.error('Erro ao deletar relatório:', error);
         });
+    } else {
+        alert("Por favor, selecione um banco para excluir o relatório.");
+    }
+});
+
+document.getElementById('bankSelect').addEventListener('change', function() {
+    const bankID = this.value;
+    document.getElementById('delete-report').disabled = !bankID;
 });

@@ -155,9 +155,14 @@
                         <input type="text" class="form-control" id="select_banker_payment_type" name="select_banker_payment_type" value="{{ proposal.select_banker_payment_type }}" >
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3"> 
                         <label for="select_banker_payment" class="form-label">Operação de Pagamento:</label>
                         <input type="text" class="form-control" id="select_banker_payment" name="select_banker_payment" value="{{ proposal.select_banker_payment }}" >
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="select_banker_payment_type" class="form-label">Chave Pix:</label>
+                        <input type="text" class="form-control" id="pix_type_key " name="pix_type_key " value="{{ proposal.pix_type_key  }}" >
                     </div>
                 </div>
                 
@@ -256,7 +261,26 @@
                     </div>
                 </div>
 
-
+                <!-- Checkboxes de Status -->
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="active" name="active" {% if proposal.active %}checked{% endif %}>
+                    <label class="form-check-label" for="active">Contrato Digitado</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="block" name="block" {% if proposal.block %}checked{% endif %}>
+                    <label class="form-check-label" for="block">Contrato Bloqueado</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="progress_check" name="progress" {% if proposal.progress_check %}checked{% endif %}>
+                    <label class="form-check-label" for="progress_check">Contrato Em Andamento</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="is_status" name="is_status" {% if proposal.is_status %}checked{% endif %}>
+                    <label class="form-check-label" for="is_status">Documentação Pendente</label>
+                </div>
 
                 <!-- Botões de Ação -->
                 <div class="mt-4">

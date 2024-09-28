@@ -5,7 +5,7 @@ from flask import (Blueprint, render_template, url_for, jsonify, abort, redirect
 from flask_login import login_required, current_user 
 from src import db
 from sqlalchemy.orm import joinedload
-from src.models.bsmodels import UserProposal, Banker, FinancialAgreement
+from src.models.bsmodels import Proposal, Banker, FinancialAgreement
 from src.utils.proposal import UploadProposal
 from datetime import datetime
 
@@ -30,7 +30,7 @@ def manage_state_contract():
         Function for listing all proposals in the table
     """
     
-    query = UserProposal.query
+    query = Proposal.query
     
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -43,12 +43,12 @@ def manage_state_contract():
 
     if search_term:
         query = query.filter(
-            UserProposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtra pelo nome do contrato
-            UserProposal.created_at.ilike(f'%{search_term}%') |  # Filtra pela data de criação
-            UserProposal.cpf.ilike(f'%{search_term}%')  # Filtra pelo CPF do contrato
+            Proposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtra pelo nome do contrato
+            Proposal.created_at.ilike(f'%{search_term}%') |  # Filtra pela data de criação
+            Proposal.cpf.ilike(f'%{search_term}%')  # Filtra pelo CPF do contrato
         )
     
-    tables_paginated = query.order_by(UserProposal.created_at.desc()).paginate(page=page, per_page=per_page)
+    tables_paginated = query.order_by(Proposal.created_at.desc()).paginate(page=page, per_page=per_page)
 
     proposal_data = [{
         'id': p.id,
@@ -75,7 +75,7 @@ def manage_state_contract():
 @bp_operational.route('/operational/available-contracts-count', methods=['GET'])
 @login_required
 def available_contracts_count():
-    available_count = UserProposal.query.filter_by(active=0, block=0, is_status=0, progress_check=0).count()
+    available_count = Proposal.query.filter_by(active=0, block=0, is_status=0, progress_check=0).count()
         
     return jsonify({'available_contracts': available_count})
 
@@ -86,7 +86,7 @@ def manage_edit_contract(id):
     """
         Editar proposta
     """
-    proposal = UserProposal.query.get_or_404(id)
+    proposal = Proposal.query.get_or_404(id)
     bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
     
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
@@ -112,9 +112,13 @@ def manage_edit_contract(id):
         proposal.city = request.form.get('city')
         proposal.state_uf_city = request.form.get('state_uf_city')
         proposal.value_salary = request.form.get('value_salary')
-        proposal.obeserve = request.form.get('obeserve')
         proposal.table_id = request.form.get('tableSelectProposal')
         proposal.conv_id = request.form.get('convenioSelectProposal')
+
+        proposal.active = 'active' in request.form
+        proposal.block = 'block' in request.form
+        proposal.is_status = 'is_status' in request.form
+        proposal.progress_check = 'progress' in request.form
         
         identifier = f"number_contrato_{proposal.id}_digitador_{proposal.creator_id}"
         base_path = os.path.join('proposta', proposal.created_at.strftime('%Y'), proposal.created_at.strftime('%m'), proposal.created_at.strftime('%d'), identifier)
@@ -167,7 +171,7 @@ def manage_delete_contract(id):
     """
         Função para deletar proposta e remover os arquivos relacionados.
     """
-    proposal = UserProposal.query.get_or_404(id)
+    proposal = Proposal.query.get_or_404(id)
     
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
     
@@ -209,7 +213,7 @@ def manage_details_contract(id):
     """
         Editar proposta
     """
-    proposal = UserProposal.query.get_or_404(id)
+    proposal = Proposal.query.get_or_404(id)
 
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
 

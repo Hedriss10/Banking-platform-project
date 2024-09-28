@@ -19,11 +19,11 @@ document.getElementById('searchInput').addEventListener('input', function() {
         data.forEach((bank, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
+                <td>${ index }</td>
                 <td>${bank.bank_name}</td>
                 <td>${bank.agreement_name}</td>
                 <td>${bank.table_name}</td>
                 <td>${bank.table_code}</td>
-                <td>${bank.rate}%</td>
             `;
             tbody.appendChild(row);
         });
@@ -31,7 +31,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
         if (data.length === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
-                <td colspan="6" class="text-center">Nenhuma comissão encontrada</td>
+                <td colspan="5" class="text-center">Nenhuma comissão encontrada</td>
             `;
             tbody.appendChild(emptyRow);
         }

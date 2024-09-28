@@ -3,16 +3,15 @@
 
 {% block main %}
 <section>
+    <h2 class="card-title">Layout de Relatório de Comissão</h2>
     <div class="container mt-4">
-        <h2 class="details">Layout de Relatório de Comissão</h2>
-        <p class="details">Importante lembrar que o <code>Layout</code> é 
-            capturado após você importar um relatório de comissão do banco, 
-            dado essa ação será salvo e quando for a próxima vez, para importação 
-            do mesmo banco será necessário seguir a mesma regra.</p>
+        <p class="details">Importante lembrar que o Layout é capturado após você importar um relatório de comissão do banco, 
+            dado essa ação será salvo e quando for a próxima vez, para importação do mesmo banco será necessário seguir a mesma regra.
+            Será necessário validar os 3 campos do relatório de comissão paga, seja o campo <strong>CPF, NOME, CÓDIGO DA TABELA</strong></p>
+
         <div id="feedback" class="alert alert-info" style="display: none;">
         </div>
         <div id="template-list" class="list-group">
-            <!-- Os templates serão inseridos aqui via JavaScript -->
         </div>
     </div>
     <br><br>
@@ -25,20 +24,10 @@
             {% endfor %}
         </select>
     </div>
-
-    <div class="mb-3">
-        <label for="convenioSelect" class="form-label">Selecione o Convênio:</label>
-        <select class="form-select" id="convenioSelect" name="convenioSelect">
-            <option value="">Escolha...</option>
-            {% for bank in banks %}
-            {% for convenio in bank.financial_agreements %}
-            <option class="convenio-options" value="{{ convenio.id }}" data-bank-id="{{ bank.id }}" style="display: none;">
-                {{ convenio.name }}
-            </option>
-            {% endfor %}
-            {% endfor %}
-        </select>
-    </div>
+    
+    <br><br>
+    <button id="delete-report" class="btn btn-danger" disabled>Excluir Relatório</button>
+    <br><br>
 
     <div class="controls mb-3">
         <input type="file" id="upload" accept=".xlsx, .xls, .csv" class="form-control" />
@@ -65,6 +54,6 @@
 <script src="{{ url_for('static', filename='js/fynance/toggleReportTableFynanceOne.js') }}"></script>
 <!--Toggle fynance todo one register tables and conv-->
 <script src="{{ url_for('static', filename='js/fynance/ToggleTableOne.js') }}"></script>
-<script src="{{ url_for('static', filename='js/fynance/ReportBanker.js') }}"></script>
-<script src="{{ url_for('static', filename='js/fynance/TemplateBankerComission.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fynance/reportBanker.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fynance/templateBankerComission.js') }}"></script>
 {% endblock%}

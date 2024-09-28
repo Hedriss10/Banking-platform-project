@@ -6,7 +6,7 @@ from flask import jsonify
 from src import db
 from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
-from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData, CalcComissionRate, UserProposal
+from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance, ReportBankerTransactionData, CalcComissionRate, Proposal
 
 bp_fynance = Blueprint("fynance", __name__)
 
@@ -116,7 +116,7 @@ def comission_calc():
             return jsonify({"error": "Tabela de comissão não encontrada para o banco selecionado."}), 404
 
         # Buscar as propostas
-        proposals = UserProposal.query.filter_by(banker_id=banker_id).all()
+        proposals = Proposal.query.filter_by(banker_id=banker_id).all()
 
         for proposal in proposals:
             # Assumindo que há apenas uma taxa para cada banco, ajuste conforme necessário
@@ -154,33 +154,32 @@ def comission_calc():
                 "status": "OK"
             })
 
-    return render_template('fynance/manage_comission.html', bankers=bankers, tables=tables, 
-                           proposals=proposals, selected_table=selected_table, 
-                           calculated_commissions=calculated_commissions)
+    return render_template('fynance/manage_comission.html', bankers=bankers, tables=tables, proposals=proposals, selected_table=selected_table,calculated_commissions=calculated_commissions)
 
 
-@bp_fynance.route("/manage-report", methods=['GET'])
+@bp_fynance.route("/manage-report", methods=['GET', 'POST'])
+@login_required
 def manage_report():
-    """Função para gerenciar relatórios"""
-
+    """
+        Função para gerenciar o relatório, realizar confirmação e pagamento de comissões.
+    """
     banker_id = request.args.get('banker_id', type=int)
     banks = Banker.query.all()
 
-    manage_report = []
     report_status = []
+    unpaid_commissions = []
+    payment_history = []
 
     if banker_id:
-        manage_report = ReportBankerTransactionData.query.filter_by(banker_id=banker_id).all()
-        proposals = UserProposal.query.all()
+        # Obter relatórios do banco selecionado
+        manage_reports = ReportBankerTransactionData.query.filter_by(banker_id=banker_id).all()
+        proposals = Proposal.query.all()
         proposal_cpf_map = {proposal.cpf: proposal for proposal in proposals}
 
-        if not manage_report:
-            return render_template("fynance/manage_report.html", 
-                                   banks=banks, 
-                                   selected_banker_id=banker_id,
-                                   message="Nenhum relatório encontrado para o banco selecionado. Cadastre um novo relatório.")
+        if not manage_reports:
+            return render_template("fynance/manage_report.html", banks=banks, selected_banker_id=banker_id, message="Nenhum relatório encontrado para o banco selecionado. Cadastre um novo relatório.")
 
-        for report in manage_report:
+        for report in manage_reports:
             data = report.data
             columns = data.get('columns', [])
             valid_columns = [col for col in columns if col.get('CPF') in proposal_cpf_map]
@@ -189,10 +188,32 @@ def manage_report():
 
             valid_proposals = [proposal_cpf_map[col['CPF']] for col in valid_columns]
 
+            # Atualizar ou criar registros em CalcComissionRate
+            for col in valid_columns:
+                proposal = proposal_cpf_map[col['CPF']]
+                existing_commission = CalcComissionRate.query.filter_by(proposal_id=proposal.id).first()
+                if not existing_commission:
+                    # Calcular comissão
+                    percentage_applied = float(col.get('% Comissão', 0)) / 100
+                    valor_comissao = float(col.get('Valor Comissão', 0))
+                    repasse_comissao = valor_comissao * percentage_applied
+
+                    # Criar novo registro de comissão
+                    new_commission = CalcComissionRate(
+                        banker_id=banker_id,
+                        table_finance_id=1,  # Assumindo uma tabela financeira padrão
+                        proposal_id=proposal.id,
+                        user_id=proposal.creator_id,
+                        valor_comissao=valor_comissao,
+                        repasse_comissao=repasse_comissao,
+                        percentage_applied=percentage_applied,
+                        comissao_recebida=False
+                    )
+                    db.session.add(new_commission)
+                    db.session.commit()
+
             report_status.append({
                 'report_id': report.id,
-                'bankID': data.get('bankID'),
-                'convID': data.get('convID'),
                 'status': status,
                 'valid_columns_count': len(valid_columns),
                 'invalid_columns_count': len(invalid_columns),
@@ -200,10 +221,11 @@ def manage_report():
                 'valid_proposals': valid_proposals
             })
 
-    return render_template("fynance/manage_report.html", 
-                           report_status=report_status, 
-                           selected_banker_id=banker_id, 
-                           banks=banks)
+        unpaid_commissions = CalcComissionRate.query.filter_by(banker_id=banker_id, comissao_recebida=False).all()
+
+        payment_history = CalcComissionRate.query.filter_by(banker_id=banker_id, comissao_recebida=True).all()
+
+    return render_template("fynance/manage_report.html",report_status=report_status,unpaid_commissions=unpaid_commissions,payment_history=payment_history,selected_banker_id=banker_id,banks=banks)
 
 
 @bp_fynance.route("/download-report/<int:report_id>", methods=['GET'])
@@ -216,7 +238,7 @@ def download_report(report_id):
     columns = report.data.get('columns', [])
     df = pd.DataFrame(columns)
 
-    proposals = UserProposal.query.all()
+    proposals = Proposal.query.all()
     proposal_cpf_map = {proposal.cpf: proposal for proposal in proposals}
 
     proposal_names = []
@@ -278,7 +300,7 @@ def manage_analytics():
 @login_required
 def process_data():
     """
-        Carried out to generate the commission report, dynamically and sent to the bank
+        Gerenciador de template de relatorio, salva no banco com json e processa
     """
     try:
         data = request.get_json()
@@ -286,13 +308,17 @@ def process_data():
             return jsonify({"error": "Nenhum dado recebido"}), 400
         
         bank_id = data.get('bankID')
-        conv_id = data.get('convID')
         columns = data.get('columns', [])
+        
+        existing_report = ReportBankerTransactionData.query.filter_by(banker_id=bank_id).first()
 
+        if existing_report:
+            db.session.delete(existing_report)
+            db.session.commit()
+        
         column_names = columns[0]
         rows = columns[1:]
         row_list = []
-
         for row in rows:
             row_data = {column_names[i]: row[i] for i in range(len(row))}
             row_list.append(row_data)
@@ -300,16 +326,14 @@ def process_data():
         data_to_save = {
             'columns': row_list,
             'bankID': bank_id,
-            'convID': conv_id
         }
+        
         new_entry = ReportBankerTransactionData(
             banker_id=bank_id,
-            conv_id=conv_id,
             data=data_to_save
         )
         db.session.add(new_entry)
         db.session.commit()
-
         return jsonify({"message": "Dados processados com sucesso!"}), 200
 
     except Exception as e:
@@ -319,7 +343,7 @@ def process_data():
 
 @bp_fynance.route("/register-convenio", methods=['POST'])
 @login_required
-def post_register_conven():
+def add_register_conven():
     """Api`s 
         modular api system within the monolithic
     Returns:
@@ -351,7 +375,7 @@ def post_register_conven():
 
 @bp_fynance.route("/register-bankers", methods=['POST'])
 @login_required
-def post_register_bankers():
+def add_register_bankers():
     """Api`s 
         modular api system within the monolithic
     Returns:
@@ -462,7 +486,9 @@ def register_tables_one():
 @bp_fynance.route("/delete-bankers/<int:id>", methods=['POST'])
 @login_required
 def delete_bankers(id):
-    """Function for delete id banker"""
+    """
+        Delete banker associate conv and tables
+    """
     banker = Banker.query.get_or_404(id)
     db.session.delete(banker)
     db.session.commit()
@@ -491,9 +517,9 @@ def delete_table_in_conv_in_banker(id):
 
 @bp_fynance.route("/clean-tables", methods=['POST'])
 @login_required
-def desativar_tabelas():
+def disable_tables():
     """
-        routes commits for tables for column  is_status for true.
+        routes commits for tables for column is_status for true.
     """
     data = request.get_json()
     table_ids = data.get('table_ids', [])
@@ -516,39 +542,60 @@ def desativar_tabelas():
         return jsonify({"success": False, "message": f"Erro ao desativar as tabelas: {str(e)}"}), 500
 
 
-
 @bp_fynance.route("/save-report-template", methods=['GET'])
+@login_required
 def save_template_report_comission():
     """
-        Coleta todos os dados do relatório e faz associação com o template.
+        Coleta as colunas e a primeira linha do relatório associado ao template.
     """
     banker_id = request.args.get('banker_id', type=int)
-    conv_id = request.args.get('conv_id', type=int)
 
     try:
-        if not banker_id or not conv_id:
+        if not banker_id:
             return jsonify({'error': 'Os campos Banco e Orgão são necessários.'}), 400
         
         report_comission = ReportBankerTransactionData.query.filter_by(
             banker_id=banker_id, 
-            conv_id=conv_id
         ).all()
         
         banker = Banker.query.filter_by(id=banker_id).first()
-        convenio = FinancialAgreement.query.filter_by(id=conv_id).first()
 
         if not report_comission:
             return jsonify({'message': 'Nenhum template de relatório encontrado para os parâmetros fornecidos.'}), 404
 
-        templates = [{
-            'Último template importado': index + 1,
-            'Banco': banker.name if banker else 'Desconhecido',
-            'Convênio': convenio.name if convenio else 'Desconhecido',
-            'Colunas': report.data.get('columns', []) 
-        } for index, report in enumerate(report_comission)]
+        templates = []
+        for index, report in enumerate(report_comission):
+            columns = report.data.get('columns', [])
+            first_row = columns[0] if columns else {}
+            
+            templates.append({
+                'Último template importado': index + 1,
+                'Banco': banker.name if banker else 'Desconhecido',
+                'Colunas': [first_row], 
+            })
 
         return jsonify(templates), 200
 
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+    
+    
+@bp_fynance.route("/delete-report/<int:idd>", methods=['DELETE'])
+@login_required
+def delete_report(idd):
+    """
+        Deleta o relatório bancário de acordo com o ID do banco
+    """
+    try:
+        report = ReportBankerTransactionData.query.filter_by(banker_id=idd).first()
+        if report:
+            db.session.delete(report)
+            db.session.commit()
+            return jsonify({"message": "Relatório deletado com sucesso!"}), 200
+        else:
+            return jsonify({"error": "Nenhum relatório encontrado para o banco especificado."}), 404
+    except Exception as e:
+        print(f"Erro ao deletar relatório: {e}")
+        return jsonify({"error": "Erro ao deletar o relatório"}), 500
+

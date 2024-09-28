@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from src import db
 from sqlalchemy.orm import joinedload
 from src.utils.proposal import UploadProposal
-from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, UserProposal
+from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, Proposal
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -44,8 +44,8 @@ def manage_proposal():
             TablesFinance.name.ilike(f'%{search_term}%') |   # Filtro pelo nome da tabela
             TablesFinance.table_code.ilike(f'%{search_term}%') |  # Filtro pelo código da tabela
             Banker.name.ilike(f'%{search_term}%') |   # Filtro pelo nome do banco
-            FinancialAgreement.name.ilike(f'%{search_term}%') |  # Filtro pelo nome do convênio
-            (TablesFinance.rate == search_rate if search_rate is not None else False)  # Filtro pela taxa de comissão
+            FinancialAgreement.name.ilike(f'%{search_term}%')   # Filtro pelo nome do convênio
+            # (TablesFinance.rate == search_rate if search_rate is not None else False)  # Filtro pela taxa de comissão
         )
 
     tables_paginated = query.order_by(TablesFinance.rate.desc()).paginate(page=page, per_page=per_page)
@@ -55,7 +55,7 @@ def manage_proposal():
         'agreement_name': table.financial_agreement.name,
         'table_name': table.name,
         'table_code': table.table_code,
-        'rate': table.rate
+        # 'rate': table.rate
     } for table in tables_paginated.items]
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -93,7 +93,7 @@ def state_proposal():
     Returns:
         _type_:  return state proposal
     """
-    query = UserProposal.query.filter_by(creator_id=current_user.id)
+    query = Proposal().query.filter_by(creator_id=current_user.id)
     
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -106,13 +106,13 @@ def state_proposal():
 
     if search_term:
         query = query.filter(
-            UserProposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtrar pelo o nome da campanha
-            UserProposal.created_at.ilike(f'%{search_term}%') |# Filtro pelo código da tabela
-            UserProposal.cpf.ilike(f'%{search_term}') #  filtrando pelo o cpf do contrato
+            Proposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtrar pelo o nome da campanha
+            Proposal.created_at.ilike(f'%{search_term}%') |# Filtro pelo código da tabela
+            Proposal.cpf.ilike(f'%{search_term}') #  filtrando pelo o cpf do contrato
         )
 
     
-    tables_paginated = query.order_by(UserProposal.created_at.desc()).paginate(page=page, per_page=per_page)
+    tables_paginated = query.order_by(Proposal.created_at.desc()).paginate(page=page, per_page=per_page)
 
     proposal_data = [{
         'id': p.id,
@@ -167,7 +167,7 @@ def add_proposal():
     
 
     try:
-        new_proposal = UserProposal(
+        new_proposal = Proposal(
         creator_id=current_user.id,
         banker_id=form_data.get('bankSelect', None),
         conv_id=form_data.get('convenioSelectProposal', None),
@@ -176,14 +176,15 @@ def add_proposal():
         matricula=form_data.get('matricula', None),
         text_password_server=form_data.get('TextPasswordServer', None),
         passowrd_chek=form_data.get('senhacontracheque', None),
-        name_and_lastname=form_data.get('nameRegisterProposal', None),
-        dd_year=datetime.strptime(form_data.get('ddb-year'), '%Y-%m-%d') if form_data.get('ddb-year') else datetime.now(),
+        name=form_data.get('nameRegisterProposal', None),
+        lastname=form_data.get('nameRegisterProposal', None),
+        date_year=datetime.strptime(form_data.get('ddb-year'), '%Y-%m-%d') if form_data.get('ddb-year') else datetime.now(),
         sex=form_data.get('SexSelect', None),
         select_state=form_data.get('stateselect', None),
         email=form_data.get('email', None),
         cpf=form_data.get('CPF', None),
         naturalidade=form_data.get('naturalidade', None),
-        identify=form_data.get('identidade', None),
+        identify_document=form_data.get('identidade', None),
         organ_emissor=form_data.get('orgao_emissor', None),
         uf_emissor=form_data.get('StateUfSelect'),
         day_emissor = datetime.strptime(form_data.get('data_emissao'), '%Y-%m-%d') if form_data.get('data_emissao') else datetime.now(),
@@ -220,9 +221,10 @@ def add_proposal():
         prazo=form_data.get('prazo', None),
         value_operation=form_data.get('valor_operacao', None),
         obeserve=form_data.get('observacoes', None),
-        edit_at=form_data.get('', None))
-
-                
+        edit_at=form_data.get('', None),
+        number_proposal=form_data.get('', None))
+        
+        
         db.session.add(new_proposal)
         db.session.flush()
 
@@ -250,9 +252,9 @@ def edit_proposal(id):
     """Função para editar proposta"""
     
     bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
-    proposal = UserProposal.query.get_or_404(id)
+    proposal = Proposal.query.get_or_404(id)
 
-    if proposal.active != 0 or proposal.block != 0 or proposal.is_status != 0:
+    if proposal.active != 0 or proposal.block != 0 or proposal.is_status != 0 or proposal.progress_check != 0:
         flash('Você não pode editar esta proposta. Verifique se ela está bloqueada ou já foi finalizada.', 'danger')
         return redirect(url_for('proposal.state_proposal'))
     
@@ -279,7 +281,6 @@ def edit_proposal(id):
         proposal.city = request.form.get('city')
         proposal.state_uf_city = request.form.get('state_uf_city')
         proposal.value_salary = request.form.get('value_salary')
-        proposal.obeserve = request.form.get('obeserve')
         proposal.table_id = request.form.get('tableSelectProposal')
         proposal.conv_id = request.form.get('convenioSelectProposal')
         
@@ -333,7 +334,7 @@ def serve_image(filename):
 @login_required
 def delete_proposal(id):
     """Função para deletar uma proposta e remover todas as imagens associadas."""
-    proposal = UserProposal.query.get_or_404(id)
+    proposal = Proposal.query.get_or_404(id)
     
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
     

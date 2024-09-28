@@ -4,12 +4,12 @@
     <ul class="sidebar-nav" id="sidebar-nav"> 
       {% if 'Administrador' in session['type_user_func'] %} <!-- Chek hard level user == adm -->
       
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link " href="{{url_for('overview.dashboard')}}">
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
-      </li><!-- Dashboard -->
+      </li> --> <!-- Dashboard -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
@@ -18,12 +18,12 @@
         <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
             <a href="{{url_for('fynance.gerement_finance')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento Bancário</span>
+              <i class="bi bi-circle"></i><span>Gerenciamento de Banco e Convênios e Tabela de Comissão</span>
             </a>
           </li>
           <li>
             <a href="{{url_for('fynance.controllers_report_banker_comission')}}">
-              <i class="bi bi-circle"></i><span>Relatório de comissão</span>
+              <i class="bi bi-circle"></i><span>Template de Relatório De Comissão Pagas</span>
             </a>
           </li>
           <li>
@@ -36,21 +36,21 @@
               <i class="bi bi-circle"></i><span>Controle de Comissão</span>
             </a>
           </li>
-          <li>
+          <!-- <li>
             <a href="{{url_for('fynance.controllers_box')}}">
               <i class="bi bi-circle"></i><span>Controle de Caixa</span>
             </a>
-          </li>
+          </li> --> 
           <li>
             <a href="{{url_for('fynance.manage_payment')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Pagamento</span>
             </a>
           </li>
-          <li>
+          <!-- <li>
             <a href="{{url_for('fynance.manage_analytics')}}">
               <i class="bi bi-circle"></i><span>Analise de risco</span>
             </a>
-          </li>
+          </li> -->
           <li>
             <a href="{{url_for('fynance.manage_report')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Relatório</span>
@@ -123,7 +123,7 @@
         </ul>
       </li><!-- Gerenciamento de vendas  -->
 
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -139,7 +139,7 @@
             </a>
           </li>
         </ul>
-      </li><!-- Campanhas  -->
+      </li> -->  <!-- Campanhas  -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-users" data-bs-toggle="collapse" href="#">
@@ -202,23 +202,23 @@
         </ul>
       </li><!-- Gerenciamento de vendas -->
 
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="icons-bootstrap.html">
+            <a href="{{url_for('campaign.manage_campaign')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
             </a>
           </li>
           <li>
-            <a href="icons-remix.html">
+            <a href="{{url_for('campaign.add_campaing')}}">
               <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
             </a>
           </li>
         </ul>
-      </li><!-- Campanhas  -->
+      </li> -->  <!-- Campanhas  -->
       
       {% elif 'Gerente de Vendas' in session['type_user_func']%}
       
@@ -356,23 +356,23 @@
         </ul>
       </li><!-- Finacneiro -->
 
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="icons-bootstrap.html">
+            <a href="{{url_for('campaign.manage_campaign')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
             </a>
           </li>
           <li>
-            <a href="icons-remix.html">
+            <a href="{{url_for('campaign.add_campaing')}}">
               <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
             </a>
           </li>
         </ul>
-      </li><!-- Campanhas  -->
+      </li> -->  <!-- Campanhas  -->
 
       {% elif 'Operacional' in session['type_user_func']%} <!-- Operacional  -->
 
@@ -401,23 +401,23 @@
 
       {% elif 'Suporte de Campanha' in session['type_user_func']%} <!-- Suporte de Campanha  -->
 
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="icons-bootstrap.html">
+            <a href="{{url_for('campaign.manage_campaign')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
             </a>
           </li>
           <li>
-            <a href="icons-remix.html">
+            <a href="{{url_for('campaign.add_campaing')}}">
               <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
             </a>
           </li>
         </ul>
-      </li><!-- Campanhas  -->
+      </li> -->  <!-- Campanhas  -->
       {% endif %}
 
     </ul>

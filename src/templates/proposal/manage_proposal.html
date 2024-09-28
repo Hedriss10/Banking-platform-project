@@ -21,7 +21,6 @@
             <th scope="col">Convênio</th>
             <th scope="col">Tabela</th>
             <th scope="col">Código da tabela</th>
-            <th scope="col">Valor da Comissão</th>
           </tr>
         </thead>
         <tbody>
@@ -32,11 +31,10 @@
               <td>{{ bank.agreement_name }}</td>
               <td>{{ bank.table_name }}</td>
               <td>{{ bank.table_code }}</td>
-              <td>{{ bank.rate }}%</td>
             </tr>
           {% else %}
             <tr>
-              <td colspan="6" class="text-center">Nenhuma comissão encontrada</td>
+              <td colspan="5" class="text-center">Nenhuma comissão encontrada</td>
             </tr>
           {% endfor %}
         </tbody>

@@ -1,8 +1,7 @@
 function fetchTemplates() {
     const bankerId = document.getElementById('bankSelect').value;
-    const convId = document.getElementById('convenioSelect').value;
 
-    fetch(`/save-report-template?banker_id=${bankerId}&conv_id=${convId}`)
+    fetch(`/save-report-template?banker_id=${bankerId}`)
         .then(response => response.json())
         .then(data => {
             const templateList = document.getElementById('template-list');
@@ -33,13 +32,12 @@ function fetchTemplates() {
                     <h5>Layout ${template['Último template importado']}</h5>
                     <ol>
                         <li><strong>Banco:</strong> ${template.Banco || 'Não especificado'}</li>
-                        <li><strong>Convênio:</strong> ${template.Convênio || 'Não especificado'}</li>
-                        <li><strong>Colunas:</strong> 
+                        <li><strong>Colunas e Primeira Linha:</strong> 
                             <ul>
                                 ${template.Colunas.map(coluna => `
                                     <li>
                                         ${Object.entries(coluna).map(([key, value]) => `
-                                            <strong>${key}:</strong> ${value}
+                                            <strong>${key}:</strong> ${value || 'Sem valor'}
                                         `).join(', ')}
                                     </li>
                                 `).join('')}
@@ -57,7 +55,5 @@ function fetchTemplates() {
             feedback.className = 'alert alert-danger';
         });
 }
-
-document.getElementById('convenioSelect').addEventListener('change', fetchTemplates);
 
 document.getElementById('bankSelect').addEventListener('change', fetchTemplates);
