@@ -160,7 +160,13 @@
                         <input type="text" class="form-control" id="pix_type_key " name="pix_type_key " value="{{ proposal.pix_type_key  }}" >
                     </div>
                 </div>
-                
+
+                <div class="col-md-6 mb-3">
+                    <label for="obeserve" class="form-label">Observações</label> <!--Observações -->
+                    <textarea class="form-control" id="obeserve" name="obeserve" rows="4"placeholder="{{proposal.obeserve}}">
+                        {{proposal.obeserve}}
+                    </textarea>
+                </div>
 
                 <!-- Fotos Relacionadas do contratos -->
                 <h5 class="mt-4 mb-3">Imagens Registradas do Contrato:</h5>

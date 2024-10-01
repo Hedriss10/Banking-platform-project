@@ -114,6 +114,7 @@ def manage_edit_contract(id):
         proposal.value_salary = request.form.get('value_salary')
         proposal.table_id = request.form.get('tableSelectProposal')
         proposal.conv_id = request.form.get('convenioSelectProposal')
+        proposal.obeserve = request.form.get('obeserve')
 
         proposal.active = 'active' in request.form
         proposal.block = 'block' in request.form
