@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
-                    <td colspan="9" class="text-center">Nenhuma proposta encontrada</td>  <!-- Ajuste para colspan correto -->
+                    <td colspan="11" class="text-center">Nenhuma proposta encontrada</td>  <!-- Ajuste para colspan correto -->
                 `;
                 tbody.appendChild(emptyRow);
                 return;
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 row.innerHTML = `
                     <td>${p.creator_name}</td> <!-- Nome do digitador -->
-                    <td>${p.name_and_lastname}</td> <!-- Nome do contrato -->
+                    <td>${p.name}</td> <!-- Nome do contrato -->
                     <td>${p.created_at}</td> <!-- Data de criação -->
                     <td>${p.cpf}</td> <!-- CPF -->
                     <td>${p.operation_select}</td>
@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="badge bg-danger delete-proposal" data-id="${p.id}" style="cursor:pointer;">Excluir</span>
                     </td>
                     <td>${p.edit_at}</td> <!-- Editado por --> 
+                    <td>${p.completed_at}</td>
+                    <td>${p.completed_by}</td>
                 `;
                 tbody.appendChild(row);
             });

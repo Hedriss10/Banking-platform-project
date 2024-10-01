@@ -13,7 +13,7 @@
                     <h5 class="mb-3">Informações Pessoais</h5>
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Nome Completo:</strong> {{ proposal.name_and_lastname }}</p>
+                            <p><strong>Nome Completo:</strong> {{ proposal.name }}</p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Data de Criação:</strong> {{ proposal.created_at.strftime('%d/%m/%Y') }}</p>
@@ -72,6 +72,20 @@
                             <p><strong>Tipo de Operação:</strong> {{ proposal.operation_select }}</p>
                         </div>
                     </div>
+                    <div class="col-md-12 mb-3">
+                        <label for="table_id" class="form-label">Tabela Cadastrada:</label>
+                        <div class="form-control-plaintext">
+                            {% for banker in bankers %}
+                                {% for convenio in banker.financial_agreements %}
+                                    {% for table in convenio.tables_finance %}
+                                        {% if proposal.table_id == table.id %}
+                                            <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
     
                 <!-- Fotos Relacionadas do contrato -->
@@ -96,31 +110,34 @@
                     <h5 class="mb-3">Observações</h5>
                     <p>{{ proposal.obeserve }}</p>
                 </div>
-
-                <!-- Fotos Relacionadas do contratos -->
-                <h5 class="mt-4 mb-3">Imagens do Contrato:</h5>
-                <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Visualizar Imagem:</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <img id="expandedImage" src="" alt="Imagem Expandida" class="img-fluid">
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 
                 <div class="row">
                 <!-- Checkboxes de Status -->
+                <div class="col-md-6 mb-3">
+                    <label for="number_proposals" class="form-label">Número da proposta:</label>
+                    <input type="text" class="form-control" id="number_proposal" name="number_proposal" {% if proposal.number_proposal %} value="{{ proposal.number_proposal}}" {%endif %} value="Número da proposta">
+                </div>
+
                 <h5 class="mt-4 mb-3">Status da Proposta:</h5>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="active" name="active" {% if proposal.active %}checked{% endif %}>
                     <label class="form-check-label" for="active">Contrato Digitado</label>
                 </div>
 
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="block" name="block" {% if proposal.block %}checked{% endif %}>
+                    <label class="form-check-label" for="block">Contrato Bloqueado</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="progress_check" name="progress" {% if proposal.progress_check %}checked{% endif %}>
+                    <label class="form-check-label" for="progress_check">Contrato Em Andamento</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="is_status" name="is_status" {% if proposal.is_status %}checked{% endif %}>
+                    <label class="form-check-label" for="is_status">Documentação Pendente</label>
+                </div>
 
                 <!-- Botões de Ação -->
                 <div class="mt-4">

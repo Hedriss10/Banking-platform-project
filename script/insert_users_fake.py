@@ -1,16 +1,19 @@
 """
     Insert users in database with faker
 """
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 import random
-from src.models.bsmodels import User
 from src import db
 from faker import Faker
-
+from src import create_app
+from src.models.bsmodels import User
 
 fake = Faker()
 
-# Lista de tipos de usuários para variação
 user_types = [
     "Administrador",
     "Gerente Geral",
@@ -31,12 +34,10 @@ def insert_fake_users(count=100):
             user_identification=f"123455678",
             username=fake.first_name(),
             lastname=fake.last_name(),
-            type_user_func=random.choice(user_types),
+            type_user_func='Vendedor',
             typecontract="Funcionario",
             password="12345",
             email=fake.unique.email(),
-            extension=fake.word(),
-            extension_room=fake.random_int(min=100, max=999)
         )
         users.append(new_user)
 
@@ -45,6 +46,16 @@ def insert_fake_users(count=100):
     print(f"{count} usuários inseridos com sucesso!")
     
     
-    
+def insert_fake_unique_user():
+    # creat user unique
+    new_user = User(user_identification=40028922, username='hedris', lastname='pereira', email='test@gmail.com', type_user_func='Administrador', typecontract='Funcionario', password='40028922')
+    db.session.add(new_user)
+    db.session.commit()
+
+
 if __name__ == "__main__":
-    insert_fake_users(100)
+    app = create_app()
+
+    with app.app_context():
+        # insert_fake_users(100)
+        insert_fake_unique_user()

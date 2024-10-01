@@ -1,65 +1,162 @@
-{% extends "base.html"%}
-
+{% extends "base.html" %}
 
 {% block main %}
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Associar Vendedores às Salas</h2>
-    <form id="association-form">
-        <div class="row">
-            <div class="col-md-7 table-container">
-                <h4>Vendedores</h4>
-                <table id="vendor-table" class="table table-striped table-bordered">
-                    <thead>
-                    <tr>
-                        <th>Selecionar</th>
-                        <th>Nome</th>
-                        <th>Email</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for vendor in user %}
-                    <tr>
-                        <td>
-                            <input type="checkbox" class="form-check-input vendor-checkbox" value="{{ vendor.id }}">
-                        </td>
-                        <td>{{ vendor.username }}</td>
-                        <td>{{ vendor.email }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title text-center mb-4">Associar Vendedores às Salas</h5>
+
+            <!-- Tabs para alternar entre Vendedores, Salas e Criar Salas -->
+            <ul class="nav nav-tabs" id="associationTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="vendors-tab" data-bs-toggle="tab" data-bs-target="#vendors" type="button" role="tab" aria-controls="vendors" aria-selected="true">Vendedores</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button" role="tab" aria-controls="rooms" aria-selected="false">Salas</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="create-tab-link" data-bs-toggle="tab" data-bs-target="#create-tab" type="button" role="tab" aria-controls="create-tab" aria-selected="false">Criar Salas</button>
+                </li>
+            </ul>
+            <div class="tab-content pt-3" id="associationTabContent">
+
+                <!-- Conteúdo da aba Vendedores -->
+                <div class="tab-pane fade show active" id="vendors" role="tabpanel" aria-labelledby="vendors-tab">
+                    <h5 class="mb-3">Lista de Vendedores</h5>
+                    <table id="vendor-table" class="table table-hover table-bordered">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="text-center"><i class="bi bi-check2-square"></i> Selecionar</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Sala Associada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vendor in vendors %}
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input vendor-checkbox" value="{{ vendor.id }}">
+                                </td>
+                                <td>{{ vendor.name }}</td>
+                                <td>{{ vendor.email }}</td>
+                                <td>
+                                    {% if vendor.room %}
+                                    {{ vendor.room }}
+                                    {% else %}
+                                    <span class="text-danger">Nenhuma sala associada</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Conteúdo da aba Salas -->
+                <div class="tab-pane fade" id="rooms" role="tabpanel" aria-labelledby="rooms-tab">
+                    <h5 class="mb-3">Lista de Salas</h5>
+                    <table id="room-table" class="table table-hover table-bordered">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="text-center"><i class="bi bi-check-circle"></i> Selecionar</th>
+                                <th>Nome da Sala</th>
+                                <th>Status</th>
+                                <th>Vendedores Associados</th>
+                                <th>Ações</th>  <!-- Coluna para ações -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in rooms %}
+                            <tr>
+                                <td class="text-center">
+                                    <input type="radio" class="form-check-input room-checkbox" name="room" value="{{ room.id }}">
+                                </td>
+                                <td>{{ room.create_room }}</td>
+                                <td>
+                                    {% if room.status == 'Ativa' %}
+                                    <span class="badge bg-success">Disponível</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Ocupada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <ul>
+                                        {% for vendor in room.vendors %}
+                                        <li>{{ vendor.name }} ({{ vendor.email }})</li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>
+                                    <!-- Botão de exclusão da sala -->
+                                    <button class="btn btn-danger btn-sm" onclick="deleteRoom({{ room.id }})">
+                                        <i class="bi bi-trash"></i> Excluir
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Conteúdo da aba Criar Salas -->
+                <div class="tab-pane fade" id="create-tab" role="tabpanel" aria-labelledby="create-tab-link">
+                    <form id="createRoomForm">
+                        <div class="mb-3">
+                            <label for="create_room" class="form-label">Nome da Sala</label>
+                            <input type="text" class="form-control" id="create_room" name="create_room" placeholder="Digite o nome da sala" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status da Sala</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Ativa">Ativa</option>
+                                <option value="Inativa">Inativa</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="createRoom()">Criar Sala</button>
+                    </form>
+                </div>
             </div>
-            <hr>
-            <div class="col-md-7 table-container">
-                <h4>Salas</h4>
-                <table id="room-table" class="table table-striped table-bordered">
-                    <thead>
-                    <tr>
-                        <th>Selecionar</th>
-                        <th>Nome da Sala</th>
-                        <th>Status</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for room in room %}
-                    <tr>
-                        <td>
-                            <input type="radio" class="form-check-input room-checkbox" name="room" value="{{ room.id }}">
-                        </td>
-                        <td>{{ room.create_room }}</td>
-                        <td>{{ room.status }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+
+            <!-- Botão de Submissão -->
+            <div class="mt-4 text-center">
+                <form id="association-form">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-link-45deg"></i> Associar Selecionados
+                    </button>
+                </form>
             </div>
         </div>
-        <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-primary">Associar Selecionados</button>
-        </div>
-    </form>
+    </div>
 </div>
 
+<!-- Importação de CSS e JS -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/rooms/list_rooms.css') }}">
 <script src="{{ url_for('static', filename='js/room/list_rooms.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rooms/manage_create_rooms.css') }}">
+<script src="{{ url_for('static', filename='js/room/room.js') }}"></script>
+
+<!-- Script para apagar sala -->
+<script>
+function deleteRoom(roomId) {
+    if (confirm('Tem certeza de que deseja excluir esta sala?')) {
+        fetch(`/delete_room/${roomId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                location.reload();  // Recarrega a página após a exclusão
+            } else {
+                alert('Erro ao excluir a sala: ' + data.error);
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    }
+}
+</script>
 {% endblock %}

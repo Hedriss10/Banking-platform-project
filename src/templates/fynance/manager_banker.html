@@ -3,10 +3,12 @@
 
 {% block main %}
 <!-- CRUD fynance -->
+
+
 <section>
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Gerenciamento bancário</h5>
+        <h5 class="card-title">Gerenciamento de Tabelas Comissões</h5>
 
         <p class="details">Gerenciamento bancário, aonde você tem controle das tabelas de comissão.
             <strong>Atenção</strong>, seguir as regra de negócio para evitar erros internos</p>
@@ -292,15 +294,18 @@
                                 <li class="list-group-item convenio-item" onclick="toggleConveniosBankersTables('{{ convenio.id }}', event)">
                                     <strong>{{ convenio.name }}</strong>
                                     <i class="fal fa-trash" data-id="{{ convenio.id }}" onclick="deleteConvenio(event, this)"></i>
-                                    <i class="bi bi-archive-fill" onclick="deactivateSelected()"></i>
+                                    <i class="bi bi-folder-symlink-fill" onclick="deactivateSelected()"></i>
                                 </li>
-                                <ul id="tables-{{ convenio.id }}" class="list-group nested-list">
+                                <br>
+                                <!-- Listagem das tabelas associadas ao convênio -->
+                                <ul id="tables-{{ convenio.id }}" class="list-group nested-list table-list" data-controls-id="pagination-controls-{{ convenio.id }}" style="display:none;">
                                     <li class="list-group-item">
                                         <input type="checkbox" id="select-all-{{ convenio.id }}" onclick="toggleSelectAll('{{ convenio.id }}', event)">
                                         <label for="select-all-{{ convenio.id }}">Selecionar Todos</label>
                                     </li>
                                     {% for table in convenio.tables_finance %}
-                                        <li class="list-group-item d-flex justify-content-between align-items-center" style="display:none;">
+                                        <!-- O data-table-code recebe {{ table.table_code }} -->
+                                        <li class="list-group-item d-flex justify-content-between align-items-center table-item" data-table-code="{{ table.table_code }}">
                                             <div>
                                                 <input type="checkbox" class="table-checkbox" data-id="{{ table.id }}" data-convenio-id="{{ convenio.id }}">
                                                 <span class="details">
@@ -317,23 +322,15 @@
                         </ul>
                     </li>
                 {% endfor %}
-            </ul>            
+            </ul>                                                                                     
         </div>
     </div>
 </div>
 </section>
 
 
-
 <script src="{{ url_for('static', filename='js/fynance/CrudFynanceGerement.js') }}"></script>
 <!--Crud de gerenciamento-->
-<script src="{{ url_for('static', filename='js/fynance/ToggleTables.js') }}"></script>
-<!--togles tables comission in conv and banker-->
-<script src="{{ url_for('static', filename='js/fynance/toggleReportTablesFynance.js') }}"></script>
-<script src="{{ url_for('static', filename='js/fynance/ToggleTablesBanker.js') }}"></script>
-<!--Toggle for controllers conv head-->
-<script src="{{ url_for('static', filename='js/fynance/toggleReportTableFynanceOne.js') }}"></script>
-<!--Toggle fynance todo one register tables and conv-->
+<script src="{{ url_for('static', filename='js/fynance/gerementPages.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fynance/ToggleTableOne.js') }}"></script>
-<script src="{{ url_for('static', filename='js/fynance/ToggleAllTablesFynance.js') }}"></script>
 {% endblock %}

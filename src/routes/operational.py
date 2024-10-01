@@ -43,7 +43,7 @@ def manage_state_contract():
 
     if search_term:
         query = query.filter(
-            Proposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtra pelo nome do contrato
+            Proposal.name.ilike(f'%{search_term}%') |  # Filtra pelo nome do contrato
             Proposal.created_at.ilike(f'%{search_term}%') |  # Filtra pela data de criação
             Proposal.cpf.ilike(f'%{search_term}%')  # Filtra pelo CPF do contrato
         )
@@ -53,7 +53,7 @@ def manage_state_contract():
     proposal_data = [{
         'id': p.id,
         'creator_name': p.creator.username if p.creator else 'Desconhecido',
-        'name_and_lastname': p.name_and_lastname,
+        'name': p.name,
         'created_at': p.created_at,
         'operation_select': p.operation_select,
         'cpf': p.cpf,
@@ -62,7 +62,8 @@ def manage_state_contract():
         'is_status': p.is_status,
         'progress_check': p.progress_check,
         'edit_at': p.edit_at if p.edit_at else "Não foi editado ainda",
-        'completed_at': p.completed_at if p.completed_at else "Não foi digitado ainda"
+        'completed_at': p.completed_at if p.completed_at else "Não foi digitado",
+        'completed_by': p.completed_by if p.completed_by else "Digitador por"
     } for p in tables_paginated.items]
 
     
@@ -99,10 +100,9 @@ def manage_edit_contract(id):
     image_paths = upload_manager.list_images()
 
     if request.method == 'POST':
-        proposal.name_and_lastname = request.form.get('name_and_lastname')
+        proposal.name = request.form.get('name')
         proposal.email = request.form.get('email')
-        proposal.dd_year = datetime.strptime(request.form.get('dd_year'), "%Y-%m-%d").date()
-        proposal.cpf = request.form.get('cpf')
+        proposal.date_year = datetime.strptime(request.form.get('date_year'), "%Y-%m-%d").date()
         proposal.sex = request.form.get('sex')
         proposal.phone = request.form.get('phone')
         proposal.address = request.form.get('address')
@@ -214,6 +214,7 @@ def manage_details_contract(id):
         Editar proposta
     """
     proposal = Proposal.query.get_or_404(id)
+    bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
 
     image_fields = ['rg_cnh_completo', 'contracheque', 'rg_frente', 'rg_verso', 'extrato_consignacoes', 'comprovante_residencia', 'selfie', 'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
 
@@ -222,9 +223,11 @@ def manage_details_contract(id):
 
     image_paths = UploadProposal(proposal_id=proposal.id, creator_id=proposal.creator_id, image_fields=image_fields, created_at=proposal.created_at).list_images()
 
- 
+
     if request.method == 'POST':
         proposal.active = 'active' in request.form
+        proposal.number_proposal = request.form.get("number_proposal")
+                
         identifier = f"number_contrato_{proposal.id}_digitador_{proposal.creator_id}"
 
         base_path = os.path.join('proposta', proposal.created_at.strftime('%Y'), proposal.created_at.strftime('%m'), proposal.created_at.strftime('%d'), identifier)
@@ -240,12 +243,13 @@ def manage_details_contract(id):
         proposal.is_status = 0
         proposal.progress_check = 0
         proposal.completed_at = datetime.now()
+        proposal.completed_by = f"""Digitado por: {current_user.username}"""
         db.session.commit()
 
         flash('Proposta atualizada com sucesso!', 'success')
         return redirect(url_for('operational.manage_state_contract'))
         
-    return render_template("operational/details_contract.html", proposal=proposal, image_paths=image_paths)
+    return render_template("operational/details_contract.html", proposal=proposal, bankers=bankers, image_paths=image_paths)
 
 
 @bp_operational.route('/operational/remove-image/<int:proposal_id>', methods=['POST'])
@@ -255,11 +259,9 @@ def remove_image(proposal_id):
     field = data.get('field')
     path = data.get('path')
 
-    # Verifica se a imagem existe e remove do diretório
     full_path = os.path.join(os.getcwd(), 'proposta', path)
     if os.path.exists(full_path):
         os.remove(full_path)
-        # Retorne uma resposta de sucesso
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'message': 'Imagem não encontrada.'}), 404

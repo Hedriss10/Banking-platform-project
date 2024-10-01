@@ -18,8 +18,8 @@
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>Nome do Digitador</th>
-                    <th>Nome do Cliente</th>
+                    <th>Vendedor</th>
+                    <th>Cliente</th>
                     <th>Data de Criação</th>
                     <th>CPF do Cliente</th>
                     <th>Tipo de Operação</th>
@@ -27,13 +27,15 @@
                     <th>Editar</th>
                     <th>Excluir</th>
                     <th>Editado às</th>
+                    <th>Digitado às</th>
+                    <th>Digitador por</th>
                 </tr>
             </thead>
             <tbody>
                 {% for p in proposal %}
                 <tr>
                     <td scope="row">{{ p.creator_name }}</td>
-                    <td scope="row">{{ p.name_and_lastname }}</td>
+                    <td scope="row">{{ p.name }}</td>
                     <td scope="row">{{ p.created_at }}</td>
                     <td scope="row">{{ p.cpf }}</td>
                     <td scope="row">{{p.operation_select}}</td>
@@ -58,7 +60,9 @@
                     <td>
                         <span class="badge bg-danger delete-proposal" data-id="{{ p.id }}" style="cursor:pointer;">Excluir</span>
                     </td>
-                    <td scope="row">{{ p.edit_at }}</td>
+                    <td scope="row"> {{ p.edit_at }} </td>
+                    <td scope="row"> {{p.completed_at}} </td>
+                    <td scope="row"> {{p.completed_by}} </td       
                 </tr>
                 {% endfor %}
             </tbody>

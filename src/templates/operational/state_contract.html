@@ -54,13 +54,14 @@
                     <th>Digitar Contrato</th>
                     <th>Editado às</th> <!-- Mudando para indicar que mostra o horário da última edição -->
                     <th>Digitado às</th>
+                    <th>Digitado por</th>
                 </tr>
             </thead>
             <tbody>
                 {% for p in proposal %}
                 <tr>
                     <td scope="row">{{ p.creator_name }}</td>
-                    <td scope="row">{{ p.name_and_lastname }}</td>
+                    <td scope="row">{{ p.name }}</td>
                     <td scope="row">{{ p.created_at }}</td>
                     <td scope="row">{{ p.cpf }}</td>
                     <td scope="row">{{ p.operation_select}}</td>
@@ -88,6 +89,7 @@
                     <td scope="row">{{ p.edit_at }}</td>
                     <td><span class="badge bg-primary"><a href="{{ url_for('operational.manage_details_contract', id=p.id) }}">Digitar o Contrato</a></span></td>
                     <td scope="row">{{p.completed_at}}</td>
+                    <td scope="row">{{p.completed_by}}</td>
                 </tr>
                 {% endfor %}
             </tbody>

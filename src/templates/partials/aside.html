@@ -22,35 +22,15 @@
             </a>
           </li>
           <li>
-            <a href="{{url_for('fynance.controllers_report_banker_comission')}}">
-              <i class="bi bi-circle"></i><span>Template de Relatório De Comissão Pagas</span>
-            </a>
-          </li>
-          <li>
             <a href="{{url_for('fynance.manage_comission')}}">
               <i class="bi bi-circle"></i><span>Rank de Comissão</span>
             </a>
           </li>
           <li>
-            <a href="{{url_for('fynance.comission_calc')}}">
-              <i class="bi bi-circle"></i><span>Controle de Comissão</span>
-            </a>
-          </li>
-          <!-- <li>
-            <a href="{{url_for('fynance.controllers_box')}}">
-              <i class="bi bi-circle"></i><span>Controle de Caixa</span>
-            </a>
-          </li> --> 
-          <li>
             <a href="{{url_for('fynance.manage_payment')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Pagamento</span>
             </a>
           </li>
-          <!-- <li>
-            <a href="{{url_for('fynance.manage_analytics')}}">
-              <i class="bi bi-circle"></i><span>Analise de risco</span>
-            </a>
-          </li> -->
           <li>
             <a href="{{url_for('fynance.manage_report')}}">
               <i class="bi bi-circle"></i><span>Gerenciamento de Relatório</span>
@@ -111,35 +91,12 @@
         </a>
         <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="{{url_for('rooms.room')}}">
-              <i class="bi bi-circle"></i><span>Criar Sala</span>
-            </a>
-          </li>
-          <li>
             <a href="{{url_for('rooms.list_rooms')}}">
               <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
             </a>
           </li>
         </ul>
       </li><!-- Gerenciamento de vendas  -->
-
-      <!-- <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('campaign.manage_campaign')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('campaign.add_campaing')}}">
-              <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
-            </a>
-          </li>
-        </ul>
-      </li> -->  <!-- Campanhas  -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-users" data-bs-toggle="collapse" href="#">
@@ -201,24 +158,6 @@
           </li>
         </ul>
       </li><!-- Gerenciamento de vendas -->
-
-      <!-- <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('campaign.manage_campaign')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('campaign.add_campaing')}}">
-              <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
-            </a>
-          </li>
-        </ul>
-      </li> -->  <!-- Campanhas  -->
       
       {% elif 'Gerente de Vendas' in session['type_user_func']%}
       
@@ -356,24 +295,6 @@
         </ul>
       </li><!-- Finacneiro -->
 
-      <!-- <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('campaign.manage_campaign')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('campaign.add_campaing')}}">
-              <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
-            </a>
-          </li>
-        </ul>
-      </li> -->  <!-- Campanhas  -->
-
       {% elif 'Operacional' in session['type_user_func']%} <!-- Operacional  -->
 
       <li class="nav-item">
@@ -401,23 +322,6 @@
 
       {% elif 'Suporte de Campanha' in session['type_user_func']%} <!-- Suporte de Campanha  -->
 
-      <!-- <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-mailbox"></i><span>Campanhas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('campaign.manage_campaign')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Campanhas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('campaign.add_campaing')}}">
-              <i class="bi bi-circle"></i><span>Cadastrar Campanha</span>
-            </a>
-          </li>
-        </ul>
-      </li> -->  <!-- Campanhas  -->
       {% endif %}
 
     </ul>

@@ -72,6 +72,7 @@ def creat_proposal():
     public_key_str = get_public_key_str()
     return render_template("proposal/creat_proposal.html", bankers=bankers, public_key=public_key_str)
 
+
 @bp_proposal.route("/search-tables", methods=['GET'])
 @login_required
 def search_tables():
@@ -83,6 +84,7 @@ def search_tables():
                     'code': table.table_code, 'name': table.name, 'rate': table.rate} for table in tables]
         return jsonify(results)
     return jsonify([])
+
 
 @bp_proposal.route("/proposal-status")
 @login_required
@@ -106,7 +108,7 @@ def state_proposal():
 
     if search_term:
         query = query.filter(
-            Proposal.name_and_lastname.ilike(f'%{search_term}%') |  # Filtrar pelo o nome da campanha
+            Proposal.name.ilike(f'%{search_term}%') |  # Filtrar pelo o nome da campanha
             Proposal.created_at.ilike(f'%{search_term}%') |# Filtro pelo código da tabela
             Proposal.cpf.ilike(f'%{search_term}') #  filtrando pelo o cpf do contrato
         )
@@ -117,7 +119,7 @@ def state_proposal():
     proposal_data = [{
         'id': p.id,
         'creator_name': p.creator.username if p.creator else 'Desconhecido',
-        'name_and_lastname': p.name_and_lastname,
+        'name': p.name,
         'created_at': p.created_at,
         'operation_select': p.operation_select,
         'cpf': p.cpf,
@@ -125,7 +127,9 @@ def state_proposal():
         'block': p.block,
         'is_status': p.is_status,
         'progress_check': p.progress_check,
-        'edit_at': p.edit_at if p.edit_at else "Esperando Digitação"
+        'edit_at': p.edit_at if p.edit_at else "Ninguem Editou",
+        'completed_at': p.completed_at if p.completed_at else "Ninguem Digitou",
+        'completed_by': p.completed_by if p.completed_by else "Digitado por"
     } for p in tables_paginated.items]
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -170,11 +174,11 @@ def add_proposal():
         new_proposal = Proposal(
         creator_id=current_user.id,
         banker_id=form_data.get('bankSelect', None),
+        created_at=datetime.now(),
         conv_id=form_data.get('convenioSelectProposal', None),
         table_id=form_data.get('tableSelectProposal', None),
         operation_select=form_data.get('operationselect', None),
         matricula=form_data.get('matricula', None),
-        text_password_server=form_data.get('TextPasswordServer', None),
         passowrd_chek=form_data.get('senhacontracheque', None),
         name=form_data.get('nameRegisterProposal', None),
         lastname=form_data.get('nameRegisterProposal', None),
@@ -268,10 +272,9 @@ def edit_proposal(id):
     image_paths = upload_manager.list_images()
 
     if request.method == 'POST':
-        proposal.name_and_lastname = request.form.get('name_and_lastname')
+        proposal.name = request.form.get('name')
         proposal.email = request.form.get('email')
-        proposal.dd_year = datetime.strptime(request.form.get('dd_year'), "%Y-%m-%d").date()
-        proposal.cpf = request.form.get('cpf')
+        proposal.date_year = datetime.strptime(request.form.get('date_year'), "%Y-%m-%d").date()
         proposal.sex = request.form.get('sex')
         proposal.phone = request.form.get('phone')
         proposal.address = request.form.get('address')

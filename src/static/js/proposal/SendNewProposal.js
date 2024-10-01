@@ -1,8 +1,32 @@
+function cpf(cpf){
+    cpf = cpf.replace(/\D/g, '');
+    if(cpf.toString().length != 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    var result = true;
+    [9,10].forEach(function(j){
+        var soma = 0, r;
+        cpf.split(/(?=)/).splice(0,j).forEach(function(e, i){
+            soma += parseInt(e) * ((j+2)-(i+1));
+        });
+        r = soma % 11;
+        r = (r <2)?0:11-r;
+        if(r != cpf.substring(j, j+1)) result = false;
+    });
+    return result;
+}
+
+
 document.addEventListener('DOMContentLoaded', function () {
     var proposalForm = document.getElementById('proposalForm');
 
     proposalForm.addEventListener('submit', function (event) {
         event.preventDefault();
+
+        var cpfField = document.querySelector('input[name="CPF"]').value;
+
+        if (!cpf(cpfField)) {
+            alert('CPF inválido. Por favor, insira um CPF válido.');
+            return;
+        }
 
         var formData = new FormData(proposalForm);
 
@@ -20,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
 
         var fileData = new FormData();
-
+        
         fileFields.forEach(function(fieldName) {
             var files = formData.getAll(fieldName);
             if (files.length > 0) {
@@ -30,6 +54,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.delete(fieldName);
             }
         });
+
+        // verificar o cpf no fileData se estiver fazer a verificação com a function cpf
+        
 
         var formObject = {};
         formData.forEach(function(value, key){

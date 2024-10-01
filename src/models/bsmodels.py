@@ -14,7 +14,6 @@ class Banker(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     financial_agreements = db.relationship('FinancialAgreement', back_populates='banker')
-    comissions = db.relationship('CalcComissionRate', back_populates='banker')
     
     def __init__(self, name):
         self.name = name
@@ -31,9 +30,9 @@ class FinancialAgreement(db.Model, UserMixin):
     banker = db.relationship('Banker', back_populates='financial_agreements')
     tables_finance = db.relationship('TablesFinance', back_populates='financial_agreement', lazy='subquery')
     
-    def __init__(self, name):
+    def __init__(self, name, banker_id):
         self.name = name
-
+        self.banker_id = banker_id
 
 class TablesFinance(db.Model, UserMixin):
     """
@@ -49,9 +48,8 @@ class TablesFinance(db.Model, UserMixin):
     rate = db.Column(db.String(100), nullable=False)
     is_status = db.Column(db.Boolean, nullable=True, default=None)
     banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id'), nullable=False)
-    conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id', ondelete='CASCADE'))
+    conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id'))
     financial_agreement = db.relationship('FinancialAgreement', back_populates='tables_finance')
-    comissions = db.relationship('CalcComissionRate', back_populates='tables_finance')
     rank_flats = db.relationship('RankFlat', back_populates='tables_finance')
     
     def __init__(self, name, type_table, table_code, start_term, end_term, rate, is_status, banker_id, conv_id):
@@ -68,18 +66,6 @@ class TablesFinance(db.Model, UserMixin):
     def __repr__(self) -> str:
         return f"Tables register successful {self.name}"
 
-class ReportBankerTransactionData(db.Model, UserMixin):
-    """
-        Salvando o template de relatorio de comissão pagas do banco
-    """
-    __tablename__ = 'report_banker_transaction_data'
-    id = db.Column(db.Integer, primary_key=True)
-    banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id'))
-    data = db.Column(JSON, nullable=False)
-    
-    def __init__(self, banker_id, data):
-        self.banker_id = banker_id
-        self.data = data
 
 class RankFlat(db.Model, UserMixin):
     """
@@ -90,28 +76,6 @@ class RankFlat(db.Model, UserMixin):
     tables_finance_id = db.Column(db.Integer, db.ForeignKey('tables_finance.id'))
     tables_finance = db.relationship('TablesFinance', back_populates='rank_flats')
 
-class CalcComissionRate(db.Model):
-    __tablename__ = 'calc_comission'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id'), nullable=False)
-    table_finance_id = db.Column(db.Integer, db.ForeignKey('tables_finance.id'), nullable=False)
-    proposal_id = db.Column(db.Integer, db.ForeignKey('proposal.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'), nullable=False)
-
-    value_comission = db.Column(db.Float, nullable=False)
-    next_comission = db.Column(db.Float, nullable=False)
-    percentage_applied = db.Column(db.Float, nullable=False)
-    comission_apply = db.Column(db.Boolean, default=False)
-    day_payment = db.Column(db.DateTime)
-
-    # Relationships
-    banker = db.relationship('Banker', back_populates='comissions')
-    tables_finance = db.relationship('TablesFinance', back_populates='comissions')
-    proposal = db.relationship('Proposal', back_populates='comissions')
-    user = db.relationship('User', back_populates='comissions')
-    room = db.relationship('Roomns', back_populates='comissions')
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -130,7 +94,6 @@ class User(db.Model, UserMixin):
     created_on = db.Column(db.DateTime, nullable=False, default=func.now())
     
     # Relationships
-    comissions = db.relationship('CalcComissionRate', back_populates='user')
     created_rooms = db.relationship('Roomns', back_populates='creator')
     created_proposals = db.relationship('Proposal', back_populates='creator')
     # 'rooms' relationship is available via backref from Roomns.users
@@ -151,6 +114,7 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"<ID {self.user_identification}>"
 
+
 class Proposal(db.Model, UserMixin):
     """
         User Proposal
@@ -158,7 +122,7 @@ class Proposal(db.Model, UserMixin):
     __tablename__ = 'proposal'
     id = db.Column(db.Integer, primary_key=True)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_creator_id'))
-    created_at = db.Column(db.DateTime(timezone=True), default=func.now())
+    created_at = db.Column(db.DateTime(timezone=True))
     banker_id = db.Column(db.Integer, db.ForeignKey('bankers.id', name='fk_banker_id'))
     conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id', name='fk_conv_id'))
     table_id = db.Column(db.Integer, db.ForeignKey('tables_finance.id', name='fk_table_id'))
@@ -217,18 +181,20 @@ class Proposal(db.Model, UserMixin):
     edit_at = db.Column(db.DateTime(timezone=True), nullable=True)
     completed_at = db.Column(db.DateTime(timezone=True), nullable=True)
     number_proposal = db.Column(db.String(30), nullable=True, default=None)
+    completed_by = db.Column(db.String(10), nullable=True, default=None)
 
     # Relationships
     creator = db.relationship('User', back_populates='created_proposals', foreign_keys=[creator_id])
     banker = db.relationship('Banker', foreign_keys=[banker_id])
     financial_agreement = db.relationship('FinancialAgreement', foreign_keys=[conv_id])
-    comissions = db.relationship('CalcComissionRate', back_populates='proposal')
+
 
 room_user_association = db.Table(
     'room_user_association',
     db.Column('room_id', db.Integer, db.ForeignKey('rooms.id'), primary_key=True),
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
+
 
 class Roomns(db.Model):
     __tablename__ = 'rooms'
@@ -238,4 +204,17 @@ class Roomns(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User', back_populates='created_rooms')
     users = db.relationship('User', secondary=room_user_association, backref='rooms')
-    comissions = db.relationship('CalcComissionRate', back_populates='room')
+
+
+class ReportData(db.Model):
+    __tablename__ = 'report_data'
+
+    id = db.Column(db.Integer, primary_key=True)
+    report_name = db.Column(db.String(100), nullable=False)  # Nome do relatório
+    date_import = db.Column(db.DateTime) # data da importação
+    cpf = db.Column(db.String(14), nullable=False)  # CPF do registro
+    number_proposal = db.Column(db.String(30), nullable=False)  # Número da proposta
+    table_code = db.Column(db.String(30), nullable=False)  # Código da tabela
+    value_operation = db.Column(db.Float, nullable=False)  # Valor da operação
+    is_valid = db.Column(db.Boolean, nullable=False, default=False)  # Se o registro foi validado
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Relacionado ao usuário que importou

@@ -1,186 +1,55 @@
 {% extends "base.html" %}
-
 {% block main %}
-<div class="container mt-4">
-    <h1 class="card-title">Gerenciar Relatórios</h2>
-
-    <form method="get" action="{{ url_for('fynance.manage_report') }}">
+<div class="container mt-5">
+    <h2 class="text-center mb-4"><i class="bi bi-file-earmark-spreadsheet"></i>Relatório de Comissões</h2>
+    
+    <!-- Formulário para upload -->
+    <form id="uploadForm" enctype="multipart/form-data" class="card p-4 shadow-sm mb-4">
         <div class="mb-3">
-            <label for="bankSelect" class="form-label">Selecione o Banco:</label>
-            <select class="form-select" id="bankSelect" name="banker_id" required>
+            <label for="report_name" class="form-label"><i class="bi bi-file-earmark-text"></i> Nome do Relatório:</label>
+            <input type="text" id="report_name" name="report_name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="bankSelect" class="form-label"><i class="bi bi-bank"></i> Selecione o Banco:</label>
+            <select class="form-select" id="bankSelect" required>
                 <option value="">Escolha um banco...</option>
                 {% for bank in banks %}
-                    <option value="{{ bank.id }}" {% if bank.id == selected_banker_id %}selected{% endif %}>{{ bank.name }}</option>
+                    <option value="{{ bank.id }}">{{ bank.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Checar</button>
-    </form>
-
-    {% if message %}
-        <div class="alert alert-warning mt-4">
-            {{ message }}
-        </div>
-    {% endif %}
-
-    {% if report_status %}
-        <div class="list-group mt-4">
-            {% for report in report_status %}
-                <div class="list-group-item">
-                    <h5>Relatório {{ report.report_id }}</h5>
-                    <p><strong>Status:</strong> {{ report.status }}</p>
-                    <p><strong>Colunas Válidas:</strong> {{ report.valid_columns_count }}</p>
-                    <p><strong>Colunas Inválidas:</strong> {{ report.invalid_columns_count }}</p>
-
-                    <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#details-{{ report.report_id }}">
-                        Ver Detalhes
-                    </button>
-
-                    <div class="collapse" id="details-{{ report.report_id }}">
-                        {% if report.status == 'OK' %}
-                            <h6 class="mt-3">Relatório verificado com sucesso!</h6>
-                            <p class="text-success">Total de linhas verificadas: {{ report.valid_columns_count }}</p>
-                            
-                            <ul class="list-group mb-3">
-                                {% for col in report.valid_columns %}
-                                    <li class="list-group-item">
-                                        CPF: {{ col.CPF }} | Nome Ponto de Venda: {{ col['Nome Ponto de Venda'] }} | Plano: {{ col.Plano }} | Prazo: {{ col.Prazo }} | Valor Comissão: {{ col['Valor Comissão'] }} | % Comissão: {{ col['% Comissão'] }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-
-                            <h6 class="mt-3">Propostas Relacionadas:</h6>
-                            <ul class="list-group">
-                                {% for proposal in report.valid_proposals %}
-                                    <li class="list-group-item">
-                                        Nome: {{ proposal.name_and_lastname }} | Email: {{ proposal.email }} | CPF: {{ proposal.cpf }} | Operação: {{ proposal.operation_select }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#details-{{ report.report_id }}">
-                                Ver Detalhes
-                            </button>
-                            
-                            <div class="collapse" id="details-{{ report.report_id }}">
-                                {% if report.status == 'OK' %}
-                                    <!-- Conteúdo dos detalhes -->
-                                    <button class="btn btn-primary mt-2" onclick="window.location.href='{{ url_for('fynance.download_report', report_id=report.report_id) }}'">
-                                        Gerar Relatório CSV
-                                    </button>
-                                {% else %}
-                                    <p class="text-danger">Algumas colunas não foram validadas!</p>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <p class="text-danger">Algumas colunas não foram validadas!</p>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
-<div class="container mt-4">
-    <h1 class="card-title">Gerenciar Relatórios</h1>
-
-    <form method="get" action="{{ url_for('fynance.manage_report') }}">
         <div class="mb-3">
-            <label for="bankSelect" class="form-label">Selecione o Banco:</label>
-            <select class="form-select" id="bankSelect" name="banker_id" required>
-                <option value="">Escolha um banco...</option>
-                {% for bank in banks %}
-                    <option value="{{ bank.id }}" {% if bank.id == selected_banker_id %}selected{% endif %}>{{ bank.name }}</option>
-                {% endfor %}
-            </select>
+            <label for="upload" class="form-label"><i class="bi bi-upload"></i> Selecione o Arquivo (.csv ou .xlsx):</label>
+            <input type="file" id="upload" name="file" class="form-control" accept=".csv, .xlsx" required>
         </div>
-        <button type="submit" class="btn btn-primary">Checar</button>
     </form>
 
-    {% if message %}
-        <div class="alert alert-warning mt-4">
-            {{ message }}
-        </div>
-    {% endif %}
+    <!-- Selecionar Sheet -->
+    <div class="mb-3" id="sheet-selector-container" style="display: none;">
+        <label for="sheet-selector" class="form-label"><i class="bi bi-file-earmark"></i> Selecione a Planilha:</label>
+        <select id="sheet-selector" class="form-select"></select>
+    </div>
 
-    {% if report_status %}
-        <h3 class="mt-4">Relatórios Processados</h3>
-        <div class="list-group mt-4">
-            {% for report in report_status %}
-                <div class="list-group-item">
-                    <h5>Relatório {{ report.report_id }}</h5>
-                    <p><strong>Status:</strong> {{ report.status }}</p>
-                    <p><strong>Colunas Válidas:</strong> {{ report.valid_columns_count }}</p>
-                    <p><strong>Colunas Inválidas:</strong> {{ report.invalid_columns_count }}</p>
+    <!-- Tabela exibida -->
+    <div id="table-container" class="table-responsive mt-4"></div>
 
-                    <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#details-{{ report.report_id }}">
-                        Ver Detalhes
-                    </button>
+    <!-- Botão para processar o relatório -->
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-success" id="process" disabled>
+            <i class="bi bi-check-circle"></i> Processar Dados
+        </button>
+    </div>
 
-                    <div class="collapse" id="details-{{ report.report_id }}">
-                        {% if report.status == 'OK' %}
-                            <h6 class="mt-3">Relatório verificado com sucesso!</h6>
-                            <p class="text-success">Total de linhas verificadas: {{ report.valid_columns_count }}</p>
-                            
-                            <ul class="list-group mb-3">
-                                {% for col in report.valid_columns %}
-                                    <li class="list-group-item">
-                                        CPF: {{ col.CPF }} | Nome: {{ col['Nome Ponto de Venda'] }} | Valor Comissão: {{ col['Valor Comissão'] }} | % Comissão: {{ col['% Comissão'] }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-
-                            <h6 class="mt-3">Propostas Relacionadas:</h6>
-                            <ul class="list-group">
-                                {% for proposal in report.valid_proposals %}
-                                    <li class="list-group-item">
-                                        Nome: {{ proposal.name_and_lastname }} | CPF: {{ proposal.cpf }} | Operação: {{ proposal.operation_select }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-danger">Algumas colunas não foram validadas!</p>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% if unpaid_commissions %}
-        <h3 class="mt-4">Comissões Pagas aos Vendedores (Aguardando Recebimento do Banco)</h3>
-        <div class="list-group mt-4">
-            {% for commission in unpaid_commissions %}
-                <div class="list-group-item">
-                    <p><strong>Proposta ID:</strong> {{ commission.proposal_id }}</p>
-                    <p><strong>Vendedor:</strong> {{ commission.user.name }}</p>
-                    <p><strong>Valor Comissão:</strong> {{ commission.valor_comissao }}</p>
-                    <p><strong>Repasse Comissão:</strong> {{ commission.repasse_comissao }}</p>
-                    <p class="text-warning"><strong>Status:</strong> Comissão não recebida do banco</p>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% if payment_history %}
-        <h3 class="mt-4">Histórico de Pagamentos de Comissões</h3>
-        <div class="list-group mt-4">
-            {% for commission in payment_history %}
-                <div class="list-group-item">
-                    <p><strong>Proposta ID:</strong> {{ commission.proposal_id }}</p>
-                    <p><strong>Vendedor:</strong> {{ commission.user.name }}</p>
-                    <p><strong>Valor Comissão:</strong> {{ commission.valor_comissao }}</p>
-                    <p><strong>Repasse Comissão:</strong> {{ commission.repasse_comissao }}</p>
-                    <p><strong>Data de Pagamento:</strong> {{ commission.data_pagamento.strftime('%d/%m/%Y') if commission.data_pagamento else 'N/A' }}</p>
-                    <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#payment-details-{{ commission.id }}">
-                        Ver Detalhes
-                    </button>
-                    <div class="collapse" id="payment-details-{{ commission.id }}">
-                        <p><strong>Detalhes da Comissão:</strong></p>
-                        <!-- Detalhes adicionais podem ser adicionados aqui -->
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+    <!-- Botão para deletar relatório -->
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-danger" id="delete-report" disabled>
+            <i class="bi bi-trash"></i> Limpar Relatório
+        </button>
+    </div>
+    <br>
+    <!-- Notificação -->
+    <div id="notification" class="alert" style="display:none;" role="alert"></div>
 </div>
+
+<script src="{{ url_for('static', filename='js/fynance/processReport.js') }}"></script>
 {% endblock %}
