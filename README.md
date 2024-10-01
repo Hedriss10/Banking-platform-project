@@ -93,4 +93,5 @@ def create_app():
 
 
 
+<p><a href="docs/bs-system-develop.md">Docs Development</a></p>
 ---
