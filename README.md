@@ -91,4 +91,6 @@ def create_app():
 - **Comprehension**: Clear and well-defined structure makes it easier for new developers to understand the project.
 - **Reusability**: Modules can be reused in different parts of the application or in other projects.
 
+
+
 ---
