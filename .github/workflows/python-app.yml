@@ -27,11 +27,12 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
-      
+        pip install pytest pytest-cov coverage
+
     - name: Run tests with coverage
       run: |
         source venv/bin/activate
-        coverage run -m pytest tests/
+        pytest --cov=src --cov-report=term-missing
 
     - name: Report coverage
       run: |
