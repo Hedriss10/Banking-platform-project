@@ -54,3 +54,16 @@ flask run --host=0.0.0.0 --port=7500
 export FLASK_ENV=testing
 flask run
 ```
+
+
+### CI/CD
+
+
+ci/cd pylint
+
+```bash
+- name: Run linting with pylint
+    run: |
+    source venv/bin/activate
+    pylint src/
+```
