@@ -55,11 +55,11 @@
                                 <tr>
                                     <td>{{ payment.proposal_number }}</td>
                                     <td>{{ payment.cpf }}</td>
-                                    <td>{{ payment.seller_id }}</td>
+                                    <td>{{ payment.username }}</td>
                                     <td>R$ {{ payment.value_operation | round(2) }}</td>
                                     <td>{{ payment.commission_rate }}</td>
                                     <td>R$ {{ payment.valor_base | round(2) }}</td>
-                                    <td>{{ payment.repasse_comissao_percent }}</td>
+                                    <td>{{ payment.taxe_comission_rate }}</td>
                                     <td>R$ {{ payment.repasse_comissao | round(2) }}</td>
                                     <td>{{ payment.table_code }}</td>
                                 </tr>

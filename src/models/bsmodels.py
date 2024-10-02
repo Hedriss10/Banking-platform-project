@@ -239,7 +239,7 @@ class Wallet(db.Model):
     seller_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     value_operation = db.Column(db.Float, nullable=False)
     commission_rate = db.Column(db.Float, nullable=False)
-    taxe_comission_rate = db.Column(db.Float, nullable=False)
+    taxe_comission_rate = db.Column(db.Float, nullable=False, default=0.0)
     valor_base = db.Column(db.Float, nullable=False)
     repasse_comissao = db.Column(db.Float, nullable=False)
     date_created = db.Column(db.DateTime)

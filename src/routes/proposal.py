@@ -263,7 +263,7 @@ def edit_proposal(id):
     bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
     proposal = Proposal.query.get_or_404(id)
 
-    if proposal.active != 0 or proposal.block != 0 or proposal.is_status != 0 or proposal.progress_check != 0:
+    if proposal.pendente_digitacao == 0:
         flash('Você não pode editar esta proposta. Verifique se ela está bloqueada ou já foi finalizada.', 'danger')
         return redirect(url_for('proposal.state_proposal'))
     
@@ -277,7 +277,7 @@ def edit_proposal(id):
     image_paths = upload_manager.list_images()
 
     if request.method == 'POST':
-        proposal.name = request.form.get('name')
+        # proposal.name = request.form.get('name')
         proposal.email = request.form.get('email')
         proposal.date_year = datetime.strptime(request.form.get('date_year'), "%Y-%m-%d").date()
         proposal.sex = request.form.get('sex')

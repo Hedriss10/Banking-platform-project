@@ -134,8 +134,11 @@ def manage_payment():
                         seller_id=proposal.creator_id,
                         value_operation=value_operation,
                         commission_rate=taxa_comissao,
+                        taxe_comission_rate= repasse_comissao_percent_str,
                         valor_base=valor_base,
-                        repasse_comissao=repasse_comissao
+                        repasse_comissao=repasse_comissao,
+                        cpf=proposal.cpf,
+                        table_code = report.table_code
                     )
                     db.session.add(new_wallet_entry)
 
@@ -159,17 +162,17 @@ def manage_payment():
 
         db.session.commit()
 
-    # Consulta para trazer os pagamentos e o nome do vendedor associado
     payments = db.session.query(
         Wallet.proposal_number,
         Wallet.value_operation,
         Wallet.commission_rate,
+        Wallet.taxe_comission_rate,
         Wallet.valor_base,
         Wallet.repasse_comissao,
         Wallet.date_created,
         Wallet.cpf,
         Wallet.table_code,
-        User.username.label('username')  # Acessa o nome do vendedor
+        User.username.label('username')  # Obter o nome do vendedor
     ).join(User, Wallet.seller_id == User.id).all()
 
     # Renderizar template com a lista de pagamentos processados
