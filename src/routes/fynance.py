@@ -1,15 +1,14 @@
 import pandas as pd
 import io
-
-from flask import Blueprint , render_template, request, redirect, url_for, make_response
+from flask import Blueprint , render_template, request, redirect, url_for, make_response, flash
 from flask_login import login_required, current_user
 from flask import jsonify
 from src import db
 from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
-from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance,  Proposal, User, Roomns, ReportData
+from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance,  Proposal, User, Roomns, ReportData, Wallet
 from src.utils.fynance import calculate_commission
-
+from decimal import Decimal, InvalidOperation
 from datetime import datetime
 
 bp_fynance = Blueprint("fynance", __name__)
@@ -35,7 +34,6 @@ def gerement_finance():
                 table for table in agreement.tables_finance if table.is_status == 0
             ]
     return render_template("fynance/manager_banker.html", banks=bankers)
-
 
 @bp_fynance.route("/manage-comission")
 @login_required
@@ -80,7 +78,6 @@ def manage_comission():
     
     return render_template("fynance/controllers_comission.html", banks=banks_data, pagination=tables_paginated)
 
-
 @bp_fynance.route("/manage-report", methods=['GET'])
 @login_required
 def manage_report():
@@ -89,78 +86,152 @@ def manage_report():
     """
     return render_template("fynance/manage_report.html", banks=Banker.query.all())
 
-
-@bp_fynance.route("/manage-payment")
+@bp_fynance.route("/manage-payment", methods=['GET', 'POST'])
 @login_required
 def manage_payment():
     """
-        # todo função para gerar o pagamento
+    Função para gerar o pagamento e exibir o nome do vendedor.
     """
-    return render_template("fynance/manage_payment.html")
+    payments = []  # Inicializar payments para evitar erro no GET
 
+    if request.method == 'POST':
+        repasse_comissao_percent_str = request.form.get('repasse_comissao')
+        try:
+            repasse_comissao_percent = Decimal(repasse_comissao_percent_str.replace(',', '.'))
+        except (ValueError, InvalidOperation):
+            flash('Valor de repasse de comissão inválido.', 'danger')
+            return redirect(url_for('fynance.manage_payment'))
+
+        proposal_valid_reports = ReportData.query.filter_by(is_valid=True).all()
+
+        for report in proposal_valid_reports:
+            proposal = Proposal.query.filter_by(number_proposal=report.number_proposal).first()
+            if proposal and proposal.table_finance:
+                table_finance = proposal.table_finance
+
+                if table_finance.rate is not None:
+                    try:
+                        rate_str = table_finance.rate.replace(',', '.')
+                        taxa_comissao = Decimal(rate_str)
+                    except (ValueError, InvalidOperation):
+                        flash(f"Taxa de comissão inválida para a tabela {table_finance.table_code}.", 'warning')
+                        continue
+
+                    try:
+                        value_operation = proposal.value_operation
+                        if not isinstance(value_operation, Decimal):
+                            value_operation = Decimal(str(value_operation))
+
+                        valor_base = value_operation * (taxa_comissao / Decimal('100'))
+                        repasse_comissao = valor_base * (repasse_comissao_percent / Decimal('100'))
+                    except (ValueError, InvalidOperation) as e:
+                        flash(f"Erro no cálculo para a proposta {proposal.number_proposal}: {e}", 'warning')
+                        continue
+
+                    # Criar entrada na Wallet
+                    new_wallet_entry = Wallet(
+                        proposal_number=proposal.number_proposal,
+                        seller_id=proposal.creator_id,
+                        value_operation=value_operation,
+                        commission_rate=taxa_comissao,
+                        valor_base=valor_base,
+                        repasse_comissao=repasse_comissao
+                    )
+                    db.session.add(new_wallet_entry)
+
+                    payments.append({
+                        'proposal_number': proposal.number_proposal,
+                        'cpf': proposal.cpf,
+                        'seller_id': proposal.creator_id,
+                        'value_operation': value_operation,
+                        'commission_rate': taxa_comissao,
+                        'valor_base': valor_base,
+                        'repasse_comissao_percent': repasse_comissao_percent,
+                        'repasse_comissao': repasse_comissao,
+                        'table_code': table_finance.table_code
+                    })
+                else:
+                    flash(f"A taxa de comissão não está definida para a tabela {table_finance.table_code}.", 'warning')
+                    continue
+            else:
+                flash(f"Proposta {report.number_proposal} ou informação da tabela financeira está ausente.", 'warning')
+                continue
+
+        db.session.commit()
+
+    # Consulta para trazer os pagamentos e o nome do vendedor associado
+    payments = db.session.query(
+        Wallet.proposal_number,
+        Wallet.value_operation,
+        Wallet.commission_rate,
+        Wallet.valor_base,
+        Wallet.repasse_comissao,
+        Wallet.date_created,
+        Wallet.cpf,
+        Wallet.table_code,
+        User.username.label('username')  # Acessa o nome do vendedor
+    ).join(User, Wallet.seller_id == User.id).all()
+
+    # Renderizar template com a lista de pagamentos processados
+    return render_template("fynance/manage_payment.html", payments=payments)
 
 @bp_fynance.route("/process-data", methods=['POST'])
 @login_required
 def process_data():
-    """Api`s 
-        modular api system within the monolithic, process models report banker comission check
-    Returns:
-        _type_: _post_
-        _data_: _bank and name in database_
+    """
+        API que processa os dados do relatório de comissões, valida o NUMERO DA PROPOSTA e o CPF,
+        e retorna o resultado salvando os dados válidos no banco de dados.
     """
     data = request.get_json()
     columns = data.get('columns', [])
     bank_id = data.get('bankID')
-    name_report = data.get('name_report')
+    name_report = data.get('nameReport')
+
 
     if not columns:
         return jsonify({"error": "Dados insuficientes para verificação."}), 400
 
-    data_rows = columns[1:]  # Ignora a primeira linha
+    try:
+        proposals = Proposal.query.all()
+        existing_proposal_numbers = {proposal.number_proposal for proposal in proposals}
+        existing_proposal_cpfs = {str(proposal.cpf).replace('.', '').replace('-', '') for proposal in proposals}
 
-    valid_data = []
-    invalid_data = []
+        valid_data = []
+        invalid_data = []
 
-    proposals = Proposal.query.all()
-    tables = TablesFinance.query.filter_by(banker_id=bank_id).all()
+        for row in columns:
+            proposal_number = row['NUMERO DA PROPOSTA']
+            cpf_number = row['CPF'].replace("-", "").replace(".", "")
 
-    # Mapas para validação rápida
-    proposal_cpf_map = {str(proposal.cpf).replace('.', '').replace('-', ''): proposal for proposal in proposals}
-    proposal_number_map = {proposal.number_proposal.strip(): proposal for proposal in proposals}
-    table_code_map = {table.table_code.strip(): table for table in tables}
+            # Verificar se o número da proposta e o CPF existem nos conjuntos correspondentes
+            if proposal_number in existing_proposal_numbers and cpf_number in existing_proposal_cpfs:
+                new_report = ReportData(
+                    report_name=name_report,
+                    date_import=datetime.now(),
+                    cpf=cpf_number,
+                    number_proposal=proposal_number,
+                    table_code=row.get('CODIGO DA TABELA', None),
+                    is_valid=True,
+                    user_id = current_user.id
+                )
+                db.session.add(new_report)
+                valid_data.append(row)
+            else:
+                # Dados inválidos
+                invalid_data.append(row)
+                
+        db.session.commit()
 
-    # Verificação das colunas no arquivo
-    for row in data_rows:
-        cpf = row['CPF'].replace('.', '').replace('-', '')  # Normalizando o CPF
-        proposal_number = row['NUMERO_DA_PROPOSTA'].strip()
-        table_code = row['CODIGO_DA_TABELA'].strip()
-
-        # Verificação se o CPF, número da proposta e código da tabela correspondem
-        proposal_by_cpf = proposal_cpf_map.get(cpf)
-        proposal_by_number = proposal_number_map.get(proposal_number)
-        table_by_code = table_code_map.get(table_code)
-
-        # Verificar se todos os dados estão corretos
-        if proposal_by_cpf and proposal_by_number and proposal_by_cpf == proposal_by_number and table_by_code:
-            valid_data.append({ 'CPF': cpf, 'Numero da Proposta': proposal_number, 'Codigo da Tabela': table_code, 'Valor da Operacao': proposal_by_cpf.value_operation})
-            # validando o report data com os dados
-            new_report = ReportData(report_name=name_report, date_import=datetime.now(), cpf=valid_data.get('CPF'), number_proposal=valid_data.get('Numero da Proposta'), table_code=valid_data.get("Codigo da Tabela"), value_operation=valid_data.get("Valor da Operacao"), is_valid=True)
-            db.session.add(new_report)
-            db.session.commit()
-        
+        if invalid_data:
+            message = "Alguns dados são inválidos."
         else:
-            # Proposta inválida
-            invalid_data.append({ 'CPF': cpf, 'Numero da Proposta': proposal_number, 'Codigo da Tabela': table_code})
+            message = "Todos os dados foram verificados e salvos com sucesso!"
 
-    # Se todos os dados forem válidos
-    if len(invalid_data) == 0:
-        message = f"Todos os dados foram do relatorio de comissões pagas verificados com sucesso!"
-    else:
-        message = f"Dados inválidos encontrados."
+        return jsonify({ "message": message, "valid_data": valid_data, "invalid_data": invalid_data}), 200
 
-    return jsonify({ "valid_data": valid_data, "invalid_data": invalid_data, "message": message, "total_valid": len(valid_data), "total_invalid": len(invalid_data) }), 200
-
-
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Ocorreu um erro ao processar os dados."}), 500
 
 @bp_fynance.route("/register-convenio", methods=['POST'])
 @login_required
@@ -193,7 +264,6 @@ def add_register_conven():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-
 @bp_fynance.route("/register-bankers", methods=['POST'])
 @login_required
 def add_register_bankers():
@@ -220,7 +290,6 @@ def add_register_bankers():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
 
 @bp_fynance.route("/register-bankers/tables", methods=['POST'])
 @login_required
@@ -272,7 +341,6 @@ def register_tables_bankers():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-
 @bp_fynance.route("/register-bankers/tables/banker/conv/one", methods=['POST'])
 @login_required
 def register_tables_one():
@@ -306,7 +374,6 @@ def register_tables_one():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-
 @bp_fynance.route("/delete-bankers/<int:id>", methods=['POST'])
 @login_required
 def delete_bankers(id):
@@ -317,7 +384,6 @@ def delete_bankers(id):
     db.session.delete(banker)
     db.session.commit()
     return jsonify({'success': True, 'message': 'Banco deletado com sucesso!'}), 200
-    
 
 @bp_fynance.route("/delete-bankers/conv/<int:id>", methods=['POST'])
 @login_required
@@ -328,7 +394,6 @@ def delete_conv_in_banker(id):
     db.session.commit()
     return jsonify({'success': True, 'message': 'Convênio deletado com sucesso!'}), 200
 
-
 @bp_fynance.route("/delete-bankers/conv/tables/<int:id>", methods=['POST'])
 @login_required
 def delete_table_in_conv_in_banker(id):
@@ -337,7 +402,6 @@ def delete_table_in_conv_in_banker(id):
     table.is_status = True
     db.session.commit()
     return jsonify({"success": True, 'message': 'Tabela deletada com sucesso!'}), 200
-
 
 @bp_fynance.route("/clean-tables", methods=['POST'])
 @login_required

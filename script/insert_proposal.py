@@ -64,7 +64,7 @@ def insert_fake_proposals(count=100):
             margem=str(fake.random_int(min=10, max=40)) + "%",
             parcela=str(fake.random_int(min=1, max=60)),
             prazo=str(fake.random_int(min=12, max=48)) + " meses",
-            value_operation=str(fake.random_int(min=5000, max=100000)),
+            value_operation=int(fake.random_int(min=5000, max=100000)),
             obeserve="Observação exemplo",
             active=False,
             block=False,

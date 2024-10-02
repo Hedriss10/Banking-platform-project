@@ -34,6 +34,7 @@ class FinancialAgreement(db.Model, UserMixin):
         self.name = name
         self.banker_id = banker_id
 
+
 class TablesFinance(db.Model, UserMixin):
     """
         Cadastrando as tabelas bancarias no sistema
@@ -51,6 +52,8 @@ class TablesFinance(db.Model, UserMixin):
     conv_id = db.Column(db.Integer, db.ForeignKey('financial_agreements.id'))
     financial_agreement = db.relationship('FinancialAgreement', back_populates='tables_finance')
     rank_flats = db.relationship('RankFlat', back_populates='tables_finance')
+    commission = db.Column(db.Float, nullable=True, default=None)
+
     
     def __init__(self, name, type_table, table_code, start_term, end_term, rate, is_status, banker_id, conv_id):
         self.name = name
@@ -172,7 +175,7 @@ class Proposal(db.Model, UserMixin):
     margem = db.Column(db.String(30))
     parcela = db.Column(db.String(30))
     prazo = db.Column(db.String(30))
-    value_operation = db.Column(db.String(30))
+    value_operation = db.Column(db.Numeric(precision=10, scale=3), nullable=True)
     obeserve = db.Column(db.String(500))
     active = db.Column(db.Boolean, nullable=False, default=False)
     block = db.Column(db.Boolean, nullable=False, default=False)
@@ -187,6 +190,7 @@ class Proposal(db.Model, UserMixin):
     creator = db.relationship('User', back_populates='created_proposals', foreign_keys=[creator_id])
     banker = db.relationship('Banker', foreign_keys=[banker_id])
     financial_agreement = db.relationship('FinancialAgreement', foreign_keys=[conv_id])
+    table_finance = db.relationship('TablesFinance', backref='proposals')
 
 
 room_user_association = db.Table(
@@ -215,6 +219,24 @@ class ReportData(db.Model):
     cpf = db.Column(db.String(14), nullable=False)  # CPF do registro
     number_proposal = db.Column(db.String(30), nullable=False)  # Número da proposta
     table_code = db.Column(db.String(30), nullable=False)  # Código da tabela
-    value_operation = db.Column(db.Float, nullable=False)  # Valor da operação
     is_valid = db.Column(db.Boolean, nullable=False, default=False)  # Se o registro foi validado
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Relacionado ao usuário que importou
+
+
+class Wallet(db.Model):
+    
+    __tablename__ = 'wallet'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    proposal_number = db.Column(db.String(100), nullable=False)
+    seller_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    value_operation = db.Column(db.Float, nullable=False)
+    commission_rate = db.Column(db.Float, nullable=False)
+    taxe_comission_rate = db.Column(db.Float, nullable=False)
+    valor_base = db.Column(db.Float, nullable=False)
+    repasse_comissao = db.Column(db.Float, nullable=False)
+    date_created = db.Column(db.DateTime)
+    cpf = db.Column(db.String(30), nullable=True)
+    table_code = db.Column(db.String(20))
+
+    seller = db.relationship('User', backref='wallet_entries')

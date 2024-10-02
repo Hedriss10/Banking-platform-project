@@ -142,7 +142,7 @@ document.getElementById('process').addEventListener('click', function() {
         if (data.message) {
             notification.className = 'alert alert-success';
             notification.innerText = data.message;
-
+            setTimeout(() => window.location.reload(), 3000);
             // Exibir dados inválidos, se existirem
             if (data.invalid_data.length > 0) {
                 let invalidTable = '<h5>Dados Inválidos</h5><table class="table table-bordered"><thead><tr><th>CPF</th><th>Número da Proposta</th><th>Código da Tabela</th></tr></thead><tbody>';
@@ -152,6 +152,7 @@ document.getElementById('process').addEventListener('click', function() {
                 invalidTable += '</tbody></table>';
                 document.getElementById('table-container').innerHTML += invalidTable;
             }
+            setTimeout(() => window.location.reload(), 3000);
         } else {
             notification.className = 'alert alert-danger';
             notification.innerText = data.error || 'Erro ao processar os dados';
