@@ -15,7 +15,7 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = decouple_config('TEST_DATABASE_URL', default='sqlite:///:memory:')
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = decouple_config('DATABASE_URL', default='sqlite:///production.db')
+    SQLALCHEMY_DATABASE_URI = decouple_config('DATABASE_URL', default='postgresql://user:maisbs%40techfun@db:5432/maisbs')
     DEBUG = False
     DEBUG_TB_ENABLED = False
     PORT_HOST = 7500
