@@ -1,19 +1,18 @@
-function cpf(cpf){
+function cpf(cpf) {
     cpf = cpf.replace(/\D/g, '');
-    if(cpf.toString().length != 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    if (cpf.toString().length != 11 || /^(\d)\1{10}$/.test(cpf)) return false;
     var result = true;
-    [9,10].forEach(function(j){
+    [9, 10].forEach(function(j) {
         var soma = 0, r;
-        cpf.split(/(?=)/).splice(0,j).forEach(function(e, i){
-            soma += parseInt(e) * ((j+2)-(i+1));
+        cpf.split(/(?=)/).splice(0, j).forEach(function(e, i) {
+            soma += parseInt(e) * ((j + 2) - (i + 1));
         });
         r = soma % 11;
-        r = (r <2)?0:11-r;
-        if(r != cpf.substring(j, j+1)) result = false;
+        r = (r < 2) ? 0 : 11 - r;
+        if (r != cpf.substring(j, j + 1)) result = false;
     });
     return result;
 }
-
 
 document.addEventListener('DOMContentLoaded', function () {
     var proposalForm = document.getElementById('proposalForm');
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
 
         var fileData = new FormData();
-        
+
         fileFields.forEach(function(fieldName) {
             var files = formData.getAll(fieldName);
             if (files.length > 0) {
@@ -55,25 +54,28 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // verificar o cpf no fileData se estiver fazer a verificação com a function cpf
-        
-
         var formObject = {};
-        formData.forEach(function(value, key){
+        formData.forEach(function(value, key) {
             formObject[key] = value;
         });
 
         var jsonString = JSON.stringify(formObject);
 
+        // Gerar a chave AES e IV
         var aesKey = crypto.getRandomValues(new Uint8Array(32));
-
         var iv = crypto.getRandomValues(new Uint8Array(16));
+
+        // Logs para verificar a chave AES e o IV
+        console.log('AES Key:', aesKey);
+        console.log('IV:', iv);
 
         encryptAESGCM(jsonString, aesKey, iv).then(function(encryptedData) {
             var aesKeyBase64 = arrayBufferToBase64(aesKey);
             var ivBase64 = arrayBufferToBase64(iv);
 
             importRSAPublicKey(publicKeyPEM).then(function(publicKey) {
+                console.log('Chave RSA importada:', publicKey); // Verificando a chave RSA importada
+
                 window.crypto.subtle.encrypt(
                     {
                         name: "RSA-OAEP"
@@ -81,6 +83,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     publicKey,
                     aesKey
                 ).then(function(encryptedAESKey) {
+                    console.log('AES Key criptografada:', encryptedAESKey); // Verificando a chave AES criptografada
+
                     var encryptedAESKeyBase64 = arrayBufferToBase64(new Uint8Array(encryptedAESKey));
                     var encryptedDataBase64 = arrayBufferToBase64(new Uint8Array(encryptedData));
 
@@ -96,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(data => {
                         if (data.success) {
                             alert('Contrato registrado com sucesso!');
-                            window.location.href = "/home"
+                            window.location.href = "/home";
                         } else {
                             alert(data.message || 'Erro ao registrar o contrato.');
                         }
@@ -152,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function encryptAESGCM(plaintext, key, iv) {
         var enc = new TextEncoder();
         var encodedText = enc.encode(plaintext);
-        // Importar a chave AES para o formato CryptoKey
+        console.log('AES key (array buffer):', key); // Verificação da chave AES
         return window.crypto.subtle.importKey(
             "raw",
             key,
@@ -162,7 +166,6 @@ document.addEventListener('DOMContentLoaded', function () {
             false,
             ["encrypt"]
         ).then(function(cryptoKey) {
-            // Usar a chave importada para criptografar os dados
             return window.crypto.subtle.encrypt(
                 {
                     name: "AES-GCM",
@@ -174,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Função para converter ArrayBuffer em Base64
     function arrayBufferToBase64(buffer) {
         var binary = '';
         var bytes = new Uint8Array(buffer);
