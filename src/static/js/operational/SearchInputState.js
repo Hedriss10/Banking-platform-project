@@ -42,11 +42,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${p.cpf}</td> <!-- CPF -->
                     <td>${p.operation_select}</td>
                     <td>
-                        ${p.active ? '<span class="badge bg-success">Contrato Digitado</span>' : ''}
-                        ${p.block ? '<span class="badge bg-danger">Contrato Bloqueado</span>' : ''}
-                        ${p.is_status ? '<span class="badge bg-warning">Contrato Pendente</span>' : ''}
-                        ${p.progress_check ? '<span class="badge bg-secondary">Contrato Em Andamento</span>': ''}
-                        ${!p.active && !p.block && !p.is_status && !p.progress_check ? '<span class="badge bg-dark">Contrato Disponivel Para digitar</span>' : ''}
+                        ${p.aguardando_digitacao ? '<span class="badge bg-secondary">AGUARDANDO A DIGITAÇÃO</span>' : ''}
+                        ${p.pendente_digitacao ? '<span class="badge bg-warning">PENDENTE DIGITAÇÃO</span>' : ''}
+                        ${p.contrato_digitacao ? '<span class="badge bg-secondary">CONTRATO EM DIGITAÇÃO</span>' : ''}
+                        ${p.aguardando_aceite_do_cliente ? '<span class="badge bg-secondary">AGUARDANDO O ACEITE DO CLIENTE</span>' : ''}
+                        ${p.aceite_feito_analise_do_banco ? '<span class="badge bg-secondary">ACEITE FEITO EM ANÁLISE DO BANCO</span>' : ''}
+                        ${p.contrato_pendente_pelo_banco ? '<span class="badge bg-secondary">CONTRATO PENDENTE PELO BANCO</span>' : ''}
+                        ${p.aguardando_pagamento ? '<span class="badge bg-dark">AGUARDANDO O PAGAMENTO</span>' : ''}
+                        ${p.contratopago ? '<span class="badge bg-success">CONTRATO PAGO</span>' : ''}
                     </td>
                     <td>
                         <span class="badge bg-warning">

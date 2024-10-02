@@ -40,16 +40,20 @@
                     <td scope="row">{{ p.cpf }}</td>
                     <td scope="row">{{p.operation_select}}</td>
                     <td scope="row">
-                        {% if p.active %}
-                        <span class="badge bg-success">Contrato Disponivel</span>
-                        {% elif p.block %}
-                        <span class="badge bg-danger">Contrato Bloqueado</span>
-                        {% elif p.is_status %}
-                        <span class="badge bg-warning">Contrato Pendente</span>
-                        {% elif p.progress_check %}
-                        <span class="badge bg-secondary">Contrato Em Andamento</span>
-                        {% else %}
-                        <span class="badge bg-dark">PENDENTE DIGITAÇÃO</span>
+                        {% if p.aguardando_digitacao %}
+                            <span class="badge bg-secondary">AGUARDANDO A DIGITAÇÃO</span>
+                        {% elif p.pendente_digitacao %}
+                            <span class="badge bg-warning">PENDENTE DIGITAÇÃO</span>
+                        {% elif p.contrato_digitacao %}
+                            <span class="badge bg-secondary">CONTRATO EM DIGITAÇÃO</span>
+                        {% elif p.aceite_feito_analise_do_banco %}
+                            <span class="badge bg-secondary">AGUARDANDO O ACEITE DO CLIENTE</span>
+                        {% elif p.contrato_pendente_pelo_banco %}
+                            <span class="badge bg-secondary">ACEITE FEITO EM ANÁLISE DO BANCO</span>
+                        {% elif p.aguardando_pagamento %}
+                            <span class="badge bg-dark">AGUARDANDO O PAGAMENTO</span>
+                        {% elif p.contratopago %}
+                            <span class="badge bg-success">CONTRATO PAGO</span>
                         {% endif %}
                     </td>
                     <td>

@@ -120,23 +120,38 @@
 
                 <h5 class="mt-4 mb-3">Status da Proposta:</h5>
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="active" name="active" {% if proposal.active %}checked{% endif %}>
-                    <label class="form-check-label" for="active">Contrato Digitado</label>
-                </div>
-
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="block" name="block" {% if proposal.block %}checked{% endif %}>
-                    <label class="form-check-label" for="block">Contrato Bloqueado</label>
+                    <input class="form-check-input" type="checkbox" id="aguardando_digitacao" name="aguardando_digitacao" {% if proposal.aguardando_digitacao %}checked{% endif %}>
+                    <label class="form-check-label" for="aguardando_digitacao">AGUARDANDO A DIGITAÇÃO</label>
                 </div>
                 
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="progress_check" name="progress" {% if proposal.progress_check %}checked{% endif %}>
-                    <label class="form-check-label" for="progress_check">Contrato Em Andamento</label>
+                    <input class="form-check-input" type="checkbox" id="pendente_digitacao" name="pendente_digitacao" {% if proposal.pendente_digitacao %}checked{% endif %}>
+                    <label class="form-check-label" for="pendente_digitacao">PENDENTE DIGITAÇÃO</label>
                 </div>
                 
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="is_status" name="is_status" {% if proposal.is_status %}checked{% endif %}>
-                    <label class="form-check-label" for="is_status">Documentação Pendente</label>
+                    <input class="form-check-input" type="checkbox" id="contrato_digitacao" name="contrato_digitacao" {% if proposal.contrato_digitacao %}checked{% endif %}>
+                    <label class="form-check-label" for="contrato_digitacao">CONTRATO EM DIGITAÇÃO</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="aceite_feito_analise_do_banco" name="aceite_feito_analise_do_banco" {% if proposal.aceite_feito_analise_do_banco %}checked{% endif %}>
+                    <label class="form-check-label" for="aceite_feito_analise_do_banco">ACEITE FEITO ANALISE DO BANCO</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="contrato_pendente_pelo_banco" name="contrato_pendente_pelo_banco" {% if proposal.contrato_pendente_pelo_banco %}checked{% endif %}>
+                    <label class="form-check-label" for="contrato_pendente_pelo_banco">CONTRATO PENDENTE PELO O BANCO</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="aguardando_pagamento" name="aguardando_pagamento" {% if proposal.aguardando_pagamento %}checked{% endif %}>
+                    <label class="form-check-label" for="aguardando_pagamento">AGUARDANDO O PAGAMENTO</label>
+                </div>
+                
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="contratopago" name="contratopago" {% if proposal.contratopago %}checked{% endif %}>
+                    <label class="form-check-label" for="contratopago">CONTRATO PAGO</label>
                 </div>
 
                 <!-- Botões de Ação -->

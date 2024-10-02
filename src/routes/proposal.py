@@ -122,11 +122,15 @@ def state_proposal():
         'name': p.name,
         'created_at': p.created_at,
         'operation_select': p.operation_select,
-        'cpf': p.cpf,
-        'active': p.active,
-        'block': p.block,
-        'is_status': p.is_status,
-        'progress_check': p.progress_check,
+        'cpf': p.cpf,     
+        'aguardando_digitacao': p.aguardando_digitacao,
+        'pendente_digitacao': p.pendente_digitacao,
+        'contrato_digitacao': p.contrato_digitacao,
+        'aguardando_aceite_do_cliente': p.aguardando_aceite_do_cliente,
+        'aceite_feito_analise_do_banco': p.aceite_feito_analise_do_banco,
+        'contrato_pendente_pelo_banco': p.contrato_pendente_pelo_banco,
+        'aguardando_pagamento': p.aguardando_pagamento,
+        'contratopago': p.contratopago,
         'edit_at': p.edit_at if p.edit_at else "Ninguem Editou",
         'completed_at': p.completed_at if p.completed_at else "Ninguem Digitou",
         'completed_by': p.completed_by if p.completed_by else "Digitado por"
@@ -226,8 +230,9 @@ def add_proposal():
         value_operation=form_data.get('valor_operacao', None),
         obeserve=form_data.get('observacoes', None),
         edit_at=form_data.get('', None),
-        number_proposal=form_data.get('', None))
-        
+        number_proposal=form_data.get('', None),
+        pendente_digitacao= 1)
+
         
         db.session.add(new_proposal)
         db.session.flush()

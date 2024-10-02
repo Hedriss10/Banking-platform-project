@@ -177,10 +177,17 @@ class Proposal(db.Model, UserMixin):
     prazo = db.Column(db.String(30))
     value_operation = db.Column(db.Numeric(precision=10, scale=3), nullable=True)
     obeserve = db.Column(db.String(500))
-    active = db.Column(db.Boolean, nullable=False, default=False)
-    block = db.Column(db.Boolean, nullable=False, default=False)
-    is_status = db.Column(db.Boolean, nullable=True, default=False)
-    progress_check = db.Column(db.Boolean, nullable=True, default=False)
+    
+    # status contrac
+    aguardando_digitacao = db.Column(db.Boolean, nullable=True, default=False)
+    pendente_digitacao = db.Column(db.Boolean, nullable=True, default=False)
+    contrato_digitacao = db.Column(db.Boolean, nullable=True, default=False) 
+    aguardando_aceite_do_cliente = db.Column(db.Boolean, nullable=True, default=False) 
+    aceite_feito_analise_do_banco = db.Column(db.Boolean, nullable=True, default=False) 
+    contrato_pendente_pelo_banco = db.Column(db.Boolean, nullable=True, default=False)
+    aguardando_pagamento = db.Column(db.Boolean, nullable=True, default=False)
+    contratopago = db.Column(db.Boolean, nullable=True, default=False)
+    
     edit_at = db.Column(db.DateTime(timezone=True), nullable=True)
     completed_at = db.Column(db.DateTime(timezone=True), nullable=True)
     number_proposal = db.Column(db.String(30), nullable=True, default=None)

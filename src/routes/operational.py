@@ -57,10 +57,14 @@ def manage_state_contract():
         'created_at': p.created_at,
         'operation_select': p.operation_select,
         'cpf': p.cpf,
-        'active': p.active,
-        'block': p.block,
-        'is_status': p.is_status,
-        'progress_check': p.progress_check,
+        'aguardando_digitacao': p.aguardando_digitacao,
+        'pendente_digitacao': p.pendente_digitacao,
+        'contrato_digitacao': p.contrato_digitacao,
+        'aguardando_aceite_do_cliente': p.aguardando_aceite_do_cliente,
+        'aceite_feito_analise_do_banco': p.aceite_feito_analise_do_banco,
+        'contrato_pendente_pelo_banco': p.contrato_pendente_pelo_banco,
+        'aguardando_pagamento': p.aguardando_pagamento,
+        'contratopago': p.contratopago,
         'edit_at': p.edit_at if p.edit_at else "Não foi editado ainda",
         'completed_at': p.completed_at if p.completed_at else "Não foi digitado",
         'completed_by': p.completed_by if p.completed_by else "Digitador por"
@@ -112,14 +116,16 @@ def manage_edit_contract(id):
         proposal.city = request.form.get('city')
         proposal.state_uf_city = request.form.get('state_uf_city')
         proposal.value_salary = request.form.get('value_salary')
-        proposal.table_id = request.form.get('tableSelectProposal')
-        proposal.conv_id = request.form.get('convenioSelectProposal')
         proposal.obeserve = request.form.get('obeserve')
-
-        proposal.active = 'active' in request.form
-        proposal.block = 'block' in request.form
-        proposal.is_status = 'is_status' in request.form
-        proposal.progress_check = 'progress' in request.form
+        
+        proposal.aguardando_digitacao = 'aguardando_digitacao' in request.form
+        proposal.pendente_digitacao = 'pendente_digitacao' in request.form
+        proposal.contrato_digitacao =  'contrato_digitacao' in request.form
+        proposal.aguardando_aceite_do_cliente = 'aguardando_aceite_do_cliente' in request.form
+        proposal.aceite_feito_analise_do_banco = 'aceite_feito_analise_do_banco' in request.form
+        proposal.contrato_pendente_pelo_banco = 'contrato_pendente_pelo_banco' in request.form
+        proposal.aguardando_pagamento = 'aguardando_pagamento' in request.form
+        proposal.contratopago = 'contratopago' in request.form
         
         identifier = f"number_contrato_{proposal.id}_digitador_{proposal.creator_id}"
         base_path = os.path.join('proposta', proposal.created_at.strftime('%Y'), proposal.created_at.strftime('%m'), proposal.created_at.strftime('%d'), identifier)
@@ -240,9 +246,15 @@ def manage_details_contract(id):
                 image_paths = UploadProposal().save_images(field_files, field_base_path)
                 setattr(proposal, field, ','.join(image_paths))
         
-        proposal.block = 0
-        proposal.is_status = 0
-        proposal.progress_check = 0
+        proposal.aguardando_digitacao = 'aguardando_digitacao' in request.form
+        proposal.pendente_digitacao = 'pendente_digitacao' in request.form
+        proposal.contrato_digitacao =  'contrato_digitacao' in request.form
+        proposal.aguardando_aceite_do_cliente = 'aguardando_aceite_do_cliente' in request.form
+        proposal.aguardando_aceite_do_cliente = 'aguardando_aceite_do_cliente' in request.form
+        proposal.aceite_feito_analise_do_banco = 'aceite_feito_analise_do_banco' in request.form
+        proposal.contrato_pendente_pelo_banco = 'contrato_pendente_pelo_banco' in request.form
+        proposal.aguardando_pagamento = 'aguardando_pagamento' in request.form
+        proposal.contratopago = 'contratopago' in request.form
         proposal.completed_at = datetime.now()
         proposal.completed_by = f"""Digitado por: {current_user.username}"""
         db.session.commit()
