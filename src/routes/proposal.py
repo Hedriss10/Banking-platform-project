@@ -227,7 +227,7 @@ def add_proposal():
         margem=form_data.get('margem', None),
         parcela=form_data.get('parcela', None),
         prazo=form_data.get('prazo', None),
-        value_operation=form_data.get('valor_operacao', None),
+        value_operation = float(form_data.get('valor_operacao').strip()) if form_data.get('valor_operacao') and form_data.get('valor_operacao').strip() else 0.0,
         obeserve=form_data.get('observacoes', None),
         edit_at=form_data.get('', None),
         number_proposal=form_data.get('', None),

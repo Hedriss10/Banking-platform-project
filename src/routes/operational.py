@@ -80,7 +80,7 @@ def manage_state_contract():
 @bp_operational.route('/operational/available-contracts-count', methods=['GET'])
 @login_required
 def available_contracts_count():
-    available_count = Proposal.query.filter_by(active=0, block=0, is_status=0, progress_check=0).count()
+    available_count = Proposal.query.filter_by(pendente_digitacao=0, aguardando_digitacao=0).count()
         
     return jsonify({'available_contracts': available_count})
 

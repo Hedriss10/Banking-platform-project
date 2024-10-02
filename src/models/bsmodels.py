@@ -175,7 +175,7 @@ class Proposal(db.Model, UserMixin):
     margem = db.Column(db.String(30))
     parcela = db.Column(db.String(30))
     prazo = db.Column(db.String(30))
-    value_operation = db.Column(db.Numeric(precision=10, scale=3), nullable=True)
+    value_operation = db.Column(db.Numeric(precision=10, scale=3), nullable=True, default=0.0)
     obeserve = db.Column(db.String(500))
     
     # status contrac
