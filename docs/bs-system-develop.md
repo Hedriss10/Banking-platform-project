@@ -1,39 +1,21 @@
-## export comands for cli terminal with Flask
+### Flask App
 
+
+### export comands for cli terminal with Flask
 ```bash
-export FLASK_APP=src/external.py:create_app
-export DEBUG=True
-export APP_SETTINGS=config.DevelopmentConfig
-export FLASK_APP=src
-export FLASK_DEBUG=1
+export FLASK_APP=src:create_app # create app
 ```
 
-## Create app in cli with Flask
+### Create app export database envirion management `developement`
 
-```bash
-# export app flask
-export FLASK_APP=src:create_app
+```bash 
+# init dabase
 flask db init 
 flask db -m migrate "init database"
 flask db upgrade
 ```
 
-<hr>
-
-## Flask cli create user
-
-```python
-from src import db
-from src.models.bsmodels import User
-
-
-new_user = User(user_identification=40028922, username='hedris', lastname='pereira', email='test@gmail.com', type_user_func='Administrador', typecontract='Funcionario', password='40028922')
-db.session.add(new_user)
-db.session.commit()
-```
-
-
-### comands exec app flask 
+### Commands to run the application Flask 
 
 `development`
 ```bash
@@ -47,7 +29,6 @@ export FLASK_ENV=production
 flask run --host=0.0.0.0 --port=7500
 ```
 
-
 `testing`
 
 ```bash
@@ -57,13 +38,60 @@ flask run
 
 
 ### CI/CD
-
-
-ci/cd pylint
+`python-app.yml`
 
 ```bash
-- name: Run linting with pylint
-    run: |
-    source venv/bin/activate
-    pylint src/
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov coverage
+
+    - name: Run tests with coverage
+      run: |
+        source venv/bin/activate
+        pytest --cov=src --cov-report=term-missing
+
+    - name: Report coverage
+      run: |
+        source venv/bin/activate
+        coverage report
+
+```
+
+## 
+
+
+### Create User fake with `insert_users_fake.py`
+
+**Application to create test users**
+
+```python
+# ./script
+    python3 insert_users_fake.py
 ```
