@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - ./proposta:/app/proposta
+      - ./instance:/app/instance
+    environment:
+      - FLASK_ENV=development
+    command: flask run --host=0.0.0.0
+
+      
+
+
+
