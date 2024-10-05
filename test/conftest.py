@@ -1,13 +1,11 @@
 import pytest
 from src import create_app, db as _db
-from src.config import TestingConfig  # Supondo que a configuração de testes esteja definida
+from src.config import TestingConfig
 
 @pytest.fixture(scope='session')
 def app():
     """Instance of main Flask app."""
-    app = create_app()  # Cria a aplicação normalmente
-
-    # Carrega a configuração de testes manualmente após a criação da aplicação
+    app = create_app()
     app.config.from_object(TestingConfig)
     
     with app.app_context():
