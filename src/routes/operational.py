@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from src.models.bsmodels import Proposal, Banker, FinancialAgreement
 from src.utils.proposal import UploadProposal
 from datetime import datetime
+from sqlalchemy import desc
 
 
 bp_operational = Blueprint("operational", __name__)
@@ -17,10 +18,41 @@ bp_operational = Blueprint("operational", __name__)
 def manage_list_contract():    
     return render_template("operational/manage_list.html")
 
+
 @bp_operational.route("/manage-operational")
 @login_required
 def manage_operational():
-    return render_template("operational/manage_operational.html")
+    """"sumary_line
+        filtered and sorted proposal board sorted by creation date
+    Keyword arguments:
+    argument -- description
+    return - proposal filter_by
+    """
+    page = request.args.get('page', 1, type=int)
+    per_page = 10 
+
+    proposal_board = {
+        "pendente_digitacao": Proposal.query.filter_by(pendente_digitacao=1).count(),
+        "aguardando_digitacao": Proposal.query.filter_by(aguardando_digitacao=1).count(),
+        "contrato_digitacao": Proposal.query.filter_by(contrato_digitacao=1).count(),
+        "aguardando_aceite": Proposal.query.filter_by(aguardando_aceite_do_cliente=1).count(),
+        "aceite_analise_banco": Proposal.query.filter_by(aceite_feito_analise_do_banco=1).count(),
+        "pendente_banco": Proposal.query.filter_by(contrato_pendente_pelo_banco=1).count(),
+        "contratopago": Proposal.query.filter_by(contratopago=1).count()
+    }
+
+    proposals_pendente_digitacao = Proposal.query.filter_by(pendente_digitacao=1).order_by(desc(Proposal.pendente_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_aguardando_digitacao = Proposal.query.filter_by(aguardando_digitacao=1).order_by(desc(Proposal.aguardando_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_contrato_digitacao = Proposal.query.filter_by(contrato_digitacao=1).order_by(desc(Proposal.contrato_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_aguardando_aceite_do_cliente = Proposal.query.filter_by(aguardando_aceite_do_cliente=1).order_by(desc(Proposal.aguardando_aceite_do_cliente)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_aceite_feito_analise_do_banco = Proposal.query.filter_by(aceite_feito_analise_do_banco=1).order_by(desc(Proposal.aceite_feito_analise_do_banco)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_contrato_pendente_pelo_banco = Proposal.query.filter_by(contrato_pendente_pelo_banco=1).order_by(desc(Proposal.contrato_pendente_pelo_banco)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_contratopago = Proposal.query.filter_by(contratopago=1).order_by(desc(Proposal.contratopago)).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template("operational/manage_operational.html",  proposal_board=proposal_board, proposals_pendente_digitacao=proposals_pendente_digitacao, 
+                           proposals_aguardando_digitacao=proposals_aguardando_digitacao,  proposals_contrato_digitacao=proposals_contrato_digitacao, 
+                           proposals_aguardando_aceite_do_cliente=proposals_aguardando_aceite_do_cliente, proposals_aceite_feito_analise_do_banco=proposals_aceite_feito_analise_do_banco,
+                           proposals_contrato_pendente_pelo_banco=proposals_contrato_pendente_pelo_banco, proposals_contratopago=proposals_contratopago)
 
 
 @bp_operational.route("/state-contract")
@@ -80,8 +112,8 @@ def manage_state_contract():
 @bp_operational.route('/operational/available-contracts-count', methods=['GET'])
 @login_required
 def available_contracts_count():
-    available_count = Proposal.query.filter_by(pendente_digitacao=0, aguardando_digitacao=0).count()
-        
+    available_count = Proposal.query.filter_by(pendente_digitacao=1).count()
+    
     return jsonify({'available_contracts': available_count})
 
 
@@ -89,7 +121,7 @@ def available_contracts_count():
 @login_required
 def manage_edit_contract(id):
     """
-        Editar proposta
+        edit proposal
     """
     proposal = Proposal.query.get_or_404(id)
     bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()

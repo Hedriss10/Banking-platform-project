@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const baseUrl = document.getElementById('baseUrl').getAttribute('data-url').replace('0', '');
     const baseUrlDetails = document.getElementById('baseUrlDetails').getAttribute('data-url').replace('0', '');
-
+    
 
     // Função para buscar propostas
     function fetchProposals(searchTerm = '') {
@@ -59,12 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>
                         <span class="badge bg-danger delete-proposal" data-id="${p.id}" style="cursor:pointer;">Excluir</span>
                     </td>
-                    <td>
-                        <span class="badge bg-warning">
-                            <a href="${baseUrlDetails}${p.id}">Digitar o Contrato</a>
-                        </span>
-                    </td>
                     <td>${p.edit_at}</td> <!-- Editado por --> 
+                    <td>
+                        <span class="badge bg-warning"><a href="${baseUrlDetails}${p.id}">Digitar o Contrato</a></span>
+                    </td>
                     <td>${p.completed_at}</td>
                     <td>${p.completed_by}</td>
                 `;

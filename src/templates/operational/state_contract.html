@@ -51,8 +51,8 @@
                     <th>Status</th>
                     <th>Editar</th>
                     <th>Excluir</th>
-                    <th>Digitar Contrato</th>
                     <th>Editado às</th> <!-- Mudando para indicar que mostra o horário da última edição -->
+                    <th>Digitar Contrato</th>
                     <th>Digitado às</th>
                     <th>Digitado por</th>
                 </tr>
@@ -91,7 +91,7 @@
                         <span class="badge bg-danger delete-proposal" data-id="{{ p.id }}" style="cursor:pointer;">Excluir</span>
                     </td>
                     <td scope="row">{{ p.edit_at }}</td>
-                    <td><span class="badge bg-primary"><a href="{{ url_for('operational.manage_details_contract', id=p.id) }}">Digitar o Contrato</a></span></td>
+                    <td><span class="badge bg-primary details-proposal"><a href="{{ url_for('operational.manage_details_contract', id=p.id) }}">Digitar o Contrato</a></span></td>
                     <td scope="row">{{p.completed_at}}</td>
                     <td scope="row">{{p.completed_by}}</td>
                 </tr>

@@ -90,7 +90,7 @@ def manage_report():
 @login_required
 def manage_payment():
     """
-    Função para gerar o pagamento e exibir o nome do vendedor.
+        Função para gerar o pagamento e exibir o nome do vendedor.
     """
     payments = []  # Inicializar payments para evitar erro no GET
 

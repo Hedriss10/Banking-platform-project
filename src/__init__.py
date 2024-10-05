@@ -17,6 +17,15 @@ def create_app():
     
     if app.config.get('DEBUG', False): # brutal force debug in development
         app.debug = True
+        
+    if flask_env == 'development':
+        app.debug = True
+    
+    elif flask_env == 'production':
+        app.debug = False
+    
+    
+    print(app.debug)
     
     db.init_app(app)
     migrate.init_app(app, db)
