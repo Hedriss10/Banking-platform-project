@@ -1,12 +1,14 @@
 import pytest
-from src.config import TestingConfig
 from src import create_app, db as _db
-
+from src.config import TestingConfig  # Supondo que a configuração de testes esteja definida
 
 @pytest.fixture(scope='session')
 def app():
     """Instance of main Flask app."""
-    app = create_app(config_class=TestingConfig)
+    app = create_app()  # Cria a aplicação normalmente
+
+    # Carrega a configuração de testes manualmente após a criação da aplicação
+    app.config.from_object(TestingConfig)
     
     with app.app_context():
         yield app
@@ -37,3 +39,8 @@ def session(db):
     transaction.rollback()
     connection.close()
     session.remove()
+
+@pytest.fixture(scope='function')
+def client(app):
+    """A test client for the app."""
+    return app.test_client()
