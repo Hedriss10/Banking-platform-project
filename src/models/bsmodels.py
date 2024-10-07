@@ -90,6 +90,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150))
     type_user_func = db.Column(db.String(100), nullable=False)
     typecontract = db.Column(db.String(30), nullable=False)
+    session_token = db.Column(db.String(150), nullable=True)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     is_block = db.Column(db.Boolean, nullable=False, default=False)
     is_inactive = db.Column(db.Boolean, nullable=False, default=False)

@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from src.models.bsmodels import User
 from src import db
-
+import uuid
 
 
 bp_auth = Blueprint("auth", __name__, template_folder="templates")
@@ -20,6 +20,9 @@ def login():
                 flash("Usuário logado com sucesso!", category='success')
                 login_user(user, remember=True)
                 session['type_user_func'] = user.type_user_func
+                session_token = str(uuid.uuid4())
+                user.session_token = session_token
+                db.session.commit()
                 return redirect(url_for('overview.home'))
             else:
                 flash('Sua senha está incorreta.', category='error')

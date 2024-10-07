@@ -1,10 +1,14 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from src.config import config 
+from flask import flash, redirect, url_for
+from functools import wraps
 
 from src.config import flask_env
+
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -23,9 +27,6 @@ def create_app():
     
     elif flask_env == 'production':
         app.debug = False
-    
-    
-    print(app.debug)
     
     db.init_app(app)
     migrate.init_app(app, db)
@@ -60,5 +61,17 @@ def create_app():
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('partials/404.html'), 404
-
+    
     return app
+
+
+def check_session_token(f):
+    from src.models.bsmodels import User
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user = User.query.get(current_user.id)  # Obtém o usuário do banco de dados
+        if user.session_token != current_user.session_token:            
+            flash('Sessão inválida. Faça login novamente.')
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated_function

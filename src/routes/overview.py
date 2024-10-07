@@ -1,13 +1,16 @@
 from flask import Blueprint , render_template
 from flask_login import login_required, current_user
 from src.models.bsmodels import User
-
+from src import check_session_token
 
 bp_overview = Blueprint("overview", __name__, template_folder="templates")
 
 
+
+
 @bp_overview.route("/home")
 @login_required
+@check_session_token
 def home():
     """Function for process overview system"""
     return render_template("partials/home.html")
