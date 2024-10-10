@@ -113,8 +113,7 @@ def state_proposal():
             Proposal.cpf.ilike(f'%{search_term}') #  filtrando pelo o cpf do contrato
         )
 
-    
-    tables_paginated = query.order_by(Proposal.created_at.desc()).paginate(page=page, per_page=per_page)
+    tables_paginated = query.filter_by(is_status=False).order_by(Proposal.created_at.desc()).paginate(page=page, per_page=per_page)
 
     proposal_data = [{
         'id': p.id,
@@ -231,7 +230,8 @@ def add_proposal():
         obeserve=form_data.get('observacoes', None),
         edit_at=form_data.get('', None),
         number_proposal=form_data.get('', None),
-        pendente_digitacao= 1)
+        pendente_digitacao= 1,
+        is_status=False)
 
         
         db.session.add(new_proposal)

@@ -95,3 +95,21 @@ jobs:
 # ./script
     python3 insert_users_fake.py
 ```
+
+
+### Initi tmux with Flask
+
+
+**Tmux application**
+
+```bash
+# init tmux
+tmux new -s flask_app
+```
+
+```bash
+# load init
+tmux attach -t flask_app
+```
+
+

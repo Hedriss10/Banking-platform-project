@@ -80,6 +80,16 @@
             </div>
         </div>
 
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card text-white bg-danger h-100" data-bs-toggle="modal" data-bs-target="#modalContratoExcluido">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-cash-stack"></i> Contrato Excluido
+                    </h5>
+                    <p class="card-text">Total: {{ proposal_board.contratoexcluido }}</p>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal para Pendente de Digitação -->
         <div class="modal fade" id="modalPendenteDigitacao" tabindex="-1" aria-labelledby="modalPendenteDigitacaoLabel" aria-hidden="true">
@@ -522,6 +532,71 @@
                                 {% if proposals_contratopago.has_next %}
                                     <li class="page-item">
                                         <a class="page-link" href="{{ url_for('operational.manage_operational', page=proposals_contratopago.next_num) }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Contrato Excluido -->
+        <div class="modal fade" id="modalContratoExcluido" tabindex="-1" aria-labelledby="modalContratoExcluidoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalContratoExcluidoLabel">Propostas Excluidas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>CPF</th>
+                                        <th>Data de Criação</th>
+                                        <th>Observações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for proposal in proposals_delete.items %}
+                                        <tr>
+                                            <td>{{ proposal.name }}</td>
+                                            <td>{{ proposal.cpf }}</td>
+                                            <td>{{ proposal.created_at }}</td>
+                                            <td>{{ proposal.deleted_at }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Links de Paginação -->
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-center">
+                                {% if proposals_delete.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('operational.manage_operational', page=proposals_delete.prev_num) }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% for page_num in proposals_delete.iter_pages() %}
+                                    {% if page_num %}
+                                        <li class="page-item {% if page_num == proposals_delete.page %}active{% endif %}">
+                                            <a class="page-link" href="{{ url_for('operational.manage_operational', page=page_num) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if proposals_delete.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('operational.manage_operational', page=proposals_delete.next_num) }}" aria-label="Next">
                                             <span aria-hidden="true">&raquo;</span>
                                         </a>
                                     </li>

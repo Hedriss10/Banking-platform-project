@@ -32,27 +32,38 @@ def manage_operational():
     per_page = 10 
 
     proposal_board = {
-        "pendente_digitacao": Proposal.query.filter_by(pendente_digitacao=1).count(),
-        "aguardando_digitacao": Proposal.query.filter_by(aguardando_digitacao=1).count(),
-        "contrato_digitacao": Proposal.query.filter_by(contrato_digitacao=1).count(),
-        "aguardando_aceite": Proposal.query.filter_by(aguardando_aceite_do_cliente=1).count(),
-        "aceite_analise_banco": Proposal.query.filter_by(aceite_feito_analise_do_banco=1).count(),
-        "pendente_banco": Proposal.query.filter_by(contrato_pendente_pelo_banco=1).count(),
-        "contratopago": Proposal.query.filter_by(contratopago=1).count()
+        "pendente_digitacao": Proposal.query.filter_by(pendente_digitacao=1, is_status=False).count(),
+        "aguardando_digitacao": Proposal.query.filter_by(aguardando_digitacao=1, is_status=False).count(),
+        "contrato_digitacao": Proposal.query.filter_by(contrato_digitacao=1, is_status=False).count(),
+        "aguardando_aceite": Proposal.query.filter_by(aguardando_aceite_do_cliente=1, is_status=False).count(),
+        "aceite_analise_banco": Proposal.query.filter_by(aceite_feito_analise_do_banco=1, is_status=False).count(),
+        "pendente_banco": Proposal.query.filter_by(contrato_pendente_pelo_banco=1, is_status=False).count(),
+        "contratopago": Proposal.query.filter_by(contratopago=1, is_status=False).count(),
+        "contratoexcluido": Proposal.query.filter_by(is_status=True).count()
     }
 
-    proposals_pendente_digitacao = Proposal.query.filter_by(pendente_digitacao=1).order_by(desc(Proposal.pendente_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
-    proposals_aguardando_digitacao = Proposal.query.filter_by(aguardando_digitacao=1).order_by(desc(Proposal.aguardando_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
-    proposals_contrato_digitacao = Proposal.query.filter_by(contrato_digitacao=1).order_by(desc(Proposal.contrato_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
-    proposals_aguardando_aceite_do_cliente = Proposal.query.filter_by(aguardando_aceite_do_cliente=1).order_by(desc(Proposal.aguardando_aceite_do_cliente)).paginate(page=page, per_page=per_page, error_out=False)
-    proposals_aceite_feito_analise_do_banco = Proposal.query.filter_by(aceite_feito_analise_do_banco=1).order_by(desc(Proposal.aceite_feito_analise_do_banco)).paginate(page=page, per_page=per_page, error_out=False)
-    proposals_contrato_pendente_pelo_banco = Proposal.query.filter_by(contrato_pendente_pelo_banco=1).order_by(desc(Proposal.contrato_pendente_pelo_banco)).paginate(page=page, per_page=per_page, error_out=False)
-    proposals_contratopago = Proposal.query.filter_by(contratopago=1).order_by(desc(Proposal.contratopago)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_pendente_digitacao = Proposal.query.filter_by(pendente_digitacao=1, is_status=False).order_by(desc(Proposal.pendente_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_aguardando_digitacao = Proposal.query.filter_by(aguardando_digitacao=1, is_status=False).order_by(desc(Proposal.aguardando_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_contrato_digitacao = Proposal.query.filter_by(contrato_digitacao=1, is_status=False).order_by(desc(Proposal.contrato_digitacao)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_aguardando_aceite_do_cliente = Proposal.query.filter_by(aguardando_aceite_do_cliente=1, is_status=False).order_by(desc(Proposal.aguardando_aceite_do_cliente)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_aceite_feito_analise_do_banco = Proposal.query.filter_by(aceite_feito_analise_do_banco=1, is_status=False).order_by(desc(Proposal.aceite_feito_analise_do_banco)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_contrato_pendente_pelo_banco = Proposal.query.filter_by(contrato_pendente_pelo_banco=1, is_status=False).order_by(desc(Proposal.contrato_pendente_pelo_banco)).paginate(page=page, per_page=per_page, error_out=False)
+    proposals_contratopago = Proposal.query.filter_by(contratopago=1, is_status=False).order_by(desc(Proposal.contratopago)).paginate(page=page, per_page=per_page, error_out=False)
     
-    return render_template("operational/manage_operational.html",  proposal_board=proposal_board, proposals_pendente_digitacao=proposals_pendente_digitacao, 
-                           proposals_aguardando_digitacao=proposals_aguardando_digitacao,  proposals_contrato_digitacao=proposals_contrato_digitacao, 
-                           proposals_aguardando_aceite_do_cliente=proposals_aguardando_aceite_do_cliente, proposals_aceite_feito_analise_do_banco=proposals_aceite_feito_analise_do_banco,
-                           proposals_contrato_pendente_pelo_banco=proposals_contrato_pendente_pelo_banco, proposals_contratopago=proposals_contratopago)
+    proposals_delete = Proposal.query.filter_by(is_status=1).order_by(desc(Proposal.is_status)).paginate(page=10, per_page=per_page, error_out=False)
+
+    proposals_delete = Proposal.query.filter_by(is_status=True).order_by(desc(Proposal.is_status)).paginate(page=page, per_page=per_page, error_out=False)
+
+    return render_template("operational/manage_operational.html",  
+                           proposal_board=proposal_board, 
+                           proposals_pendente_digitacao=proposals_pendente_digitacao, 
+                           proposals_aguardando_digitacao=proposals_aguardando_digitacao,  
+                           proposals_contrato_digitacao=proposals_contrato_digitacao, 
+                           proposals_aguardando_aceite_do_cliente=proposals_aguardando_aceite_do_cliente, 
+                           proposals_aceite_feito_analise_do_banco=proposals_aceite_feito_analise_do_banco,
+                           proposals_contrato_pendente_pelo_banco=proposals_contrato_pendente_pelo_banco, 
+                           proposals_contratopago=proposals_contratopago, 
+                           proposals_delete=proposals_delete)
 
 
 @bp_operational.route("/state-contract")
@@ -80,7 +91,7 @@ def manage_state_contract():
             Proposal.cpf.ilike(f'%{search_term}%')  # Filtra pelo CPF do contrato
         )
     
-    tables_paginated = query.order_by(Proposal.created_at.desc()).paginate(page=page, per_page=per_page)
+    tables_paginated = query.filter_by(is_status=False).order_by(Proposal.created_at.desc()).paginate(page=page, per_page=per_page)
 
     proposal_data = [{
         'id': p.id,
@@ -236,7 +247,8 @@ def manage_delete_contract(id):
         if os.path.exists(base_path):
             os.rmdir(base_path)
 
-        db.session.delete(proposal)
+        proposal.is_status = True
+        proposal.deleted_at = f"""Excluido por: {current_user.username}"""
         db.session.commit()
 
         return jsonify({'success': True}), 200

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
-                    <td colspan="11" class="text-center">Nenhuma proposta encontrada</td>  <!-- Ajuste para colspan correto -->
+                    <td colspan="11" class="text-center">Nenhuma tabela encontrada</td>  <!-- Ajuste para colspan correto -->
                 `;
                 tbody.appendChild(emptyRow);
                 return;

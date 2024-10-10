@@ -4,10 +4,8 @@ from flask import Blueprint , render_template, request, redirect, url_for, make_
 from flask_login import login_required, current_user
 from flask import jsonify
 from src import db
-from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
-from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance,  Proposal, User, Roomns, ReportData, Wallet
-from src.utils.fynance import calculate_commission
+from src.models.bsmodels import Banker, FinancialAgreement, TablesFinance,  Proposal, User, ReportData, Wallet
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 

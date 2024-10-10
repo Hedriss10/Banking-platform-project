@@ -193,6 +193,8 @@ class Proposal(db.Model, UserMixin):
     completed_at = db.Column(db.DateTime(timezone=True), nullable=True)
     number_proposal = db.Column(db.String(30), nullable=True, default=None)
     completed_by = db.Column(db.String(10), nullable=True, default=None)
+    deleted_at = db.Column(db.String(10), nullable=True, default=None)
+    is_status = db.Column(db.Boolean, nullable=True, default=None)
 
     # Relationships
     creator = db.relationship('User', back_populates='created_proposals', foreign_keys=[creator_id])

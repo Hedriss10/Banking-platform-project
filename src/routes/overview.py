@@ -6,8 +6,6 @@ from src import check_session_token
 bp_overview = Blueprint("overview", __name__, template_folder="templates")
 
 
-
-
 @bp_overview.route("/home")
 @login_required
 @check_session_token
