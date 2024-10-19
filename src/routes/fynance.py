@@ -90,17 +90,21 @@ def manage_payment():
     """
         Função para gerar o pagamento e exibir o nome do vendedor.
     """
+    
+    proposal_valid_reports = ReportData.query.filter_by(is_valid=True).all()
+    
     payments = []  # Inicializar payments para evitar erro no GET
 
     if request.method == 'POST':
         repasse_comissao_percent_str = request.form.get('repasse_comissao')
         try:
-            repasse_comissao_percent = Decimal(repasse_comissao_percent_str.replace(',', '.'))
+            if proposal_valid_reports:
+                repasse_comissao_percent = Decimal(repasse_comissao_percent_str.replace(',', '.'))
+            else:
+                flash('Não contem nenhum relatorio cadastrado!', category='error')
         except (ValueError, InvalidOperation):
-            flash('Valor de repasse de comissão inválido.', 'danger')
+            flash('Valor de repasse de comissão inválido.', category='danger')
             return redirect(url_for('fynance.manage_payment'))
-
-        proposal_valid_reports = ReportData.query.filter_by(is_valid=True).all()
 
         for report in proposal_valid_reports:
             proposal = Proposal.query.filter_by(number_proposal=report.number_proposal).first()

@@ -22,7 +22,8 @@ def manage_list_contract():
 @bp_operational.route("/manage-operational")
 @login_required
 def manage_operational():
-    """"sumary_line
+    """"
+        sumary_line
         filtered and sorted proposal board sorted by creation date
     Keyword arguments:
     argument -- description
@@ -123,7 +124,7 @@ def manage_state_contract():
 @bp_operational.route('/operational/available-contracts-count', methods=['GET'])
 @login_required
 def available_contracts_count():
-    available_count = Proposal.query.filter_by(pendente_digitacao=1).count()
+    available_count = Proposal.query.filter_by(pendente_digitacao=1, is_status=False).count()
     
     return jsonify({'available_contracts': available_count})
 

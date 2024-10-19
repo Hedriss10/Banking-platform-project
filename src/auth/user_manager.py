@@ -17,7 +17,6 @@ def login():
         
         if user:
             if check_password_hash(user.password, password):
-                flash("Usuário logado com sucesso!", category='success')
                 login_user(user, remember=True)
                 session['type_user_func'] = user.type_user_func
                 session_token = str(uuid.uuid4())

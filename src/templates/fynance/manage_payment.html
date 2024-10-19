@@ -1,7 +1,28 @@
 <!-- templates/fynance/manage_payment.html -->
 {% extends "base.html" %}
 {% block main %}
+
 <div class="container mt-5">
+
+    {% if get_flashed_messages(with_categories=True) %}
+    <div class="flash-messages">
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+        {% if category == 'error' %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% else %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+
     <h2 class="text-center mb-4 text-primary">Gerenciamento de Pagamentos</h2>
 
     <!-- Abas -->

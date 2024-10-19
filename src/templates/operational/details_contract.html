@@ -88,22 +88,36 @@
                     </div>
                 </div>
     
+
                 <!-- Fotos Relacionadas do contrato -->
-                <div class="border-bottom pb-3 mb-4">
-                    <h5 class="mb-3">Imagens do Contrato</h5>
-                    <div class="row">
-                        {% for field, paths in image_paths.items() %}
-                        <div class="col-md-6">
-                            <h6>{{ field | replace('_', ' ') }}</h6>
-                            <div class="d-flex flex-wrap">
-                                {% for path in paths %}
-                                <img src="{{ url_for('operational.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail me-2 mb-2" style="max-width: 150px; cursor: pointer;">
-                                {% endfor %}
+                <h5 class="mt-4 mb-3">Imagens Registradas do Contrato:</h5>
+                <!-- Modal -->
+                <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Visualizar Imagem:</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img id="expandedImage" src="" alt="Imagem Expandida" class="img-fluid">
                             </div>
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
+
+                <div class="row">
+                    {% for field, paths in image_paths.items() %}
+                        <div class="col-md-6">
+                            <h5 class="mt-4 mb-3"><strong>{{ field | replace('_', ' ') }}:</strong></h5>
+                            {% for path in paths %}
+                                <div class="img-wrapper">
+                                    <img src="{{ url_for('proposal.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div> 
     
                 <!-- Observações -->
                 <div class="border-bottom pb-3 mb-4">
