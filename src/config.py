@@ -3,7 +3,7 @@ from decouple import config as decouple_config
 
 class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Upload de 16 MB
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024 
     SECRET_KEY = os.urandom(24)
 
 class TestingConfig(Config):
@@ -15,7 +15,10 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = decouple_config('TEST_DATABASE_URL', default='sqlite:///:memory:')
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = decouple_config('DATABASE_URL', default='sqlite:///production.db')
+    SQLALCHEMY_DATABASE_URI = decouple_config(
+        'DATABASE_URL',
+        default='postgresql://maisbs_user:maisbs%40master@192.168.0.242:5432/maisbs'
+    )
     DEBUG = False
     DEBUG_TB_ENABLED = False
     PORT_HOST = 8000
@@ -27,7 +30,10 @@ class DevelopmentConfig(Config):
     DEBUG = True
     DEBUG_TB_ENABLED = True
     PORT_HOST = 8000
-    SQLALCHEMY_DATABASE_URI = decouple_config('DEV_DATABASE_URL', default='sqlite:///dev.db')
+    SQLALCHEMY_DATABASE_URI = decouple_config(
+        'DEV_DATABASE_URL',
+        default='postgresql://maisbs_user_dev:maisbs%40master@192.168.0.242:5432/maisbsdv'
+    )
     IP_HOST = "localhost"
     PORT_HOST = 5500
     URL_MAIN = f'http://{IP_HOST}:{PORT_HOST}/'
@@ -44,4 +50,3 @@ if flask_env not in config_by_name:
     raise ValueError(f"Invalid value for FLASK_ENV: {flask_env}. Must be one of {list(config_by_name.keys())}")
 
 config = config_by_name[flask_env]
-
