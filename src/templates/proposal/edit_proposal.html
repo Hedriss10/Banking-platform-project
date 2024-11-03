@@ -7,7 +7,7 @@
     <h2 class="text-center mb-4">Editar Proposta</h2>
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="POST" enctype="multipart/form-data" data-proposal-id="{{ proposal.id }}">
+            <form id="editProposalForm" method="POST" enctype="multipart/form-data" data-proposal-id="{{ proposal.id }}">
                 <!-- Informações Pessoais -->
                 <br>
                 <h5 class="mb-3">Informações Pessoais:</h5>
@@ -19,12 +19,12 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="dd_year" class="form-label">Data de Nascimento:</label>
-                        <input type="date" class="form-control" id="date_year" name="date_year" value="{{ proposal.date_year.strftime('%Y-%m-%d') }}" >
+                        <input type="date" class="form-control" id="date_year" name="date_year" value="{{ proposal.date_year.strftime('%Y-%m-%d')  }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="email" class="form-label">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ proposal.email }}" >
+                        <input type="email" class="form-control" id="email" name="email" value="{{ proposal.email  }} " >
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -37,7 +37,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="phone" class="form-label">Telefone:</label>
-                        <input type="text" class="form-control" id="phone" name="phone" value="{{ proposal.phone }}">
+                        <input type="text" class="form-control" id="phone" name="phone" value="{{ proposal.phone  }}">
                     </div>
                 </div>
 
@@ -46,32 +46,32 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="address" class="form-label">Endereço:</label>
-                        <input type="text" class="form-control" id="address" name="address" value="{{ proposal.address }}" >
+                        <input type="text" class="form-control" id="address" name="address" value="{{ proposal.address  }}" >
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label for="address_number" class="form-label">Número:</label>
-                        <input type="text" class="form-control" id="address_number" name="address_number" value="{{ proposal.address_number }}" >
+                        <input type="text" class="form-control" id="address_number" name="address_number" value="{{ proposal.address_number  }}" >
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label for="zipcode" class="form-label">CEP:</label>
-                        <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ proposal.zipcode }}" >
+                        <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ proposal.zipcode  }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="neighborhood" class="form-label">Bairro:</label>
-                        <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="{{ proposal.neighborhood }}" >
+                        <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="{{ proposal.neighborhood  }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="city" class="form-label">Cidade:</label>
-                        <input type="text" class="form-control" id="city" name="city" value="{{ proposal.city }}" >
+                        <input type="text" class="form-control" id="city" name="city" value="{{ proposal.city  }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="state_uf_city" class="form-label">Estado:</label>
-                        <input type="text" class="form-control" id="state_uf_city" name="state_uf_city" value="{{ proposal.state_uf_city }}" >
+                        <input type="text" class="form-control" id="state_uf_city" name="state_uf_city" value="{{ proposal.state_uf_city  }}" >
                     </div>
                 </div>
 
@@ -80,19 +80,19 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="value_salary" class="form-label">Salário:</label>
-                        <input type="text" class="form-control" id="value_salary" name="value_salary" value="{{ proposal.value_salary }}" >
+                        <input type="text" class="form-control" id="value_salary" name="value_salary" value="{{ proposal.value_salary   }}" >
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="value_operation" class="form-label">Valor da Operação:</label>
-                        <input type="text" class="form-control" id="value_operation" name="value_operation" value="{{ proposal.value_operation }}" >
+                        <input type="text" class="form-control" id="value_operation" name="value_operation" value="{{ proposal.value_operation  }}" required >
                     </div>
 
                     <div class="col-md-12 mb-3">
                         <label for="operation_select" class="form-label">Operação:</label>
-                        <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select }}" >
+                        <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select  }}" >
                     </div> 
-
+                    
                     <div class="col-md-12 mb-3">
                         <label for="table_id" class="form-label">Tabela Cadastrada:</label>
                         <div class="form-control-plaintext">
@@ -100,7 +100,7 @@
                                 {% for convenio in banker.financial_agreements %}
                                     {% for table in convenio.tables_finance %}
                                         {% if proposal.table_id == table.id %}
-                                            <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                            <strong data-table-id="{{ table.id }}">{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}
@@ -113,24 +113,26 @@
                             <label for="tableSearchInput" class="form-label">Buscar Tabela:</label>
                             <input type="text" id="tableSearchInput" class="form-control" placeholder="Digite o código da tabela...">
                         </div>
-                    
-                        <div class="col-md-6">
-                            <label for="tableSelectProposal" class="form-label">Selecione a Tabela:</label>
-                            <select class="form-select" id="tableSelectProposal" name="tableSelectProposal">
-                                <option value="">Escolha...</option>
-                                {% for banker in bankers %}
-                                    {% for convenio in banker.financial_agreements %}
-                                        {% for table in convenio.tables_finance %}
-                                            <option class="table-options" data-convenio-id="{{ convenio.id }}" value="{{ table.id }}">
-                                                <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
-                                            </option>
-                                        {% endfor %}
-                                    {% endfor %}
-                                {% endfor %}
-                            </select>
-                        </div>
                     </div>
 
+                    <div class="col-md-6">
+                        <label for="tableSelectProposal" class="form-label">Selecione a Tabela:</label>
+                        <select class="form-select" id="tableSelectProposal" name="tableSelectProposal" required>
+                            <option value="">Escolha...</option>
+                            {% for banker in bankers %}
+                                {% for convenio in banker.financial_agreements %}
+                                    {% for table in convenio.tables_finance %}
+                                        <option class="table-options" data-convenio-id="{{ convenio.id }}" 
+                                            value="{{ table.id }}"
+                                            {% if proposal.table_id == table.id %} selected {% endif %}>
+                                            <strong>{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                        </option>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
                     <br><br>
                     <div class="col-md-12 mb-3">
                         <label for="conv_id" class="form-label">Convenio Cadastrado:</label>
@@ -152,7 +154,7 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="select_banker_payment" class="form-label">Operação de Pagamento:</label>
+                        <label for="select_banker_payment" class="form-label">Ordem de Pagamento:</label>
                         <input type="text" class="form-control" id="select_banker_payment" name="select_banker_payment" value="{{ proposal.select_banker_payment }}" >
                     </div>
                 </div>
@@ -175,18 +177,20 @@
                 </div>
                 
                 <div class="row">
-                    {% for field, paths in image_paths.items() %}
+                    {% for field, image in image_paths.items() %}
                         <div class="col-md-6">
-                            <h5 class="mt-4 mb-3">{{ field | replace('_', ' ') }}</h5>
-                            {% for path in paths %}
+                            <h5 class="mt-4 mb-3">{{ field | replace('_', ' ') | capitalize }}:</h5>
+                            {% if image %}
                                 <div class="img-wrapper">
-                                    <img src="{{ url_for('proposal.serve_image', filename=path) }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
-                                    <button type="button" class="btn btn-danger btn-sm remove-image" data-field="{{ field }}" data-path="{{ path }}">Remover</button>
+                                    <img src="data:image/jpeg;base64,{{ image }}" alt="{{ field }}" class="img-thumbnail" style="max-width: 150px; cursor: pointer;">
+                                    <button type="button" class="btn btn-danger btn-sm remove-image" data-field="{{ field }}">Remover</button>
                                 </div>
-                            {% endfor %}
+                            {% else %}
+                                <p>Nenhuma Imagem Cadastrada</p>
+                            {% endif %}
                         </div>
                     {% endfor %}
-                </div>                                                         
+                </div>               
             
                 <hr>
                 <h5 class="mt-4 mb-3">Registrar imagens:</h5>
@@ -274,6 +278,6 @@
 
 <script src="{{ url_for('static', filename='js/proposal/EditProposal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/proposal/removeImage.js') }}"></script>
-<script src="{{ url_for('static', filename='js/proposal/EditNewProposal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proposal/putProposal.js') }}"></script>
 <script src="{{ url_for('static', filename='js/proposal/SearchTables.js') }}"></script>
 {% endblock %}

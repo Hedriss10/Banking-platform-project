@@ -50,7 +50,6 @@ def creat_proposal():
     public_key_str = get_public_key_str()
     return render_template("proposal/creat_proposal.html", bankers=bankers, public_key=public_key_str)
 
-
 @bp_proposal.route("/search-tables", methods=['GET'])
 @login_required
 def search_tables():
@@ -58,16 +57,16 @@ def search_tables():
     search_term = request.args.get('query', '')
     return ProposalControllers(current_user=current_user).filter_tables_with_search(search_term=search_term)
 
-
 @bp_proposal.route("/proposal-status")
 @login_required
 def state_proposal():
-    """
-    Retorna o estado atual das propostas do usuário.
+    """ State Proposal
+        Function to return the entire list of user proposals filtered by the unique key
     Returns:
-        dict: retorna os dados das propostas.
+        _type_: args 
+        return list proposal filter by id 
     """
-
+    
     page = request.args.get('page', 1, type=int)
     per_page = 10
     search_term = request.args.get('search', '').lower()
@@ -78,7 +77,6 @@ def state_proposal():
         return jsonify(proposal_data)
     
     return render_template("proposal/state_proposal.html", proposal=proposal_data, pagination=tables_paginated)
-
 
 @bp_proposal.route("/proposal/new-proposal", methods=['POST'])
 @login_required
@@ -125,23 +123,24 @@ def add_proposal():
         current_app.logger.error("Erro ao processar o formulário: %s", e)
         return jsonify({'error': str(e)}), 500
 
-
 @bp_proposal.route("/proposal/edit-proposal/<int:id>", methods=['GET', 'POST'])
 @login_required
 def edit_proposal(id):
-    """Função para editar proposta"""
-    
-    bankers, proposal = ProposalControllers(current_user=current_user).edit_proposal_controllers(request=request, id=id)
-    
-    if proposal.pendente_digitacao == 0:
-        flash('Você não pode editar esta proposta. Verifique se ela está bloqueada ou já foi finalizada.', 'danger')
-        return redirect(url_for('proposal.state_proposal'))
-    elif proposal.pendente_digitacao != 0:
-        db.session.commit()
-        return redirect(url_for('proposal.state_proposal'))
-    else:  
-        return render_template("proposal/edit_proposal.html", bankers=bankers, proposal=proposal, image_paths=image_paths)
+    """ 
+        Edit Proposal
+        Function to edit the proposal, there is a business rule, where if the operational sector collects the proposal, there is no way to edit it anymore
+    Args:
+        id (_type_): id proposal
 
+    Returns:
+        _type_: bankers, proposal, image_paths
+    """
+    
+    bankers, proposal, image_paths = ProposalControllers(current_user=current_user).edit_proposal_controllers(request=request, id=id)    
+    if proposal.pendente_digitacao == True:
+        return render_template("proposal/edit_proposal.html", bankers=bankers, proposal=proposal, image_paths=image_paths)
+    else: 
+        return redirect(url_for('proposal.state_proposal'))
 
 @bp_proposal.route('/proposal/<int:proposal_id>/<string:field>')
 @login_required
@@ -182,15 +181,13 @@ def delete_proposal(id):
         current_app.logger.error(f"Erro ao excluir a proposta: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @bp_proposal.route('/proposal/remove-image/<int:proposal_id>', methods=['POST'])
 @login_required
 def remove_image(proposal_id):
     data = request.get_json()
     field = data.get('field')
-    path = data.get('path')
-
-    result = ProposalControllers().remove_image_proposal_controllers(proposal_id, field)
+    
+    result = ProposalControllers(current_user=current_user.id).remove_image_proposal_controllers(proposal_id, field)
 
     if result:
         db.session.commit()

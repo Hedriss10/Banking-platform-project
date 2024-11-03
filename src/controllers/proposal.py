@@ -1,13 +1,18 @@
-import json
+import base64
 
+from src import db
 from sqlalchemy.orm import joinedload
-from flask import current_app, jsonify, flash, redirect, url_for
+from flask import current_app, jsonify
 from src.models.bsmodels import Proposal, Banker, FinancialAgreement, TablesFinance
 from datetime import datetime
+
+import json
 
 
 def get_nullable_value(value):
     return value if value not in ('', None) else None
+
+
 
 
 class ProposalControllers:
@@ -16,9 +21,7 @@ class ProposalControllers:
         self.current_user = current_user
 
     def state_proposal_controllers(self, search_term, page, per_page):
-        
         query = Proposal.query.filter_by(creator_id=self.current_user)
-        
         if search_term:
             query = query.filter(
                 Proposal.name.ilike(f'%{search_term}%') |  # Filtrar pelo nome da proposta
@@ -37,8 +40,8 @@ class ProposalControllers:
             'id': p.id,
             'creator_name': p.creator.username if p.creator else 'Desconhecido',
             'name': p.name,
-            'created_at': p.created_at,
-            'operation_select': p.operation_select,
+            'created_at': p.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'operation_select': p.operation_select if p.operation_select else 'Nenhuma Tabela Cadastrada',
             'cpf': p.cpf,
             'aguardando_digitacao': p.aguardando_digitacao,
             'pendente_digitacao': p.pendente_digitacao,
@@ -100,7 +103,7 @@ class ProposalControllers:
 
     def add_proposal_controllers(self, request , form_data):
         """
-            _add proposal controllers_
+            add proposal controllers
             def for add controllers proposal in database. 
         Args:
             request (_type_): request of frontend.
@@ -112,10 +115,10 @@ class ProposalControllers:
         try:
             new_proposal = Proposal(
             creator_id=self.current_user.id,
-            banker_id=get_nullable_value(form_data.get('bankSelect')),
+            banker_id=form_data.get('bankSelect') or None,
             created_at=datetime.now(),
-            conv_id=get_nullable_value(form_data.get('convenioSelectProposal')),
-            table_id=get_nullable_value(form_data.get('tableSelectProposal')),
+            conv_id=form_data.get('convenioSelectProposal') or None,
+            table_id=form_data.get('tableSelectProposal') or None,
             operation_select=get_nullable_value(form_data.get('operationselect')),
             matricula=get_nullable_value(form_data.get('matricula')),
             passowrd_chek=get_nullable_value(form_data.get('senhacontracheque')),
@@ -194,32 +197,41 @@ class ProposalControllers:
             raise
             
     def edit_proposal_controllers(self, request, id):
-            
         bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
         proposal = Proposal.query.get_or_404(id)
-            
-        if proposal.pendente_digitacao == 0:
-            flash('Você não pode editar esta proposta. Verifique se ela está bloqueada ou já foi finalizada.', 'danger')
-            return redirect(url_for('proposal.state_proposal'))
-    
-        if request.method == 'POST':
-            # proposal.name = request.form.get('name')
-            proposal.email = request.form.get('email')
-            proposal.date_year = datetime.strptime(request.form.get('date_year'), "%Y-%m-%d").date()
-            proposal.sex = request.form.get('sex')
-            proposal.phone = request.form.get('phone')
-            proposal.address = request.form.get('address')
-            proposal.address_number = request.form.get('address_number')
-            proposal.zipcode = request.form.get('zipcode')
-            proposal.neighborhood = request.form.get('neighborhood')
-            proposal.city = request.form.get('city')
-            proposal.state_uf_city = request.form.get('state_uf_city')
-            proposal.value_salary = request.form.get('value_salary')
-            proposal.table_id = request.form.get('tableSelectProposal')
-            proposal.conv_id = request.form.get('convenioSelectProposal')
         
-        return bankers, proposal
-                
+        fields = ["email", "sex", "phone", "address", "address_number", "zipcode", "neighborhood", "city", "state_uf_city", "value_salary", "select_banker_payment_type", "select_banker_payment", "value_operation", "operation_select"]
+
+        for field in fields:
+            setattr(proposal, field, getattr(proposal, field) or "")
+
+        image_paths = {field: (base64.b64encode(getattr(proposal, field)).decode('utf-8') if getattr(proposal, field) else None) for field in ['rg_cnh_completo', 'rg_frente', 'rg_verso', 'contracheque',  'extrato_consignacoes', 'comprovante_residencia', 'selfie',  'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss' ]}
+
+        if request.method == 'POST':
+            proposal_fields = {
+                'email': 'email', 'date_year': 'date_year', 'sex': 'sex', 'phone': 'phone',
+                'address': 'address', 'address_number': 'address_number', 'zipcode': 'zipcode',
+                'neighborhood': 'neighborhood', 'city': 'city', 'state_uf_city': 'state_uf_city',
+                'value_salary': 'value_salary', 'table_id': 'tableSelectProposal' , 'conv_id': 'convenioSelectProposal' , 'value_operation': 'value_operation'}
+            
+            for field, form_key in proposal_fields.items():
+                value = request.form.get(form_key)
+                if form_key == 'date_year' and value:
+                    value = datetime.strptime(value, "%Y-%m-%d").date()
+                setattr(proposal, field, value)
+
+            status_fields = [
+                'aguardando_digitacao', 'pendente_digitacao', 'contrato_digitacao', 
+                'aguardando_aceite_do_cliente', 'aceite_feito_analise_do_banco', 
+                'contrato_pendente_pelo_banco', 'aguardando_pagamento', 'contratopago'
+            ]
+            for field in status_fields:
+                setattr(proposal, field, field in request.form)
+
+            db.session.commit()
+                    
+        return bankers, proposal, image_paths
+           
     def delete_proposal_controllers(self, id):
         proposal = Proposal.query.get_or_404(id)
         return proposal

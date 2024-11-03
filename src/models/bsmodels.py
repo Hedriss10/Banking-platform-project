@@ -178,6 +178,7 @@ class Proposal(db.Model, UserMixin):
     prazo = db.Column(db.String(30))
     value_operation = db.Column(db.Numeric(precision=10, scale=3), nullable=True, default=0.0)
     
+    # photos in database
     rg_cnh_completo = db.Column(db.LargeBinary, nullable=True)
     rg_frente = db.Column(db.LargeBinary, nullable=True)
     rg_verso = db.Column(db.LargeBinary, nullable=True)

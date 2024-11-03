@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     option.style.display = 'none';
                 }
-            });
+            }); 
         });
     } else {
         console.error("Campo de busca ou select de tabela não encontrado!");
