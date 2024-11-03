@@ -9,6 +9,7 @@ from src import db
 from sqlalchemy.orm import joinedload
 from src.utils.proposal import UploadProposal
 from src.models.bsmodels import User, Banker, FinancialAgreement, TablesFinance, Proposal
+
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -40,7 +41,6 @@ def manage_proposal():
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(banks_data)
     return render_template("proposal/manage_proposal.html", bankers=bankers ,banks=banks_data, pagination=tables_paginated)
-
 
 @bp_proposal.route("/creat-proposal", methods=['GET'])
 @login_required
@@ -136,11 +136,21 @@ def edit_proposal(id):
         _type_: bankers, proposal, image_paths
     """
     
-    bankers, proposal, image_paths = ProposalControllers(current_user=current_user).edit_proposal_controllers(request=request, id=id)    
-    if proposal.pendente_digitacao == True:
-        return render_template("proposal/edit_proposal.html", bankers=bankers, proposal=proposal, image_paths=image_paths)
-    else: 
-        return redirect(url_for('proposal.state_proposal'))
+    form_data = None
+    print(request.form)
+    if request.method == 'POST':
+        form_data = request.form
+        response = ProposalControllers(current_user=current_user).edit_proposal_controllers(id=id, request=request, form_data=form_data)
+        return jsonify(response), 200 if response["success"] else 500
+
+    response = ProposalControllers(current_user=current_user).edit_proposal_controllers(id=id, request=request, form_data=form_data)
+        
+    if response["success"]:
+        return render_template("proposal/edit_proposal.html", bankers=response["bankers"], proposal=response["proposal"], image_paths=response["image_paths"])
+    else:
+        print(response["error"])
+        return jsonify({"error": response["error"]}), 500
+    
 
 @bp_proposal.route('/proposal/<int:proposal_id>/<string:field>')
 @login_required

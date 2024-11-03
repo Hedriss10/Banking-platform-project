@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                if (data.success) {
+                if (data.success ) {
                     alert('Proposta atualizada com sucesso!');
-                    window.location.href = "/proposal/state-proposal";
+                    window.location.href = "/state-contract";
                 } else {
                     alert('Erro ao atualizar proposta.');
                 }

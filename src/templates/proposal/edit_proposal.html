@@ -3,110 +3,114 @@
 
 {% block main %}
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Editar Proposta</h2>
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form id="editProposalForm" method="POST" enctype="multipart/form-data" data-proposal-id="{{ proposal.id }}">
-                <!-- Informações Pessoais -->
-                <br>
-                <h5 class="mb-3">Informações Pessoais:</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="name_and_lastname" class="form-label">Nome Completo:</label>
-                        <input type="text" class="form-control" id="name_and_lastname" name="name_and_lastname" value="{{ proposal.name }}" >
-                    </div>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Editar Proposta</h2>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form id="editProposalForm" method="POST" enctype="multipart/form-data" data-proposal-id="{{ proposal.id }}">
+                    <!-- Informações Pessoais -->
+                    <br>
+                    <h5 class="mb-3">Informações Pessoais:</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name_and_lastname" class="form-label">Nome Completo:</label>
+                            <input type="text" class="form-control" id="name_and_lastname" name="name_and_lastname" value="{{ proposal.name }}" >
+                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="dd_year" class="form-label">Data de Nascimento:</label>
-                        <input type="date" class="form-control" id="date_year" name="date_year" value="{{ proposal.date_year.strftime('%Y-%m-%d')  }}" >
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="dd_year" class="form-label">Data de Nascimento:</label>
+                            <input type="date" class="form-control" id="date_year" name="date_year" value="{{ proposal.date_year.strftime('%Y-%m-%d')  }}" >
+                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="email" class="form-label">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ proposal.email  }} " >
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ proposal.email  }} " >
+                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="sex" class="form-label">Sexo:</label>
-                        <select class="form-select" id="sex" name="sex">
-                            <option value="Masculino" {% if proposal.sex == 'Masculino' %}selected{% endif %}>Masculino</option>
-                            <option value="Feminino" {% if proposal.sex == 'Feminino' %}selected{% endif %}>Feminino</option>
-                        </select>
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="sex" class="form-label">Sexo:</label>
+                            <select class="form-select" id="sex" name="sex">
+                                <option value="Masculino" {% if proposal.sex == 'Masculino' %}selected{% endif %}>Masculino</option>
+                                <option value="Feminino" {% if proposal.sex == 'Feminino' %}selected{% endif %}>Feminino</option>
+                            </select>
+                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="phone" class="form-label">Telefone:</label>
-                        <input type="text" class="form-control" id="phone" name="phone" value="{{ proposal.phone  }}">
-                    </div>
-                </div>
-
-                <!-- Endereço -->
-                <h5 class="mt-4 mb-3">Endereço:</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="address" class="form-label">Endereço:</label>
-                        <input type="text" class="form-control" id="address" name="address" value="{{ proposal.address  }}" >
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label for="address_number" class="form-label">Número:</label>
-                        <input type="text" class="form-control" id="address_number" name="address_number" value="{{ proposal.address_number  }}" >
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label for="zipcode" class="form-label">CEP:</label>
-                        <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ proposal.zipcode  }}" >
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="neighborhood" class="form-label">Bairro:</label>
-                        <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="{{ proposal.neighborhood  }}" >
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="city" class="form-label">Cidade:</label>
-                        <input type="text" class="form-control" id="city" name="city" value="{{ proposal.city  }}" >
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="state_uf_city" class="form-label">Estado:</label>
-                        <input type="text" class="form-control" id="state_uf_city" name="state_uf_city" value="{{ proposal.state_uf_city  }}" >
-                    </div>
-                </div>
-
-                <!-- Informações Financeiras -->
-                <h5 class="mt-4 mb-3">Informações Financeiras:</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="value_salary" class="form-label">Salário:</label>
-                        <input type="text" class="form-control" id="value_salary" name="value_salary" value="{{ proposal.value_salary   }}" >
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="value_operation" class="form-label">Valor da Operação:</label>
-                        <input type="text" class="form-control" id="value_operation" name="value_operation" value="{{ proposal.value_operation  }}" required >
-                    </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label for="operation_select" class="form-label">Operação:</label>
-                        <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select  }}" >
-                    </div> 
-                    
-                    <div class="col-md-12 mb-3">
-                        <label for="table_id" class="form-label">Tabela Cadastrada:</label>
-                        <div class="form-control-plaintext">
-                            {% for banker in bankers %}
-                                {% for convenio in banker.financial_agreements %}
-                                    {% for table in convenio.tables_finance %}
-                                        {% if proposal.table_id == table.id %}
-                                            <strong data-table-id="{{ table.id }}">{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endfor %}
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Telefone:</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ proposal.phone  }}">
                         </div>
                     </div>
+
+                    <!-- Endereço -->
+                    <h5 class="mt-4 mb-3">Endereço:</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="address" class="form-label">Endereço:</label>
+                            <input type="text" class="form-control" id="address" name="address" value="{{ proposal.address  }}" >
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label for="address_number" class="form-label">Número:</label>
+                            <input type="text" class="form-control" id="address_number" name="address_number" value="{{ proposal.address_number  }}" >
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label for="zipcode" class="form-label">CEP:</label>
+                            <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ proposal.zipcode  }}" >
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="neighborhood" class="form-label">Bairro:</label>
+                            <input type="text" class="form-control" id="neighborhood" name="neighborhood" value="{{ proposal.neighborhood  }}" >
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">Cidade:</label>
+                            <input type="text" class="form-control" id="city" name="city" value="{{ proposal.city  }}" >
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="state_uf_city" class="form-label">Estado:</label>
+                            <input type="text" class="form-control" id="state_uf_city" name="state_uf_city" value="{{ proposal.state_uf_city  }}" >
+                        </div>
+                    </div>
+
+                    <!-- Informações Financeiras -->
+                    <h5 class="mt-4 mb-3">Informações Financeiras:</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="value_salary" class="form-label">Salário:</label>
+                            <input type="text" class="form-control" id="value_salary" name="value_salary" value="{{ proposal.value_salary   }}" >
+                        </div>
+
+                        {% macro currency_format(value) %}
+                            {{ "{:.0f}".format(value).replace(" ", "").strip() }}
+                        {% endmacro %}
+                        <div class="col-md-6 mb-3">
+                            <label for="value_operation" class="form-label">Valor da Operação:</label>
+                            <input type="text" class="form-control" id="value_operation" name="value_operation" value="{{ (proposal.value_operation|round(0)) }}"  required>
+                        </div>
+                        
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="operation_select" class="form-label">Operação:</label>
+                            <input type="text" class="form-control" id="operation_select" name="operation_select" value="{{ proposal.operation_select  }}" >
+                        </div> 
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="table_id" class="form-label">Tabela Cadastrada:</label>
+                            <div class="form-control-plaintext">
+                                {% for banker in bankers %}
+                                    {% for convenio in banker.financial_agreements %}
+                                        {% for table in convenio.tables_finance %}
+                                            {% if proposal.table_id == table.id %}
+                                                <strong data-table-id="{{ table.id }}">{{ table.name }}</strong> - {{ table.type_table }} - Cod: {{ table.table_code }} - Prazo Início: {{ table.start_term }} - Prazo Fim: {{ table.end_term }} - Comissão: {{ table.rate }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -205,12 +209,12 @@
                     <div class="col-md-6">
                         <label for="rg_frente" class="form-label">RG - Frente</label>
                         <!--Frente -->
-                        <input type="file" class="form-control" id="rg-cnh-completo" name="rg_frente" multiple>
+                        <input type="file" class="form-control" id="rg_frente" name="rg_frente" multiple>
                     </div>
                     <div class="col-md-6">
                         <label for="rg_verso" class="form-label">RG - Verso</label>
                         <!--Frente-->
-                        <input type="file" class="form-control" id="rg-cnh-completo" name="rg_verso" multiple>
+                        <input type="file" class="form-control" id="rg_verso" name="rg_verso" multiple>
                     </div>
                     <div class="col-md-6">
                         <label for="contracheque" class="form-label">Contracheque</label>

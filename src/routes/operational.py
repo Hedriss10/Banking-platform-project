@@ -45,13 +45,17 @@ def available_contracts_count():
 @bp_operational.route("/operational/edit-proposal/<int:id>", methods=['GET', 'POST'])
 @login_required
 def manage_edit_contract(id):
-    """
-        Edit proposal contract.
-    Renders the form with current proposal data, bankers, and encoded images.
-    """
-    bankers, proposal, image_paths = OperationalControllers(current_user=current_user).manage_edit_contract_controllers(proposal_id=id, request=request)
+    
+    if request.method == 'POST':
+        form_data = request.form
+        response = OperationalControllers(current_user=current_user).manage_edit_contract_controllers(proposal_id=id, form_data=form_data)
+        return jsonify(response), 200 if response["success"] else 500
 
-    return render_template("operational/edit_contract.html", bankers=bankers, proposal=proposal, image_paths=image_paths)
+    response = OperationalControllers(current_user=current_user).manage_edit_contract_controllers(proposal_id=id)
+    if response["success"]:
+        return render_template("operational/edit_contract.html", bankers=response["bankers"], proposal=response["proposal"], image_paths=response["image_paths"])
+    else:
+        return jsonify({"error": response["error"]}), 500
 
 @bp_operational.route('/operational/delete-proposal/<int:id>', methods=['POST'])
 @login_required

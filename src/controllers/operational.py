@@ -1,5 +1,6 @@
 import base64
 
+from flask import jsonify
 from flask import current_app
 from src import db
 from sqlalchemy import desc
@@ -118,47 +119,49 @@ class OperationalControllers:
         available_count = Proposal.query.filter_by(pendente_digitacao=True, is_status=False).count()
         return available_count
     
-    def manage_edit_contract_controllers(self, proposal_id, request):
+    def manage_edit_contract_controllers(self, proposal_id, form_data=None):
+        try:
+            proposal = Proposal.query.get_or_404(proposal_id)
+            bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
 
-        proposal = Proposal.query.get_or_404(proposal_id)
-        bankers = Banker.query.options(joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)).order_by(Banker.name).all()
+            fields = ["email", "sex", "phone", "address", "address_number", "zipcode", "neighborhood", "city", "state_uf_city", "value_salary", "select_banker_payment_type", "select_banker_payment", "value_operation", "operation_select", "obeserve", "pix_type_key"]
+            
+            for field in fields:
+                setattr(proposal, field, getattr(proposal, field) or "")
 
-        # Ensure proposal fields are not None
-        fields = ["email", "sex", "phone", "address", "address_number", "zipcode", "neighborhood", 
-                "city", "state_uf_city", "value_salary", "select_banker_payment_type", 
-                "select_banker_payment", "value_operation", "operation_select", "obeserve", "pix_type_key"]
-      
-        for field in fields:
-            setattr(proposal, field, getattr(proposal, field) or "")
-
-        # Encode image fields in base64 for rendering
-        image_paths = {field: (base64.b64encode(getattr(proposal, field)).decode('utf-8') if getattr(proposal, field) else None) for field in ['rg_cnh_completo', 'rg_frente', 'rg_verso', 'contracheque',  'extrato_consignacoes', 'comprovante_residencia', 'selfie',  'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss' ]}
-
-        if request.method == 'POST':
-            proposal_fields = {
-                'email': 'email', 'date_year': 'date_year', 'sex': 'sex', 'phone': 'phone',
-                'address': 'address', 'address_number': 'address_number', 'zipcode': 'zipcode',
-                'neighborhood': 'neighborhood', 'city': 'city', 'state_uf_city': 'state_uf_city',
-                'value_salary': 'value_salary', 'table_id': 'tableSelectProposal', 'conv_id': 'convenioSelectProposal', 'value_operation' : 'value_operation'
+            image_paths = {
+                field: (base64.b64encode(getattr(proposal, field)).decode('utf-8') 
+                        if getattr(proposal, field) else None)
+                for field in ['rg_cnh_completo', 'rg_frente', 'rg_verso', 'contracheque',  'extrato_consignacoes', 'comprovante_residencia', 'selfie',  'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss']
             }
-            for field, form_key in proposal_fields.items():
-                value = request.form.get(form_key)
-                if form_key == 'date_year' and value:
-                    value = datetime.strptime(value, "%Y-%m-%d").date()
-                setattr(proposal, field, value)
 
-            status_fields = [
-                'aguardando_digitacao', 'pendente_digitacao', 'contrato_digitacao', 
-                'aguardando_aceite_do_cliente', 'aceite_feito_analise_do_banco', 
-                'contrato_pendente_pelo_banco', 'aguardando_pagamento', 'contratopago'
-            ]
-            for field in status_fields:
-                setattr(proposal, field, field in request.form)
+            if form_data:
+                proposal_fields = {
+                    'email': 'email', 'date_year': 'date_year', 'sex': 'sex', 'phone': 'phone',
+                    'address': 'address', 'address_number': 'address_number', 'zipcode': 'zipcode','neighborhood': 'neighborhood', 'city': 'city', 'state_uf_city': 'state_uf_city','value_salary': 'value_salary', 'table_id': 'tableSelectProposal', 'conv_id': 'convenioSelectProposal', 'value_operation': 'value_operation'}
+                
+                for field, form_key in proposal_fields.items():
+                    value = form_data.get(form_key)
+                    if form_key == 'date_year' and value:
+                        value = datetime.strptime(value, "%Y-%m-%d").date()
+                    setattr(proposal, field, value)
 
-            proposal.edit_at = datetime.now()
-            db.session.commit()
+                status_fields = ['aguardando_digitacao', 'pendente_digitacao', 'contrato_digitacao', 'aguardando_aceite_do_cliente', 'aceite_feito_analise_do_banco', 'contrato_pendente_pelo_banco', 'aguardando_pagamento', 'contratopago']
+                
+                for field in status_fields:
+                    setattr(proposal, field, field in form_data)
 
-        return bankers, proposal, image_paths
+                proposal.edit_at = datetime.now()
+                db.session.commit()
+                proposal.date_year = proposal.date_year.strftime('%Y-%m-%d')
+                
+                return {"success": True}
+            
+            return {"success": True, "bankers": bankers, "proposal": proposal, "image_paths": image_paths}
+        
+        except Exception as e:
+            db.session.rollback()
+            return {"success": False, "error": str(e)}
 
     def manage_delete_contract_controllers(self, id):
 

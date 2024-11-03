@@ -18,7 +18,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="dd_year" class="form-label">Data de Nascimento:</label>
-                        <input type="date" class="form-control" id="date_year" name="date_year" value="{{ proposal.date_year }}" >
+                        <input type="date" class="form-control" id="date_year" name="date_year" value="{{ proposal.date_year.strftime('%Y-%m-%d') }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">

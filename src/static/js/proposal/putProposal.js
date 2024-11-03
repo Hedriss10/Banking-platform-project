@@ -5,17 +5,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let tableId = '';
 
-    // Captura o table_id se existir
-    if (registeredTableInfo) {
-        tableId = registeredTableInfo.dataset.tableId; // Pega o data-table-id
+    for (let pair of formData.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
     }
-
-    console.log("Captured tableId:", tableId); // Verifique se o valor é correto
 
     if (formElement) {
         formElement.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            const proposalId = this.dataset.proposalId;
+            const formData = new FormData(this);  // Cria um novo objeto FormData
+
+            const fileFields = [
+                'rg_cnh_completo',
+                'rg_frente',
+                'rg_verso',
+                'contracheque',
+                'extrato_consignacoes',
+                'comprovante_residencia',
+                'selfie',
+                'comprovante_bancario',
+                'detalhamento_inss',
+                'historico_consignacoes_inss'
+            ];
+
+            fileFields.forEach(function(field) {
+                const fileInput = document.getElementById(field);
+                if (fileInput && fileInput.files.length > 0) {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        formData.append(field, fileInput.files[i]);  // Adiciona o arquivo ao FormData
+                    }
+                } else {
+                    // Marcar que o campo não foi alterado
+                    formData.append(`${field}_no_change`, 'true');
+                }
+            });
+
+            // Captura o table_id baseado no estado registrado ou seleção
+            if (registeredTableInfo) {
+                tableId = registeredTableInfo.dataset.tableId;
+            }
 
             if (tableId) {
                 formData.append('table_id', tableId); 
@@ -30,11 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('table_id', null); 
             }
 
+            // Captura o valor do campo de operação
             const operationSelect = document.getElementById('operationSelect');
             const operationValue = operationSelect ? operationSelect.value : '';
             formData.append('operation_select', operationValue || null); 
 
-            fetch(`/proposal/edit-proposal/${this.dataset.proposalId}`, {
+            // Envia a requisição para o servidor
+            fetch(`/proposal/edit-proposal/${proposalId}`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -52,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Proposta atualizada com sucesso!');
                     window.location.href = "/proposal-status";
                 }
-                
             })
             .catch(error => {
                 console.error('Erro:', error);
