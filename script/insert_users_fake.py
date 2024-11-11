@@ -11,6 +11,8 @@ from src import db
 from faker import Faker
 from src import create_app
 from src.models.bsmodels import User
+from werkzeug.security import generate_password_hash
+
 
 fake = Faker()
 
@@ -36,7 +38,7 @@ def insert_fake_users(count=100):
             lastname=fake.last_name(),
             type_user_func='Vendedor',
             typecontract="Funcionario",
-            password="12345",
+            password=generate_password_hash("12345"),
             email=fake.unique.email(),
         )
         users.append(new_user)
@@ -57,5 +59,5 @@ if __name__ == "__main__":
     app = create_app()
 
     with app.app_context():
-        # insert_fake_users(100)
-        insert_fake_unique_user()
+        insert_fake_users(100)
+        # insert_fake_unique_user()

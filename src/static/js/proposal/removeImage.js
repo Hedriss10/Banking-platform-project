@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const path = this.dataset.path;
 
                 if (confirm('Tem certeza que deseja remover esta imagem?')) {
-                    // Faz a requisição para o backend removendo a imagem
                     fetch(`/proposal/remove-image/${proposalId}`, {  
                         method: 'POST',
                         headers: {

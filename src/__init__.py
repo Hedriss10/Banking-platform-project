@@ -28,6 +28,7 @@ def create_app():
     elif flask_env == 'production':
         app.debug = False
     
+    db.Model.metadata.schema = 'public'
     db.init_app(app)
     migrate.init_app(app, db)
     

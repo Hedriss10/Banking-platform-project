@@ -1,34 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
     const formElement = document.getElementById('editProposalForm');
-    const searchInput = document.getElementById('tableSearchInput');
     const tableSelect = document.getElementById('tableSelectProposal');
+    const registeredTableInfo = document.querySelector('#registeredTableInfo strong');
 
-    if (searchInput && tableSelect) {
-        searchInput.addEventListener('input', function() {
-            const searchValue = searchInput.value.toLowerCase();
+    let tableId = '';
 
-            const options = tableSelect.querySelectorAll('.table-options');
-            options.forEach(option => {
-                const tableCode = option.textContent.toLowerCase();
-                if (tableCode.includes(searchValue)) {
-                    option.style.display = '';
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-        });
-    } else {
-        console.error("Campo de busca ou select de tabela não encontrado!");
+    for (let pair of formData.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
     }
 
     if (formElement) {
         formElement.addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Impede o envio padrão do formulário
 
             const proposalId = this.dataset.proposalId;
-            const formData = new FormData(this);  
+            const formData = new FormData(this);  // Cria um novo objeto FormData
 
-            var fileFields = [
+            const fileFields = [
                 'rg_cnh_completo',
                 'rg_frente',
                 'rg_verso',
@@ -45,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const fileInput = document.getElementById(field);
                 if (fileInput && fileInput.files.length > 0) {
                     for (let i = 0; i < fileInput.files.length; i++) {
-                        formData.append(field, fileInput.files[i]);
+                        formData.append(field, fileInput.files[i]);  // Adiciona o arquivo ao FormData
                     }
                 } else {
                     // Marcar que o campo não foi alterado
@@ -53,6 +41,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            // Captura o table_id baseado no estado registrado ou seleção
+            if (registeredTableInfo) {
+                tableId = registeredTableInfo.dataset.tableId;
+            }
+
+            if (tableId) {
+                formData.append('table_id', tableId); 
+            } else if (tableSelect) {
+                const selectedTableId = tableSelect.value;
+                if (selectedTableId) {
+                    formData.append('table_id', selectedTableId);
+                } else {
+                    formData.append('table_id', null); 
+                }
+            } else {
+                formData.append('table_id', null); 
+            }
+
+            // Captura o valor do campo de operação
+            const operationSelect = document.getElementById('operationSelect');
+            const operationValue = operationSelect ? operationSelect.value : '';
+            formData.append('operation_select', operationValue || null); 
+
+            // Envia a requisição para o servidor
             fetch(`/proposal/edit-proposal/${proposalId}`, {
                 method: 'POST',
                 body: formData,
@@ -67,11 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                if (data.success) {
+                if (data) {
                     alert('Proposta atualizada com sucesso!');
-                    window.location.href = "/proposal/state-proposal";
-                } else {
-                    alert('Erro ao atualizar proposta.');
+                    window.location.href = "/proposal-status";
                 }
             })
             .catch(error => {

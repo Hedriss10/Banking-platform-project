@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     option.style.display = 'none';
                 }
-            });
+            }); 
         });
     } else {
         console.error("Campo de busca ou select de tabela não encontrado!");
@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                if (data.success) {
+                if (data.success ) {
                     alert('Proposta atualizada com sucesso!');
-                    window.location.href = "/proposal/state-proposal";
+                    window.location.href = "/state-contract";
                 } else {
                     alert('Erro ao atualizar proposta.');
                 }
