@@ -95,6 +95,7 @@ class User(db.Model, UserMixin):
     is_block = db.Column(db.Boolean, nullable=False, default=False)
     is_inactive = db.Column(db.Boolean, nullable=False, default=False)
     is_comission = db.Column(db.Boolean, nullable=False, default=False)
+    is_deleted = db.Column(db.Boolean, nullable=False, default=False)
     created_on = db.Column(db.DateTime, nullable=False, default=func.now())
     
     # Relationships
