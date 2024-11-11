@@ -69,8 +69,8 @@ def creat_proposal():
     bankers = Banker.query.options(
         joinedload(Banker.financial_agreements).joinedload(FinancialAgreement.tables_finance)
     ).order_by(Banker.name).all()
-    public_key_str = get_public_key_str()
-    return render_template("proposal/creat_proposal.html", bankers=bankers, public_key=public_key_str)
+    # public_key_str = get_public_key_str()
+    return render_template("proposal/creat_proposal.html", bankers=bankers)
 
 
 @bp_proposal.route("/search-tables", methods=['GET'])
@@ -145,33 +145,7 @@ def state_proposal():
 @login_required
 def add_proposal():
     """Function for register proposal"""
-    encrypted_data = request.form.get('encrypted_data')
-    encrypted_key = request.form.get('encrypted_key')
-    iv_base64 = request.form.get('iv')
-
-    if not encrypted_data or not encrypted_key or not iv_base64:
-        return jsonify({'error': 'Dados criptografados faltando'}), 400
-
-    try:
-        aes_key = load_private_key().decrypt(base64.b64decode(encrypted_key),padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(),label=None))
-    except Exception as e:
-        current_app.logger.error(f"Erro ao descriptografar a chave AES: {e}")
-        return jsonify({'error': 'Erro ao descriptografar a chave AES'}), 400
-
-    try:
-        encrypted_data_bytes = base64.b64decode(encrypted_data)
-        iv = base64.b64decode(iv_base64)
-
-        aesgcm = AESGCM(aes_key)
-        data_bytes = aesgcm.decrypt(iv, encrypted_data_bytes, None)
-
-        json_string = data_bytes.decode('utf-8')
-        form_data = json.loads(json_string)
-        
-    except Exception as e:
-        current_app.logger.error(f"Erro ao descriptografar os dados: {e}")
-        return jsonify({'error': 'Erro ao descriptografar os dados do formulário'}), 400
-    
+    form_data = request.form
 
     try:
         new_proposal = Proposal(
