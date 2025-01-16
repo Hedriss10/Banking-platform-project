@@ -1,0 +1,16 @@
+commands:
+  dev:
+    command: "cd requirements && pip install -r dev.txt"
+    help: "Rav is a command line tool to run a dev environment."
+
+  main:
+    command: "cd requirements && pip install -r main.txt"
+    help: "Rav is a command line tool to run the main environment."
+
+  set_env_dev:
+    command: "python3 manage.py"
+    help: "Executando o projeto em desenvolvimento."
+
+  set_env_main:
+    command: "cd commands && python3 prd.py"
+    help: "Executando o projeto em produção."

@@ -4,14 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (proposalForm) {
         const proposalId = proposalForm.dataset.proposalId;
 
-        // Captura todos os botões de remoção de imagem
         document.querySelectorAll('.remove-image').forEach(button => {
             button.addEventListener('click', function() {
                 const field = this.dataset.field;
                 const path = this.dataset.path;
 
                 if (confirm('Tem certeza que deseja remover esta imagem?')) {
-                    // Faz a requisição para o backend removendo a imagem
                     fetch(`/proposal/remove-image/${proposalId}`, {  
                         method: 'POST',
                         headers: {

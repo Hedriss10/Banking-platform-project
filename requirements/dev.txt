@@ -16,6 +16,7 @@ dill==0.3.8
 et-xmlfile==1.1.0
 fabric==3.2.2
 Faker==28.1.0
+fire==0.7.0
 Flask==3.0.3
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
@@ -28,8 +29,10 @@ isort==5.13.2
 itsdangerous==2.2.0
 Jinja2==3.1.4
 Mako==1.3.5
+markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mccabe==0.7.0
+mdurl==0.1.2
 numpy==1.26.4
 openpyxl==3.1.4
 packaging==24.1
@@ -38,7 +41,9 @@ paramiko==3.4.1
 pillow==10.4.0
 platformdirs==4.3.6
 pluggy==1.5.0
+psycopg2-binary==2.9.10
 pycparser==2.22
+Pygments==2.19.1
 pylint==3.3.1
 PyNaCl==1.5.0
 pytest==8.2.2
@@ -47,9 +52,13 @@ python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.1
 pytz==2024.1
+PyYAML==6.0.2
+rav==0.0.9
 requests==2.32.3
+rich==13.9.4
 six==1.16.0
 SQLAlchemy==2.0.30
+termcolor==2.5.0
 tomlkit==0.13.2
 typing_extensions==4.12.0
 tzdata==2024.1
