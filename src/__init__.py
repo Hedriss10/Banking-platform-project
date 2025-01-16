@@ -1,35 +1,14 @@
 from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
-from flask_migrate import Migrate
-from src.config import config 
+from src.settings._base import config
 from flask import flash, redirect, url_for
 from functools import wraps
 
-from src.config import flask_env
-
-
-
-db = SQLAlchemy()
-migrate = Migrate()
 login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-    
     app.config.from_object(config)
-    
-    if app.config.get('DEBUG', False): # brutal force debug in development
-        app.debug = True
-        
-    if flask_env == 'development':
-        app.debug = True
-    
-    elif flask_env == 'production':
-        app.debug = False
-    
-    db.init_app(app)
-    migrate.init_app(app, db)
     
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = "danger"
@@ -63,7 +42,6 @@ def create_app():
         return render_template('partials/404.html'), 404
     
     return app
-
 
 def check_session_token(f):
     from src.models.bsmodels import User

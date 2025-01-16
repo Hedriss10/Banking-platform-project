@@ -3,7 +3,7 @@ import os
 from psycopg2 import InterfaceError
 from psycopg2 import sql
 from typing import Optional, List, Dict
-
+from src.settings._base import config
 
 class PgAdmin(metaclass=type):
 
@@ -16,15 +16,15 @@ class PgAdmin(metaclass=type):
 
     def __init__(self):
         if not hasattr(self, 'connect'):
-            self.dbname = os.environ.get("database")
-            self.host = os.environ.get("host")
-            self.user = os.environ.get("username")
-            self.password = os.environ.get("password")
-            self.port = os.environ.get("port")
+            self.dbname = config.DATABASE
+            self.host = config.DB_HOST
+            self.user = config.USERNAME
+            self.password = config.PASSWORD
+            self.port = config.DB_PORT
             self.connect: Optional[psycopg2.extensions.connection] = None
 
     def connect_postgresql(self):
-        if not self.connect:  # Verifica se a conexão já está ativa
+        if not self.connect:
             try:
                 self.connect = psycopg2.connect(
                     dbname=self.dbname,
@@ -128,4 +128,4 @@ class PgAdmin(metaclass=type):
             except Exception as e:
                 print(f"Erro ao fechar a conexão: {e}")
             finally:
-                self.connect = None
+                self.connect = None  # Sempre resetar self.connect

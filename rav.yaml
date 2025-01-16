@@ -14,3 +14,7 @@ commands:
   set_env_main:
     command: "cd commands && python3 prd.py"
     help: "Executando o projeto em produção."
+
+  test:
+    command: "pytest --cov=src --cov-report=term-missing"
+    help: "Executando o projeto em desenvolvimento."
