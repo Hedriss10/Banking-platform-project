@@ -6,9 +6,13 @@ function setupUpdatePassword() {
         formData.append("userId", document.getElementById('userId').value);
         formData.append("newPassword", document.getElementById('newPassword').value);
 
+
         fetch('/update-user', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                emai: document.getElementById("email").value
+            }
         })
         .then(response => response.json())  // Diretamente processa o JSON
         .then(data => {

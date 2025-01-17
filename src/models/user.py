@@ -37,6 +37,17 @@ class UserModels:
         """
         return query
 
+    def get_unique_user(self) -> None:
+        query = f"""
+            SELECT 
+                id, cpf, username, lastname, email, role, is_first_acess, create_at, COUNT(*) OVER() AS full_count
+            FROM 
+                public.user u
+            WHERE u.is_acctive=false AND u.is_deleted=false
+        """
+        return query
+
+
     def get_user(self, id: int) -> None:
         query = f"""
             SELECT 

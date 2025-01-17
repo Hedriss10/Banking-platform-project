@@ -9,7 +9,7 @@
                     <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
                         <div class="d-flex justify-content-center py-4">
                             <a href="index.html" class="logo d-flex align-items-center w-auto">
-                                <span class="d-none d-lg-block">MaisBs</span>
+                                <span class="d-none d-lg-block">maisbs</span>
                             </a>
                         </div>
 
@@ -22,33 +22,13 @@
                                     <p class="text-center small">Seu <strong>CPF</strong> e senha para realizar o login
                                     </p>
                                 </div>
-                                {% with messages = get_flashed_messages(with_categories=true) %}
-                                {% if messages %}
-                                <div class="flash-messages">
-                                    {% for category, message in messages %}
-                                    {% if category == 'error' %}
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                    {% else %}
-                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                {% endwith %}
-                                <form class="row g-3 needs-validation" novalidate method="POST" action="{{url_for('auth.login')}}">
+                                <form class="row g-3 needs-validation" id="SendLoginUser" novalidate method="POST">
 
                                     <div class="col-12">
                                         <label for="yourUsername" class="form-label">CPF:</label>
                                         <div class="input-group has-validation">
                                             <span class="input-group-text" id="inputGroupPrepend">CPF</span>
-                                            <input type="text" name="user" class="form-control" id="user"
-                                                required>
+                                            <input type="text" name="user" class="form-control" id="user" equired>
                                             <div class="invalid-feedback">Seu CPF.</div>
                                         </div>
                                     </div>
@@ -82,6 +62,5 @@
 
     </div>
 </main>
-<script src="{{ url_for('static', filename='js/login/login.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/login/manageLogin.js') }}"></script>
 {% endblock %}
