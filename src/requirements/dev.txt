@@ -1,4 +1,3 @@
-alembic==1.13.1
 astroid==3.3.4
 bcrypt==4.2.0
 blinker==1.8.2
@@ -17,7 +16,7 @@ et-xmlfile==1.1.0
 fabric==3.2.2
 Faker==28.1.0
 fire==0.7.0
-Flask==3.0.3
+Flask
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
