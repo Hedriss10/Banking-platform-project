@@ -1,11 +1,21 @@
 class ManagerLogin {
     constructor() {
-        this.url_login = '/login';
-        this.url_password = '/update-password';
+        this.url_login = '/login'; // rotas do backend
+        this.url_password = '/update-password'; // rotas do backend
     }
 
-    setupUpdatePassword() {
-        document.getElementById('updatePasswordForm').addEventListener('submit', (e) => {
+    showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.className = `alert alert-${type}`;
+        notification.innerText = message;
+        notification.classList.remove('d-none');
+        setTimeout(() => {
+            notification.classList.add('d-none');
+        }, 5000);
+    }
+
+    async setupUpdatePassword() {
+        document.getElementById('updatePasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const formData = {
@@ -14,75 +24,89 @@ class ManagerLogin {
                 email: document.getElementById("email").value,
             };
 
-            fetch(this.url_password, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    const notification = document.getElementById('notification');
-                    if (data.success) {
-                        notification.className = 'alert alert-success';
-                        notification.innerText = data.message;
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 3000);
-                    } else {
-                        notification.className = 'alert alert-danger';
-                        notification.innerText = data.error || 'Erro ao atualizar a senha';
-                    }
-                    notification.style.display = 'block';
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    const notification = document.getElementById('notification');
-                    notification.className = 'alert alert-danger';
-                    notification.innerText = 'Ocorreu um erro ao atualizar a senha';
+            try {
+                const response = await fetch(this.url_password, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
                 });
+
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        throw new Error('Dados inválidos. Verifique e tente novamente.');
+                    }
+                    throw new Error(`Erro: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    this.showNotification(data.error || 'Erro ao atualizar a senha', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification(error.message || 'Ocorreu um erro ao atualizar a senha', 'danger');
+            }
         });
     }
 
-    setupLogin() {
-        document.getElementById('SendLoginUser').addEventListener('submit', (e) => {
+    async setupLogin() {
+        document.getElementById('SendLoginUser').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const email = document.getElementById('emailLogin').value;
-            const password = document.getElementById('passwordLogin').value;
+            const formData = new FormData();
+            formData.append("cpfLogin", document.getElementById('cpfLogin').value).trim();
+            formData.append("passwordLogin", document.getElementById('passwordLogin').value);
 
-            fetch(this.url_login, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    const notification = document.getElementById('notification');
-                    if (data.success) {
-                        alert('Seja bem-vindo!');
-                        // Redirecionar para a página operacional, se necessário
-                        // window.location.href = '/operational';
-                    } else {
-                        notification.className = 'alert alert-danger';
-                        notification.innerText = data.error || 'Erro ao logar';
-                        notification.style.display = 'block';
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    const notification = document.getElementById('notification');
-                    notification.className = 'alert alert-danger';
-                    notification.innerText = 'Erro ao tentar logar!';
-                    notification.style.display = 'block';
+
+            if (!cpfLogin || !passwordLogin) {
+                this.showNotification('CPF e senha são obrigatórios!', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(this.url_login, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
                 });
+
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        throw new Error('CPF ou senha inválidos. Tente novamente.');
+                    }
+                    throw new Error(`Erro: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showNotification('Seja bem-vindo!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard'; // Redireciona após o login
+                    }, 2000);
+                } else {
+                    this.showNotification(data.error || 'Erro ao logar', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.showNotification(error.message || 'Erro ao tentar logar!', 'danger');
+            }
         });
     }
 }
 
-const managerLogin = new ManagerLogin();
-managerLogin.setupUpdatePassword();
-managerLogin.setupLogin();
+document.addEventListener("DocumentContentLoaded", function() {
+    const managerLogin = new ManagerLogin();
+    managerLogin.setupUpdatePassword();
+    managerLogin.setupLogin();
+});

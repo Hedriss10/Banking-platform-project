@@ -9,6 +9,8 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     SECRET_KEY = os.urandom(24)
+    SQLALCHEMY_DATABASE_URI = os.getenv("DEV_DATABASE_URL")
+    SQLALCHEMY_POOL_RECYCLE = 3600 
 
 class DevelopmentConfig(Config):
     ENV = "development"

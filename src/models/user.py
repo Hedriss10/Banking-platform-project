@@ -1,10 +1,9 @@
-from src.db.pg import Base
-
 from sqlalchemy import (
     Column, Integer, String, Boolean, Text, DateTime, ForeignKey, func
 )
+from src import db
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True, autoincrement=True)
     cpf = Column(String(100), unique=True, nullable=True)
@@ -27,7 +26,7 @@ class User(Base):
     reset_password_by = Column(Integer, nullable=True)
     action_reset_password_text = Column(Text, nullable=True)
 
-class Role(Base):
+class Role(db.Model):
     __tablename__ = 'role'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(250), nullable=True)
