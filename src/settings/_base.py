@@ -14,22 +14,15 @@ class DevelopmentConfig(Config):
     ENV = "development"
     DEBUG = os.getenv("DEV_DEBUG")
     PORT = os.getenv("PORT", "5001")
-    DATABASE = os.getenv("DB_DEV_DATABASE")
-    USERNAME = os.getenv("DB_DEV_USERNAME")
-    PASSWORD =  os.getenv("DB_DEV_PASSWORD")
-    DB_HOST = os.getenv("DB_DEV_HOST")
-    DB_PORT = os.getenv("DB_DEV_PORT")
-    
+    DEV_DATABASE_URL = os.getenv("DEV_DATABASE_URL")
 
 class ProductionConfig(Config):    
     ENV = "production"
     DEBUG = os.getenv("PRD_DEBUG")
     PORT = os.getenv("PORT", "5002")
-    DATABASE = os.getenv("DB_PRD_DATABASE")
-    USERNAME = os.getenv("DB_PRD_USERNAME")
-    PASSWORD =  os.getenv("DB_PRD_PASSWORD")
-    DB_HOST = os.getenv("DB_PRD_HOST")
-    DB_PORT = os.getenv("DB_PRD_PORT")
+    PRD_DATABASE_URL = os.getenv("PRD_DATABASE_URL")
+    
+    
 
 config_by_name = {'development': DevelopmentConfig, 'production': ProductionConfig}
 
