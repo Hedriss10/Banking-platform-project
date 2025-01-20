@@ -1,32 +1,35 @@
 import os
 from decouple import config as decouple_config
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config(object):
     ENV = os.getenv("FLASK_ENV", "development")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Upload de 16 MB
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
     SECRET_KEY = os.urandom(24)
 
 class DevelopmentConfig(Config):
     ENV = "development"
-    DEBUG = True
+    DEBUG = os.getenv("DEV_DEBUG")
     PORT = os.getenv("PORT", "5001")
-    DATABASE = os.getenv("DATABASE", "maisbs")
-    USERNAME = os.getenv("USERNAME", "maisbs_user")
-    PASSWORD = os.getenv("PASSWORD", "maisbs@master")
-    DB_HOST = os.getenv("HOST_DB", "192.168.0.242")
-    DB_PORT = os.getenv("HOST_DB", "5432")
+    DATABASE = os.getenv("DB_DEV_DATABASE")
+    USERNAME = os.getenv("DB_DEV_USERNAME")
+    PASSWORD =  os.getenv("DB_DEV_PASSWORD")
+    DB_HOST = os.getenv("DB_DEV_HOST")
+    DB_PORT = os.getenv("DB_DEV_PORT")
     
 
 class ProductionConfig(Config):    
     ENV = "production"
-    DEBUG = False
+    DEBUG = os.getenv("PRD_DEBUG")
     PORT = os.getenv("PORT", "5002")
-    DATABASE = os.getenv("DATABASE", "maisbsdv")
-    USERNAME = os.getenv("USERNAME", "maisbs_user_dev")
-    PASSWORD = os.getenv("PASSWORD", "maisbs@master")
-    DB_HOST = os.getenv("HOST_DB", "192.168.0.242")
-    DB_PORT = os.getenv("HOST_DB", "5432")
+    DATABASE = os.getenv("DB_PRD_DATABASE")
+    USERNAME = os.getenv("DB_PRD_USERNAME")
+    PASSWORD =  os.getenv("DB_PRD_PASSWORD")
+    DB_HOST = os.getenv("DB_PRD_HOST")
+    DB_PORT = os.getenv("DB_PRD_PORT")
 
 config_by_name = {'development': DevelopmentConfig, 'production': ProductionConfig}
 

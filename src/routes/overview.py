@@ -1,5 +1,5 @@
 from flask import Blueprint , render_template
-from src import check_session_token
+from flask_login import current_user
 
 bp_overview = Blueprint("overview", __name__, template_folder="templates")
 
@@ -10,21 +10,13 @@ def home():
     return render_template("partials/home.html")
 
 
-# @bp_overview.route("/dashboard")
-# @login_required
-# def dashboard():
-#     """Function for processing dash board"""
-#     return render_template("partials/dashboard.html")
+@bp_overview.route("/dashboard")
+def dashboard():
+    """Function for processing dash board"""
+    return render_template("partials/dashboard.html")
 
 
-# @bp_overview.context_processor
-# def inject_user():
-#     return dict(current_user=current_user)
-
-
-# @bp_overview.route("/profile")
-# @login_required
-# def profile():
-#     user_id = current_user.id
-#     user = User.query.filter_by(user_identification=user_id).first()
-#     return render_template("user/profile.html", users=user)
+@bp_overview.route("/profile")
+def profile():
+    user_id = current_user.id
+    return render_template("user/profile.html", users=user_id)

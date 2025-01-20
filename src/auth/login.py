@@ -1,31 +1,18 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash
-from werkzeug.security import check_password_hash
 from src.core.login import LoginCore
-from flask_login import login_user
-from src.service.auth import AuthUser
-
 
 bp_auth = Blueprint("auth", __name__, template_folder="templates")
 
 @bp_auth.route("/", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        data_dict = request.form.to_dict(flat=True)
-        
+        data_dict = request.form.to_dict(flat=True)        
         user = LoginCore().get_login(data=data_dict)
         
-        if not user:
-            return redirect(url_for("auth.login"))
-        
-        print(user)
-        # if user:
-        #     if check_password_hash(user['password'], data_dict.get("password")):
-        #         login_user(AuthUser(user['id'], user['email']))
-        #         return redirect(url_for("overview.home"))
-        #     else:
-        #         flash("Senha incorreta!", "danger")
-        # else:
-        #     flash("Usuário não encontrado!", "danger")
+        if user:
+            return redirect(url_for("overview.home"))
+
+        return redirect(url_for("auth.login"))
 
     return render_template("login/login.html")
 

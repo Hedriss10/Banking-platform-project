@@ -2,6 +2,15 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,windows,flask
 
 
+# ignore rav.yaml
+rav.yaml
+
+
+# ignore folders
+commands
+db_backups
+
+
 .DS_Store
 
 

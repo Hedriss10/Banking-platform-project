@@ -1,157 +1,39 @@
-from werkzeug.security import generate_password_hash
+from src.db.pg import Base
 
+from sqlalchemy import (
+    Column, Integer, String, Boolean, Text, DateTime, ForeignKey, func
+)
 
-class UserModels:
-            
-    def __init__(self, user_id: int, *args, **kwargs) -> None:
-        self.user_id = user_id
-        
-    def list_users(self, pagination: dict):
-        
-        query_filter = ""
-        if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.role) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
-        query_order_by = ""
-        if pagination["sort_by"] and pagination["order_by"]:
-            query_order_by = f"""ORDER BY u.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
-        query = f"""
-            SELECT 
-                id,
-                cpf,
-                username,
-                lastname,
-                email,
-                role,
-                is_first_acess,
-                is_deleted,
-                is_block,
-                is_acctive,
-                TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at,
-                typecontract
-            FROM public.user u
-            WHERE u.is_deleted = false AND u.is_block = false {query_filter}
-            ORDER BY u.id desc 
-            OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
-        """
-        return query
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cpf = Column(String(100), unique=True, nullable=True)
+    username = Column(String(150), nullable=False)
+    lastname = Column(String(150), nullable=False)
+    email = Column(String(150), nullable=False)
+    password = Column(String(300), nullable=True)
+    role = Column(String(200), nullable=True)
+    typecontract = Column(String(30), nullable=False)
+    session_token = Column(Text, nullable=True)
+    is_admin = Column(Boolean, nullable=True)
+    is_block = Column(Boolean, nullable=True)
+    is_acctive = Column(Boolean, nullable=True)
+    is_comission = Column(Boolean, nullable=True)
+    create_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    is_first_acess = Column(Boolean, nullable=False)
+    is_deleted = Column(Boolean, default=False, nullable=True)
+    reset_password_at = Column(DateTime, nullable=True)
+    reset_password_by = Column(Integer, nullable=True)
+    action_reset_password_text = Column(Text, nullable=True)
 
-    def get_unique_user(self) -> None:
-        query = f"""
-            SELECT 
-                id, cpf, username, lastname, email, role, is_first_acess, create_at, COUNT(*) OVER() AS full_count
-            FROM 
-                public.user u
-            WHERE u.is_acctive=false AND u.is_deleted=false
-        """
-        return query
-
-
-    def get_user(self, id: int) -> None:
-        query = f"""
-            SELECT 
-                id, cpf, username, lastname, email, role, is_first_acess, create_at, COUNT(*) OVER() AS full_count
-            FROM public.user u
-            WHERE u.is_acctive=false and u.id={id}
-        """
-        return query
-        
-    def add_user(self, data: dict, password: str):
-        _cpf = data.get("cpf").replace(".", "").replace("-", "")
-        
-        query = f"""
-            INSERT INTO public.user (username, lastname, email, password, role, typecontract, cpf, is_block, is_acctive, is_comission, is_first_acess, is_deleted) 
-            VALUES (
-                '{data.get("username")}',
-                '{data.get("lastname")}',
-                '{data.get("email")}',
-                '{password}',
-                '{data.get("role")}',
-                '{data.get("typecontract")}',
-                '{_cpf}',
-                FALSE,
-                TRUE,
-                FALSE,
-                TRUE,
-                FALSE
-            )
-            RETURNING id; 
-        """
-        return query
-    
-    def add_employee(self, id: int, data: dict):
-        """
-            add employee id.
-            columns: numero_pis, matricula, empresa, situacao_cadastro, carga_horaria_semanal, user_id, is_deleted
-        Args:
-            data (dict): _description_
-        """
-        _num = data.get("carga_horaria_semanal")
-        query = f"""
-            INSERT INTO employee(numero_pis, matricula, empresa, situacao_cadastro, carga_horaria_semanal, user_id, is_deleted) 
-            VALUES ('{data.get("numero_pis")}', '{data.get("matricula")}', '{data.get("empresa")}', '{data.get("situacao_cadastro")}', {int(_num)}, {id}, false);
-        """
-        return query
-                
-    def edit_user(self, id: int, data: dict):
-        """
-            Updates a user in the appropriate table based on the provided data.
-        Args:
-            id (int): User ID to update.
-            data (dict): Fields and values to update.
-        """
-        fields_by_table = {
-            "public.user": [
-                "username", "lastname", "email", "cpf", "password", "typecontract",
-                "role", "is_admin", "is_block", "is_acctive", "is_first_acess"
-            ],
-            "employee": [
-                "matricula", "numero_pis", "empresa", "situacao_cadastro", "carga_horaria_semanal"
-            ]
-        }
-
-        updates = {table: [] for table in fields_by_table.keys()}
-
-        for key, value in data.items():
-            for table, fields in fields_by_table.items():
-                if key in fields and value is not None:
-                    if table == "public.user" and key == "cpf":
-                        value = value.replace(".", "").replace("-", "")
-                    elif table == "public.user" and key == "password":
-                        value = generate_password_hash(password=value, method="scrypt")
-
-                    formatted_value = f"'{value}'" if isinstance(value, str) else value
-                    updates[table].append(f"{key} = {formatted_value}")
-
-        queries = []
-        for table, set_clauses in updates.items():
-            if set_clauses:
-                set_clause_str = ", ".join(set_clauses)
-
-                if table == "employee":
-                    where_clause = f"user_id = {id}"
-                else:
-                    where_clause = f"id = {id}"
-
-                query = f"""
-                    UPDATE {table} 
-                    SET {set_clause_str},
-                        updated_at = now()
-                    WHERE {where_clause};
-                """
-                queries.append(query)
-        
-        return queries
-
-    def delete_user(self, id):
-        query = f"""
-            UPDATE public.user u
-            SET
-                is_deleted = true,
-                is_acctive = false
-            WHERE u.id = {id}
-            RETURNING u.id;
-        """
-        return query
-        
+class Role(Base):
+    __tablename__ = 'role'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(250), nullable=True)
+    created_at = Column(DateTime, default=func.now(), nullable=True)
+    updated_at = Column(DateTime, nullable=True, onupdate=func.now())
+    updated_by = Column(Integer, nullable=True)
+    deleted_by = Column(Integer, nullable=True)
+    deleted_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=True)
