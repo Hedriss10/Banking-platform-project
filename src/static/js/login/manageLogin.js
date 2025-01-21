@@ -4,6 +4,7 @@ class ManagerLogin {
         this.url_password = '/new-restpassword'; // rotas do backend
     }
 
+    // showNotification recebe duas strings para ser notificado na UI
     showNotification(message, type = 'success') {
         const notification = document.getElementById('notification');
         notification.className = `alert alert-${type}`;
@@ -32,7 +33,7 @@ class ManagerLogin {
                     },
                     body: JSON.stringify(formData),
                 });
-                console.log(response);
+
                 if (!response.ok) {
                     if (response.status === 400) {
                         throw new Error('Dados inválidos. Verifique e tente novamente.');
@@ -42,13 +43,13 @@ class ManagerLogin {
 
                 const data = await response.json();
 
-                if (data.success) {
-                    this.showNotification(data.message, 'success');
+                if (response.status === 200) {
+                    this.showNotification('Senha atualizada!', 'success');
                     setTimeout(() => {
-                        window.location.reload();
-                    }, 3000);
+                        window.location.href = data.redirect_url;                        
+                    }, 1000);
                 } else {
-                    this.showNotification(data.error || 'Erro ao atualizar a senha', 'danger');
+                    this.showNotification(message=data.error || 'Erro ao atualizar a senha', 'danger');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -82,26 +83,20 @@ class ManagerLogin {
                     },
                     body: JSON.stringify(formData),
                 });
-    
-                console.log('Resposta:', response);
-    
-                // Verifique se a resposta é JSON e se o login foi bem-sucedido
+        
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log('Dados recebidos:', data);
-    
-                    if (data.success) {
+                    const data = await response.json();    
+                    if (response.status == 200) {
                         this.showNotification('Seja bem-vindo!', 'success');
                         setTimeout(() => {
-                            window.location.href = '/home'; // Redireciona após login bem-sucedido
+                            window.location.href = data.redirect_url;                     
                         }, 1000);
                     } else {
                         this.showNotification(data.error || 'Erro ao logar', 'danger');
-                    }
+                    } 
                 } else {
                     const text = await response.text();
-                    console.error('Erro inesperado:', text);
-                    this.showNotification('Erro inesperado no servidor.', 'danger');
+                    this.showNotification('Senha incorreta.', 'danger');
                 }
             } catch (error) {
                 console.error('Error:', error);

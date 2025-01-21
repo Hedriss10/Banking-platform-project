@@ -13,20 +13,16 @@ class LoginCore:
 
     def login_user(self, data: dict):
         try:
-            cpf = data.get("cpfLogin")
-            password = data.get("passwordLogin")
-            
-            if not cpf:
-                return jsonify({"error": "cpf is required"}), 400
-            if not password:
-                return jsonify({"error": "Password is required"}), 400
 
-            user = User.query.filter_by(cpf=cpf, is_deleted=False).first()
+            if not data.get("cpfLogin") and not data.get("passwordLogin"):
+                return jsonify({"error": "cpf_is_required_and_password"}), 400
+
+            user = User.query.filter_by(cpf=data.get("cpfLogin"), is_deleted=False).first()
             if not user:
-                return jsonify({"error": "User not found"}), 404
+                return jsonify({"error": "user_not_found"}), 404
 
-            if not check_password_hash(user.password, password):
-                return jsonify({"error": "Invalid password"}), 400
+            if not check_password_hash(user.password, data.get("passwordLogin")):
+                return jsonify({"error": "invalid_password"}), 400
 
             user_auth = UserAuth(
                 id=user.id,
@@ -41,34 +37,29 @@ class LoginCore:
             )
 
             login_user(user_auth)
-            return jsonify({'success': True, 'message': 'Login bem-sucedido'}), 200
+            return jsonify({'success': True, 'message': 'login_successfully', 'redirect_url' : '/home'}), 200
 
         except Exception as e:
-            print(e)
             return jsonify({"error": str(e)}), 500
 
 
     def reset_password(self, data: dict):
         try:
-            user_id = data.get("userId")
-            new_password = data.get("newPassword")
+            if not data.get("userId") and not data.get("newPassword"):
+                return jsonify({'error': 'cpf_is_required_and_password'}), 400
             
-            if not user_id:
-                return jsonify({'error': 'CPF não fornecido'}), 400
-            
-            if not new_password:
-                return jsonify({'error': 'Senha não fornecida'}), 400
-            
-            user = User.query.filter_by(id=user_id).first()
-            print("esse aqui é o user", user)
-            if not user:
-                return jsonify({'error': 'Usuário não encontrado'}), 404
+            user = User.query.filter_by(cpf=data.get("userId")).first()
 
-            user.password = generate_password_hash(new_password)
-            user.updated_at = datetime.now()
-            db.session.add(user)
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'Senha atualizada com sucesso!'}), 200
+            if not user:
+                return jsonify({'error': 'user_not_found'}), 404
+
+            if user:
+                user.password = generate_password_hash(data.get("newPassword"))
+                user.updated_at = datetime.now()
+                db.session.add(user)
+                db.session.commit()
+
+            return jsonify({'success': True, 'message': 'update_password_sucessfully', 'redirect_url' : '/login'}), 200
         
         except Exception as e:
             db.session.rollback()

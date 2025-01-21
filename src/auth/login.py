@@ -6,7 +6,6 @@ from src.core.login import LoginCore
 bp_auth = Blueprint("auth", __name__, template_folder="templates")
 
 class AuthView(MethodView):
-    # todo criar uma rota para o login e redirecionar ela para home
     def get(self):
         return render_template("login/login.html")
 
@@ -14,9 +13,9 @@ class AuthView(MethodView):
         login_response = LoginCore().login_user(data=request.get_json())
 
         if login_response:
-            return render_template("partials/home.html")
+            return login_response
         else:
-            return render_template("login/login.html")
+            return redirect(url_for("auth.login"))
 
     def logout(self):
         return redirect(url_for("auth.login"))
@@ -28,12 +27,10 @@ class ResetView(MethodView):
         return render_template("login/pagesReset.html")
     
     def post(self):
-        data_dict = request.form.to_dict(flat=True)
-        print(data_dict)
-        reset_user = LoginCore().reset_password(data=data_dict)
-            
-        if reset_user[1] == 200:
-            return redirect(url_for("auth.login"))
+        reset_user = LoginCore().reset_password(data=request.get_json())
+        
+        if reset_user:
+            return reset_user
         else:
             return render_template("login/pagesReset.html")
 

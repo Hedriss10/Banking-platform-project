@@ -1,18 +1,18 @@
 from flask import Blueprint , render_template
+from flask_login import login_required
 from flask_login import current_user
 
 bp_overview = Blueprint("overview", __name__, template_folder="templates")
 
 
 @bp_overview.route("/home")
+@login_required
 def home():
-    """Function for process overview system"""
     return render_template("partials/home.html")
 
 
 @bp_overview.route("/dashboard")
 def dashboard():
-    """Function for processing dash board"""
     return render_template("partials/dashboard.html")
 
 
