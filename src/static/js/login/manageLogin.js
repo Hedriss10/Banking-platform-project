@@ -1,7 +1,7 @@
 class ManagerLogin {
     constructor() {
         this.url_login = '/login'; // rotas do backend
-        this.url_password = '/update-password'; // rotas do backend
+        this.url_password = '/new-restpassword'; // rotas do backend
     }
 
     showNotification(message, type = 'success') {
@@ -32,7 +32,7 @@ class ManagerLogin {
                     },
                     body: JSON.stringify(formData),
                 });
-
+                console.log(response);
                 if (!response.ok) {
                     if (response.status === 400) {
                         throw new Error('Dados inválidos. Verifique e tente novamente.');
@@ -60,17 +60,20 @@ class ManagerLogin {
     async setupLogin() {
         document.getElementById('SendLoginUser').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const formData = new FormData();
-            formData.append("cpfLogin", document.getElementById('cpfLogin').value).trim();
-            formData.append("passwordLogin", document.getElementById('passwordLogin').value);
-
-
+    
+            const cpfLogin = document.getElementById('cpfLogin').value.trim();
+            const passwordLogin = document.getElementById('passwordLogin').value;
+    
             if (!cpfLogin || !passwordLogin) {
                 this.showNotification('CPF e senha são obrigatórios!', 'warning');
                 return;
             }
-
+    
+            const formData = {
+                cpfLogin: cpfLogin,
+                passwordLogin: passwordLogin,
+            };
+    
             try {
                 const response = await fetch(this.url_login, {
                     method: 'POST',
@@ -79,23 +82,26 @@ class ManagerLogin {
                     },
                     body: JSON.stringify(formData),
                 });
-
-                if (!response.ok) {
-                    if (response.status === 400) {
-                        throw new Error('CPF ou senha inválidos. Tente novamente.');
+    
+                console.log('Resposta:', response);
+    
+                // Verifique se a resposta é JSON e se o login foi bem-sucedido
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Dados recebidos:', data);
+    
+                    if (data.success) {
+                        this.showNotification('Seja bem-vindo!', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/home'; // Redireciona após login bem-sucedido
+                        }, 1000);
+                    } else {
+                        this.showNotification(data.error || 'Erro ao logar', 'danger');
                     }
-                    throw new Error(`Erro: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    this.showNotification('Seja bem-vindo!', 'success');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard'; // Redireciona após o login
-                    }, 2000);
                 } else {
-                    this.showNotification(data.error || 'Erro ao logar', 'danger');
+                    const text = await response.text();
+                    console.error('Erro inesperado:', text);
+                    this.showNotification('Erro inesperado no servidor.', 'danger');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -105,8 +111,15 @@ class ManagerLogin {
     }
 }
 
-document.addEventListener("DocumentContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const managerLogin = new ManagerLogin();
-    managerLogin.setupUpdatePassword();
-    managerLogin.setupLogin();
+
+    if (document.getElementById('updatePasswordForm')) {
+        managerLogin.setupUpdatePassword();
+    }
+
+    if (document.getElementById('SendLoginUser')) {
+        managerLogin.setupLogin();
+    }
 });
+

@@ -22,8 +22,7 @@
                   <h5 class="card-title text-center pb-0 fs-4">Redefinição de senha...</h5>
                   <p class="text-center small"></p>
                 </div>
-                <form class="row g-3 needs-validation" novalidate id="updatePasswordForm" method='POST'
-                  action="{{url_for('auth.reset_password')}}">
+                <form class="row g-3 needs-validation" novalidate id="updatePasswordForm" onsubmit="return false;">
                   <div class="col-12">
                     <label for="yourName" class="form-label">Sua Identificação:</label>
                     <input type="text" name="userId" class="form-control" id="userId" required>

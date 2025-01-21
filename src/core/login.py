@@ -15,13 +15,13 @@ class LoginCore:
         try:
             cpf = data.get("cpfLogin")
             password = data.get("passwordLogin")
-
+            
             if not cpf:
                 return jsonify({"error": "cpf is required"}), 400
             if not password:
                 return jsonify({"error": "Password is required"}), 400
 
-            user = User.query.filter_by(cpf=cpf).where(User.is_deleted == False).first()
+            user = User.query.filter_by(cpf=cpf, is_deleted=False).first()
             if not user:
                 return jsonify({"error": "User not found"}), 404
 
@@ -41,9 +41,10 @@ class LoginCore:
             )
 
             login_user(user_auth)
-            return jsonify({"success": True}), 200
+            return jsonify({'success': True, 'message': 'Login bem-sucedido'}), 200
 
         except Exception as e:
+            print(e)
             return jsonify({"error": str(e)}), 500
 
 
@@ -59,12 +60,13 @@ class LoginCore:
                 return jsonify({'error': 'Senha não fornecida'}), 400
             
             user = User.query.filter_by(id=user_id).first()
-            
+            print("esse aqui é o user", user)
             if not user:
                 return jsonify({'error': 'Usuário não encontrado'}), 404
-            
+
             user.password = generate_password_hash(new_password)
             user.updated_at = datetime.now()
+            db.session.add(user)
             db.session.commit()
             return jsonify({'success': True, 'message': 'Senha atualizada com sucesso!'}), 200
         
