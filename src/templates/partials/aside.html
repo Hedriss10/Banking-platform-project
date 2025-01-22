@@ -2,87 +2,22 @@
   <aside id="sidebar" class="sidebar">
 
     <ul class="sidebar-nav" id="sidebar-nav"> 
-      {% if 'Administrador' in session['type_user_func'] %} <!-- Chek hard level user == adm -->
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-piggy-bank"></i><span>Financeiro</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('fynance.gerement_finance')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Banco e Convênios e Tabela de Comissão</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('fynance.manage_comission')}}">
-              <i class="bi bi-circle"></i><span>Rank de Comissão</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('fynance.manage_payment')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Pagamento</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('fynance.manage_report')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Relatório</span>
-            </a>
-          </li>
-        </ul>
       </li><!-- Finacneiro -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-minecart-loaded"></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('proposal.manage_proposal')}}">
-              <i class="bi bi-circle"></i><span>Rank de Tabelas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('proposal.state_proposal')}}">
-              <i class="bi bi-circle"></i><span>Esteira de Vendas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('proposal.creat_proposal')}}">
-              <i class="bi bi-circle"></i><span>Criar Proposta</span>
-            </a>
-          </li>
-        </ul>
       </li><!-- Area Comercial -->
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-layout-text-window-reverse"></i><span>Operacional</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('operational.manage_operational')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento Operacional</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('operational.manage_state_contract')}}">
-              <i class="bi bi-circle"></i><span>Esteira de Contratos</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Operacional  -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
           <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('rooms.list_rooms')}}">
-              <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
-            </a>
-          </li>
-        </ul>
       </li><!-- Gerenciamento de vendas  -->
 
       <li class="nav-item">
@@ -96,153 +31,18 @@
             </a>
           </li>
           <li>
-            <a href="{{url_for('users.permission_users')}}">
+            <a href="">
               <i class="bi bi-circle"></i><span>Permissão de usuário</span>
             </a>
           </li>
         </ul>
       </li><!-- Usuários  -->
 
-      {% elif 'Gerente Geral' in session['type_user_func'] %} <!-- Gerente Geral -->
-      
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-layout-text-window-reverse"></i><span>Operacional</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('operational.manage_operational')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento Operacional</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('operational.manage_state_contract')}}">
-              <i class="bi bi-circle"></i><span>Esteira de Contratos</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Operacional  -->
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('rooms.list_rooms')}}">
-              <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Gerenciamento de vendas  -->
-      
-      {% elif 'Gerente de Vendas' in session['type_user_func']%}
-      
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('rooms.list_rooms')}}">
-              <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Gerenciamento de vendas  -->
-
-      {% elif 'Vendedor' in session['type_user_func']%} <!-- Vendedores -->
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-minecart-loaded"></i><span>Área Comercial</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('proposal.manage_proposal')}}">
-              <i class="bi bi-circle"></i><span>Rank de Tabelas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('proposal.state_proposal')}}">
-              <i class="bi bi-circle"></i><span>Esteira de Vendas</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('proposal.creat_proposal')}}">
-              <i class="bi bi-circle"></i><span>Criar Proposta</span>
-            </a>
-          </li>
-        </ul>
       </li><!-- Area Comercial -->
-
-      {% elif 'Supervisor de Vendas' in session['type_user_func']%} <!-- Supervisor de Vendas -->
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="ri-vip-diamond-line"></i></i><span>Gerenciamento de Vendas</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('rooms.list_rooms')}}">
-              <i class="bi bi-circle"></i><span>Gerenciar Salas</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Gerenciamento de vendas  -->
-
-
-      {% elif 'Financeiro' in session['type_user_func'] %} <!-- Finacneiro -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-piggy-bank"></i><span>Financeiro</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('fynance.gerement_finance')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Banco e Convênios e Tabela de Comissão</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('fynance.manage_comission')}}">
-              <i class="bi bi-circle"></i><span>Rank de Comissão</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('fynance.manage_payment')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Pagamento</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('fynance.manage_report')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento de Relatório</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Finacneiro -->
-
-      {% elif 'Operacional' in session['type_user_func']%} <!-- Operacional  -->
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-layout-text-window-reverse"></i><span>Operacional</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{url_for('operational.manage_operational')}}">
-              <i class="bi bi-circle"></i><span>Gerenciamento Operacional</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{url_for('operational.manage_state_contract')}}">
-              <i class="bi bi-circle"></i><span>Esteira de Contratos</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- Operacional  -->
-
-      {% elif 'Suporte de Campanha' in session['type_user_func']%} <!-- Suporte de Campanha  -->
-
-      {% endif %}
 
     </ul>
   </ul>

@@ -26,3 +26,6 @@ class UserAuth(UserMixin):
 
     def get_id(self):
         return str(self.id)
+    
+    def get_role(self):
+        return str(self.role)

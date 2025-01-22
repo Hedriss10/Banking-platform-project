@@ -1,6 +1,8 @@
 from sqlalchemy import (
     Column, Integer, String, Boolean, Text, DateTime, ForeignKey, func
 )
+from sqlalchemy.orm import relationship
+from src.models.employee import Employee
 from src import db
 
 class User(db.Model):
@@ -25,6 +27,8 @@ class User(db.Model):
     reset_password_at = Column(DateTime, nullable=True)
     reset_password_by = Column(Integer, nullable=True)
     action_reset_password_text = Column(Text, nullable=True)
+    
+    employees = relationship("Employee", back_populates="user")
 
 class Role(db.Model):
     __tablename__ = 'role'
