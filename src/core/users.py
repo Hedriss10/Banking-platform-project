@@ -6,13 +6,11 @@ from src import db
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
-
 class UserCore:
     
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
-        
-        
+
     def list_users(self, data: dict):
         try:
             page = int(data.get('page', 1))
@@ -29,6 +27,7 @@ class UserCore:
                     User.cpf.ilike(f'%{search_term}%')
                 )
 
+
             tables_paginated = query.order_by(User.username.desc()).paginate(page=page, per_page=per_page)
 
             user_data = [{
@@ -44,10 +43,12 @@ class UserCore:
                 'page': tables_paginated.page,
                 'total_pages': tables_paginated.pages,
                 'total_items': tables_paginated.total,
+                'has_prev': tables_paginated.has_prev,
+                'has_next': tables_paginated.has_next,
             }
-
             return jsonify({'users': user_data, 'pagination': pagination}), 200
         except Exception as e:
+            print('Erro:', e)
             return jsonify({'message': 'Internal server error'}), 500
             
     def add_user(self):

@@ -38,7 +38,7 @@ def create_app():
 
     from src.auth.login import bp_auth
     from src.routes.overview import bp_overview
-    from src.routes.ex1 import bp_user
+    from src.routes.users import bp_user
     
     app.register_blueprint(bp_auth, url_prefix="/")
     app.register_blueprint(bp_overview, url_prefix="/")

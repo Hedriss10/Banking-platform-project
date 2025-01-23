@@ -199,64 +199,15 @@
             </tr>
         </thead>
         <tbody>
-            {% for user in users %}
-            <tr class="{{ 'table-danger' if user.is_block else '' }}">
-                <td>{{ user.username }}</td>
-                <td>{{ user.lastname }}</td>
-                <td>{{ user.cpf }}</td>
-                <td>{{ user.role }}</td>
-                <td>{{ user.email }}</td>
-                <td>
-                    <i class="fas fa-ban cursor-pointer" data-userid="{{ user.id }}"
-                        onclick="showUpdateBlockModal(this)"></i>
-                </td>
-                <td>
-                    <i class="fad fa-user-check cursor-pointer" data-userid="{{ user.id }}"
-                        onclick="showUpdateActiveModal(this)"></i>
-                </td>
-                <td>
-                    <i class="fad fa-trash-alt cursor-pointer" data-userid="{{ user.id }}"
-                        onclick="showDeleteModal(this)"></i>
-                </td>
-            </tr>
-            {% endfor %}
+            <!-- Dynamic content will be inserted here by JavaScript -->
         </tbody>
     </table>
     <nav aria-label="Page navigation">
         <ul class="pagination">
-            <li class="page-item {{ 'disabled' if not pagination.has_prev else '' }}">
-                <a class="page-link" 
-                   href="{{ url_for('users.users', page=pagination.page-1) if pagination.has_prev else '#' }}" 
-                   tabindex="{{ '-1' if not pagination.has_prev else '0' }}">
-                    Anterior
-                </a>
-            </li>
-    
-            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
-                {% if page_num %}
-                    <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
-                        <a class="page-link" 
-                           href="{{ url_for('users.users', page=page_num) if page_num != pagination.page else '#' }}">
-                            {{ page_num }} {% if page_num == pagination.page %}<span class="sr-only">(current)</span>{% endif %}
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">...</span>
-                    </li>
-                {% endif %}
-            {% endfor %}
-    
-            <li class="page-item {{ 'disabled' if not pagination.has_next else '' }}">
-                <a class="page-link" 
-                   href="{{ url_for('users.users', page=pagination.page+1) if pagination.has_next else '#' }}">
-                    Próximo
-                </a>
-            </li>
+            <!-- Dynamic pagination will be inserted here by JavaScript -->
         </ul>
     </nav>
-    
 </section>
-<script src="{{ url_for('static', filename='js/user/CrudUserGerement.js') }}"></script>
+
 <script src="{{ url_for('static', filename='js/user/manageUsers.js') }}"></script>
-{% endblock%}
+{% endblock %}
