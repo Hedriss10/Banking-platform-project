@@ -16,8 +16,6 @@
 <div class="container mt-3 ms-3">
 
 
-
-
     <!-- Modal for updating password -->
     <div class="modal fade" id="updatePasswordModal" tabindex="-1" aria-labelledby="updatePasswordModalLabel"
         aria-hidden="true">
@@ -124,32 +122,31 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="card-body">
-                        <form id="importUser" enctype="multipart/form-data" method="POST"
-                            action="{{ url_for('users.addusers') }}">
+                        <form id="importUser" enctype="multipart/form-data" method="POST">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Nome</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                                <label for="username" class="form-label"><strong>Nome:</strong></label>
+                                <input type="text" class="form-control" id="username" name="username" required placeholder="Admin">
                             </div>
                             <div class="mb-3">
-                                <label for="lastname" class="form-label">Sobrenome</label>
-                                <input type="text" class="form-control" id="lastname" name="lastname" required>
+                                <label for="lastname" class="form-label"><strong>Sobrenome:</strong></label>
+                                <input type="text" class="form-control" id="lastname" name="lastname" required placeholder="BS+">
                             </div>
                             <div class="mb-3">
-                                <label for="user_identification" class="form-label">CPF</label>
-                                <input type="text" class="form-control" id="user_identification"
+                                <label for="user_identification" class="form-label"><strong>CPF:</strong></label>
+                                <input type="text" class="form-control" id="user_identification" placeholder="402.899.213-12"
                                     name="user_identification" required>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">Senha</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
+                                <label for="password" class="form-label"><strong>Senha:</strong></label>
+                                <input type="password" class="form-control" id="password" name="password" required placeholder="*****">
                             </div>
                             <div class="mb-3">
-                                <label for="user_identification" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                                <label for="user_identification" class="form-label"><strong>Email:</strong></label>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="admin@bsmais.com">
                             </div>
                             <div class="mb-3">
-                                <label for="type_user_func" class="form-label">Cargo</label>
-                                <select id="type_user_func" name="type_user_func" class="form-control">
+                                <label for="role" class="form-label"><strong>Cargo:</strong></label>
+                                <select id="role" name="role" class="form-control" placeholder="Administrador">
                                     <option value="Administrador">Administrador</option>
                                     <option value="Gerente Geral">Gerente Geral</option>
                                     <option value="Gerente de vendas">Gerente de vendas</option>
@@ -161,14 +158,19 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="type_contract">Gestão de contrato</label>
-                                <select name="type_contract" id="typecontract" class="form-control" required>
+                                <label for="contract"><strong>Gestão de contrato:</strong></label>
+                                <select name="contract" id="typecontract" class="form-control" required placeholder="Estagiário">
                                     <option value="">Selecione...</option>
                                     <option value="funcionario">Funcionário</option>
                                     <option value="estagiario">Estagiário</option>
                                     <option value="Corretor Externo">Corretor Externo</option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label for="contract"><strong>Cargo Horario:</strong></label>
+                                <input type="text" class="form-control" id="cargo_horario" name="cargo_horario" required placeholder="44">
+                            </div>
+                            
                             <button type="submit" class="btn btn-success">Adcionar</button>
                         </form>
                     </div>
@@ -210,4 +212,5 @@
 </section>
 
 <script src="{{ url_for('static', filename='js/user/manageUsers.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user/userCrud.js') }}"></script>
 {% endblock %}

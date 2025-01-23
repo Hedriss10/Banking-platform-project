@@ -5,6 +5,10 @@ from src.models.user import User
 from src import db
 from werkzeug.security import generate_password_hash
 from datetime import datetime
+from src.service.log import setup_logger
+
+
+logger = setup_logger(__name__)
 
 class UserCore:
     
@@ -51,8 +55,25 @@ class UserCore:
             print('Erro:', e)
             return jsonify({'message': 'Internal server error'}), 500
             
-    def add_user(self):
-        ...
+    def add_user(self, data: dict):
+        _cpf = data.get("cpf").replace(",", "").replace(".", "").replace("-", "")
+        try:
+            user = User(
+                username=data.get('username'),
+                lastname=data.get('lastname'),
+                role=data.get('role'),
+                email=data.get('email'),
+                cpf=_cpf,
+                password=generate_password_hash(data.get('password')),
+                is_acctive=True,
+                is_block=False,
+                is_deleted=False,
+            )
+            db.session.add(user)
+            db.session.commit()
+            return jsonify({'message': 'user_added_successfully'}), 201
+        except Exception as e:
+            logger.error(f"Error adding user in core: {e}", exc_info=True)
         
     def update_user(self):
         ...

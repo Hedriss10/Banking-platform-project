@@ -14,6 +14,6 @@ class UserViewList(MethodView):
 # manager users
 bp_user.add_url_rule("/users", view_func=UserViewList.as_view("users"), methods=["GET"])
 bp_user.add_url_rule("/list-users", view_func=UserResourceView.as_view("list-users"), methods=["GET"])
-bp_user.add_url_rule("/user", view_func=UserResourceView.as_view("addusers"), methods=["POST"])
-bp_user.add_url_rule("/user/<int:id>", view_func=UserResourceView.as_view("updateusers", methods=["PUT"]))
-bp_user.add_url_rule("/user/<int:id>", view_func=UserResourceView.as_view("deleteusers"), methods=["DELETE"])
+bp_user.add_url_rule("/user", view_func=UserResourceView.as_view("add-user"), methods=["POST"])
+bp_user.add_url_rule("/user/<int:id>", view_func=UserResourceView.as_view("update-user", methods=["PUT"]))
+bp_user.add_url_rule("/user/<int:id>", view_func=UserResourceView.as_view("delete-user"), methods=["DELETE"])
