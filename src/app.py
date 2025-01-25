@@ -4,7 +4,6 @@ from flask_cors import CORS
 from flask_restx import Api
 from os import environ
 from flask_jwt_extended import JWTManager
-from src.utils.magicrypt import Magicrypt
 from src.settings._base import config, flask_env
 
 
