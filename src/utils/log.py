@@ -1,5 +1,12 @@
 import logging
 
+
+class DbLogger:
+    def __init__(self, msg: str):
+        self.msg = msg
+
+
+
 def setup_logger(name: str):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
