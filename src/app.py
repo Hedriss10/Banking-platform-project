@@ -42,20 +42,8 @@ def create_app():
 
     jwt = JWTManager(app)
     
-    @app.before_request
-    def decompress():
-        if request.data != b"" and flask_env != "development" and flask_env != "production":
-            request.data = Magicrypt().decrypt(request.data)
-            request._cached_data = request.data
-
-    @app.after_request
-    def compress(response):
-        if flask_env != "development" and flask_env != "production":
-            response.data = Magicrypt().encrypt(response.data)
-        return response 
-
     # Namespaces registration
-    api.add_namespace(users_ns)
-    api.add_namespace(login_ns)
+    # api.add_namespace(users_ns)
+    # api.add_namespace(login_ns)
 
     return app
