@@ -2,6 +2,11 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,windows,flask
 
 
+# ignore static
+static.
+static/ 
+
+
 # ignore rav.yaml
 rav.yaml
 

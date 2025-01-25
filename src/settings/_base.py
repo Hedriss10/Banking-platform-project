@@ -6,30 +6,29 @@ load_dotenv()
 
 class Config:
     ENV = os.getenv("FLASK_ENV", "development")
-    DEBUG = False
+    DEBUG = True
 
 class DevelopmentConfig(Config):
     APPLICATION_ROOT = "/dev"
     ENV = "development"
     DEBUG = True
-    PORT = os.getenv("PORT", "5001")
-    DATABASE = os.getenv("DATABASE", "maisbs")
-    USERNAME = os.getenv("USERNAME", "maisbs_user")
-    PASSWORD = os.getenv("PASSWORD", "maisbs@master")
-    DB_HOST = os.getenv("HOST_DB", "192.168.0.242")
-    DB_PORT = os.getenv("HOST_DB", "5432")
-    
+    PORT = os.getenv("DEV_PORT")
+    DATABASE = os.getenv("DB_DEV_DATABASE")
+    USERNAME = os.getenv("DB_USERNAME")
+    PASSWORD = os.getenv("DB_PASSWORD")
+    DB_HOST = os.getenv("HOST_DB")
+    DB_PORT = os.getenv("HOST_DB")
 
-class ProductionConfig(Config):    
+class ProductionConfig(Config):
     APPLICATION_ROOT = "/athenas"
     ENV = "production"
     DEBUG = False
-    PORT = os.getenv("PORT", "5002")
-    DATABASE = os.getenv("DATABASE", "maisbsdv")
-    USERNAME = os.getenv("USERNAME", "maisbs_user_dev")
-    PASSWORD = os.getenv("PASSWORD", "maisbs@master")
-    DB_HOST = os.getenv("HOST_DB", "192.168.0.242")
-    DB_PORT = os.getenv("HOST_DB", "5432")
+    PORT = os.getenv("PRD_PORT")
+    DATABASE = os.getenv("DB_PRD_DATABASE")
+    USERNAME = os.getenv("DB_PRD_USERNAME")
+    PASSWORD = os.getenv("DB_PRD_PASSWORD")
+    DB_HOST = os.getenv("DB_PRD_HOST")
+    DB_PORT = os.getenv("DB_PRD_PORT")
 
 config_by_name = {'development': DevelopmentConfig, 'production': ProductionConfig}
 
