@@ -1,8 +1,0 @@
-.card-custom {
-    width: 800px; /* Define a largura do card */
-    height: 600px; /* Define a altura do card */
-    margin: 0 auto; /* Centraliza horizontalmente */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
