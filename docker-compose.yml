@@ -1,0 +1,19 @@
+services:
+  app:
+    image: platform-bs-users:x86
+    container_name: platform-bs-users-dev
+    ports:
+      - "5001:5001"
+    networks:
+      - app_network
+    volumes:
+      - .:/src
+    working_dir: /src
+    environment:
+      FLASK_ENV: development
+      FLASK_APP: src.app:create_app()
+    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src.app:create_app()"]
+
+networks:
+  app_network:
+    driver: bridge
