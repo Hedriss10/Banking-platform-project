@@ -1,18 +1,17 @@
 services:
   app:
-    image: platform-bs-users:x86
-    container_name: platform-bs-users-dev
+    image: athenas:x86
+    container_name: athenas-dev
     ports:
-      - "5001:5001"
+      - "${DEV_PORT}:${DEV_PORT}"
     networks:
       - app_network
     volumes:
       - .:/src
     working_dir: /src
-    environment:
-      FLASK_ENV: development
-      FLASK_APP: src.app:create_app()
-    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src.app:create_app()"]
+    env_file:
+      - .env
+    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:${DEV_PORT}", "app:create_app()"]
 
 networks:
   app_network:

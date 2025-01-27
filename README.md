@@ -109,5 +109,5 @@ docker-compose up --build
 ## Gunicorn 
 
 ```bash
-gunicorn -w 4 -b 0.0.0.0:5001 'src:create_app()'
+gunicorn -w 4 -b 0.0.0.0:5001 'src.app:create_app()'
 ```
