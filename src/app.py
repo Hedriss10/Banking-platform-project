@@ -5,6 +5,9 @@ from flask_restx import Api
 from os import environ
 from flask_jwt_extended import JWTManager
 from src.settings._base import config, flask_env
+from src.resource.users import users_ns
+from src.resource.login import login_ns
+from src.resource.datacatalog import datacatalog_ns
 
 
 def create_app():
@@ -43,7 +46,8 @@ def create_app():
     jwt = JWTManager(app)
     
     # Namespaces registration
-    # api.add_namespace(users_ns)
-    # api.add_namespace(login_ns)
+    api.add_namespace(users_ns)
+    api.add_namespace(login_ns)
+    api.add_namespace(datacatalog_ns)
 
     return app
