@@ -1,7 +1,7 @@
 services:
   app:
-    image: athenas:x86
-    container_name: athenas-dev
+    image: platform-athenas:x86
+    container_name: platform-athenas
     ports:
       - "5002"
     networks:
@@ -11,7 +11,8 @@ services:
     working_dir: /src
     env_file:
       - .env
-    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5002", "app:create_app()"]
+    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5002", "src.app:create_app()"]
+    platform: linux/amd64
 
 networks:
   app_network:

@@ -8,7 +8,7 @@ RUN apt-get update && \
 ENV FLASK_ENV=development
 ENV FLASK_APP=src.app:create_app
 
-COPY requirements/dev.txt /requirements.txt
+COPY requirements/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
 COPY . /src

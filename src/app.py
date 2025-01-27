@@ -40,9 +40,9 @@ def create_app():
         doc="/doc",
         authorizations=authorizations,
         security="Bearer Auth",
-        version="2.0",
-        title="Athenas Users",
-        description="Documentação completa do users e login.",
+        version="3.0",
+        title="Athenas Backend API micro serviços",
+        description="Backend Athenas.",
     )
 
     cors = CORS(app)

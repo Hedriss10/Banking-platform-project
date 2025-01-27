@@ -13,7 +13,6 @@ et_xmlfile==2.0.0
 etelemetry==0.3.1
 filelock==3.17.0
 fire==0.7.0
-fitz==0.0.1.dev2
 Flask==3.0.3
 Flask-Cors==5.0.0
 Flask-JWT-Extended==4.6.0
