@@ -1,0 +1,163 @@
+import math
+import os
+from pandas import read_excel
+from src.models.tablesfinance import TablesFinanceModels
+from src.db.pg import PgAdmin
+from src.service.response import Response
+from src.utils.pagination import Pagination
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
+from src.utils.log import setup_logger
+
+logger = setup_logger(__name__)
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "upload")
+
+
+class TablesFinanceCore:
+
+    def __init__(self, user_id: int, *args, **kwargs):
+        self.user_id = user_id
+        self.pg = PgAdmin()
+        self.models = TablesFinanceModels(user_id=user_id)
+
+    def rank_comission(self, data: dict) -> None:
+        current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+
+        if current_page < 1:  # Force variables min values
+            current_page = 1
+        if rows_per_page < 1:
+            rows_per_page = 1
+
+        pagination = Pagination().pagination(
+            current_page=current_page,
+            rows_per_page=rows_per_page,
+            sort_by=data.get("sort_by", ""),
+            order_by=data.get("order_by", ""),
+            filter_by=data.get("filter_by", ""),
+        )
+
+        rank = self.pg.fetch_to_dict(query=self.models.rank_comission(pagination=pagination))
+
+        metadata = Pagination().metadata(
+            current_page=current_page,
+            rows_per_page=rows_per_page,
+            sort_by=pagination["sort_by"],
+            order_by=pagination["order_by"],
+            filter_by=pagination["filter_by"],
+        )
+
+        return Response().response(status_code=200, error=False, message_id="list_rank_successful", data=rank, metadata=metadata)
+
+    def add_table(self, data: dict) -> None:
+        try:
+            if not data.get("banker_id") and data.get("financial_agreements_id"):
+                logger.warning(f"Is Banker and Financialagreements Required")
+                return Response().response(status_code=400, error=True, message_id="is_banker_and_financialagreements_required")
+
+            self.pg.execute_query(query=self.models.add_tables(data=data))
+            self.pg.commit()
+            return Response().response(status_code=200, error=False, message_id="tables_add_successful")
+        except Exception as e:
+            logger.warning(f"Error Processing add tables  {e}", exc_info=True)
+            return Response().response(status_code=500, error=True, message_id="error_add_tables", exception=str(e))
+
+    def add_tables_finance(self, data: dict, file: FileStorage) -> None:
+        try:
+            if not file or file.filename == '':
+                logger.warning(f"Is required xlsx.")
+                return Response().response(status_code=400, error=False, message_id="is_required_xlsx")
+
+            if not os.path.exists(UPLOAD_FOLDER):
+                os.makedirs(UPLOAD_FOLDER)
+
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+
+            dftmp = read_excel(filepath, dtype="object", engine="openpyxl")
+
+            for index, row in dftmp.iterrows():
+                self.pg.execute_query(query=self.models.add_tables_finance(
+                    name=row['Tabela'],
+                    type_table=row['Tipo'],
+                    table_code=row['Cod Tabela'],
+                    start_term=row['Prazo Inicio'],
+                    end_term=row['Prazo Fim'],
+                    rate=row['Flat'],
+                    banker_id=data.get("banker_id"),
+                    financial_agreements_id=data.get("financialagreements_id"),
+                    issue_date=data.get("issue_date")
+                ))
+            self.pg.commit()
+            os.remove(filepath)
+
+            return Response().response(status_code=200, error=False, message_id="tables_import_successfull", metadata={"file": filename})
+        except FileNotFoundError as fnf_err:
+            os.remove(filepath)
+            logger.error(f"Xlsx is not save. {e}", exc_info=True)
+            return Response().response(status_code=400, error=True, message_id="xlsx_is_not_save", exception=str(fnf_err))
+        except KeyError as key_err:
+            os.remove(filepath)
+            logger.error(f"Excel With Missing Rows Or Columns.", exc_info=True)
+            return Response().response(status_code=400, error=True, message_id="excel_with_missing_rows_or_columns", exception=str(key_err))
+        except Exception as e:
+            os.remove(filepath)
+            logger.error(f"Error Processing Xlsx. {e}", exc_info=True)
+            return Response().response(status_code=400, error=True, message_id="error_processing_xlsx", exception=str(e))
+
+    def list_bankers_financial_agreements(self, data: dict) -> None:
+        current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+
+        if current_page < 1:  # Force variables min values
+            current_page = 1
+        if rows_per_page < 1:
+            rows_per_page = 1
+
+        pagination = Pagination().pagination(current_page=current_page, rows_per_page=rows_per_page, sort_by=data.get("sort_by", ""), order_by=data.get("order_by", ""), filter_by=data.get("filter_by", ""))
+
+        list_bankers_fiancial = self.pg.fetch_to_dict(query=self.models.list_bankers_financial_agreements(pagination=pagination))
+
+        metadata = Pagination().metadata(
+            current_page=current_page,
+            rows_per_page=rows_per_page,
+            sort_by=pagination["sort_by"],
+            order_by=pagination["order_by"],
+            filter_by=pagination["filter_by"]
+        )
+
+        return Response().response(status_code=200, error=False, message_id="list_bankers_financial_agreements_successful", data=list_bankers_fiancial, metadata=metadata)
+
+    def list_board_table(self, data: dict, banker_id: int, financial_agreements_id: int) -> None:
+        current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+
+        if current_page < 1:  # Force variables min values
+            current_page = 1
+        if rows_per_page < 1:
+            rows_per_page = 1
+
+        pagination = Pagination().pagination(current_page=current_page, rows_per_page=rows_per_page, sort_by=data.get("sort_by", ""), order_by=data.get("order_by", ""), filter_by=data.get("filter_by", ""))
+
+        board_table = self.pg.fetch_to_dict(query=self.models.list_board_tables(pagination=pagination, banker_id=banker_id, financial_agreements=financial_agreements_id))
+
+        metadata = Pagination().metadata(
+            current_page=current_page,
+            rows_per_page=rows_per_page,
+            sort_by=pagination["sort_by"],
+            order_by=pagination["order_by"],
+            filter_by=pagination["filter_by"],
+            total_pages=math.ceil(board_table[0]["full_count"] / rows_per_page) if len(board_table) > 0 else 0,
+            total_rows=board_table[0]["full_count"] if len(board_table) > 0 else 0,
+        )
+
+        return Response().response(status_code=200, error=False, message_id="list_board_tables_successful", data=board_table, metadata=metadata)
+
+    def delete_tables(self, id: int, banker_id: int, financial_agreements_id: int):
+        logger.info("Delete Tables Sucessfull.")
+        table = self.pg.execute_query(query=self.models.delete_tables(id=id, banker_id=banker_id, financial_agreements_id=financial_agreements_id))
+        return Response().response(status_code=200, error=False, message_id="delete_table_successful", data=table)
+
+    def delete_tabels_ids(self, data: dict, banker_id: int, financial_agreements_id: int) -> None:
+        logger.info("Delete Tables Ids Sucessfull.")
+        tables_ids = self.pg.execute_query(query=self.models.delete_tables_ids(ids=data.get("ids"), banker_id=banker_id, financial_agreements_id=financial_agreements_id))
+        return Response().response(status_code=200, error=False, message_id="delete_table_ids_successful", data=tables_ids)
