@@ -41,7 +41,7 @@ class SellerCore:
         return Response().response(status_code=200, message_id="proposal_list_bankers_successful", data=proposal, metadata=metadata)
 
     def add_proposal(self, data, image_data: FileStorage):
-        from src.external import ProposalDispatcher
+        # from src.external import ProposalDispatcher
 
         try:
             data_dict = data.to_dict(flat=True)
@@ -78,8 +78,8 @@ class SellerCore:
                 )
                 self.pg.commit()
 
-                ProposalDispatcher.dispatch_proposal_addition(user_id=self.user_id)
-                ProposalDispatcher.dispatch_proposal_count_addtion(user_id=self.user_id)
+                # ProposalDispatcher.dispatch_proposal_addition(user_id=self.user_id)
+                # ProposalDispatcher.dispatch_proposal_count_addtion(user_id=self.user_id)
 
             return Response().response(
                 status_code=200, error=False,

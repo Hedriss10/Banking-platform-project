@@ -6,14 +6,14 @@ from src.core.token import CoreToken
 from src.service.response import Response
 
 
-tokens_ns = Namespace("token", description="Manager token",)
+token_ns = Namespace("token", description="Manager token",)
 
 
-@tokens_ns.route("/<int:id>")
+@token_ns.route("/<int:id>")
 class TokenManager(Resource):
     
     # @jwt_required()
-    @tokens_ns.doc(description="Get filter token")
+    @token_ns.doc(description="Get filter token")
     @cross_origin()
     def get(self, id):
         """Get filter token"""
