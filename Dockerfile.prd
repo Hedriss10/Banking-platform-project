@@ -17,4 +17,4 @@ WORKDIR /app
 
 EXPOSE 5001
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5002", "src:create_app()"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src:create_app()"]
