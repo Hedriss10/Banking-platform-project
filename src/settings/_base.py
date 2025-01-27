@@ -14,10 +14,10 @@ class DevelopmentConfig(Config):
     DEBUG = True
     PORT = os.getenv("DEV_PORT")
     DATABASE = os.getenv("DB_DEV_DATABASE")
-    USERNAME = os.getenv("DB_USERNAME")
+    USERNAME = os.getenv("DB_DEV_USERNAME")
     PASSWORD = os.getenv("DB_PASSWORD")
-    DB_HOST = os.getenv("HOST_DB")
-    DB_PORT = os.getenv("HOST_DB")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
 
 class ProductionConfig(Config):
     APPLICATION_ROOT = "/athenas"

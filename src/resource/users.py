@@ -5,7 +5,7 @@ from flask_cors import cross_origin
 from src.core.users import UsersCore
 from src.service.response import Response
 from src.service.token import token_required
-from src.resource.swagger.factorypayloadsLogin import PaylaodFactoryUser
+from src.resource.swagger.factorypayloadsUser import PaylaodFactoryUser
 
 
 # namespace
