@@ -11,4 +11,4 @@ preload_app = True
 accesslog = "-"
 errorlog = "-"
 loglevel = "info"
-wsgi_app = "src.app:create_app()"
+wsgi_app = "src.app:create_app"
