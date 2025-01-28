@@ -15,6 +15,6 @@ COPY . /src
 
 WORKDIR /src
 
-EXPOSE 5001
+EXPOSE 8080
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src.app:create_app()"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "src.app:create_app()"]

@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile.dev
     container_name: platform-athenas
     ports:
-      - "5001:5001"
+      - "8080:8080"
     networks:
       - app_network
     env_file:
       - .env
-    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src.app:create_app()"]
+    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "src.app:create_app()"]
     platform: linux/amd64
 
 networks:
