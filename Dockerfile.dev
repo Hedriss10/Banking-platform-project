@@ -6,16 +6,15 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 ENV FLASK_ENV=development
-ENV FLASK_APP=src.app:create_app
+ENV FLASK_APP=src.app:create_app 
 
 COPY requirements/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
 COPY . /src
-COPY .env /src/.env
 
 WORKDIR /src
 
 EXPOSE 5001
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src.app:create_app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "src.app:create_app()"]
