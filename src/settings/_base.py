@@ -7,6 +7,7 @@ load_dotenv()
 class Config:
     ENV = os.getenv("FLASK_ENV", "development")
     DEBUG = True
+    DOCS = os.getenv("DOCS_DEV")
 
 class DevelopmentConfig(Config):
     APPLICATION_ROOT = "/dev"
@@ -18,6 +19,8 @@ class DevelopmentConfig(Config):
     PASSWORD = os.getenv("DB_PASSWORD")
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
+    DOCS = os.getenv("DOCS_DEV")
+    
 
 class ProductionConfig(Config):
     APPLICATION_ROOT = "/athenas"
@@ -29,6 +32,8 @@ class ProductionConfig(Config):
     PASSWORD = os.getenv("DB_PRD_PASSWORD")
     DB_HOST = os.getenv("DB_PRD_HOST")
     DB_PORT = os.getenv("DB_PRD_PORT")
+    DOCS = os.getenv("DOCS_PRD")
+    
 
 config_by_name = {'development': DevelopmentConfig, 'production': ProductionConfig}
 
