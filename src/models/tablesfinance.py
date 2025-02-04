@@ -121,6 +121,7 @@ class TablesFinanceModels:
             {query_order_by}
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
+        print(query)
         return query
 
     def delete_tables(self, id: int, banker_id: int, financial_agreements_id: int) -> None:
