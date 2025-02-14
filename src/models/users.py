@@ -47,9 +47,13 @@ class UserModels:
                 role,
                 is_first_acess,
                 typecontract,
-                TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at
+                TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at,
+                ep.matricula,
+                ep.carga_horaria_semanal,
+                ep.situacao_cadastro
             FROM 
                 public.user u
+                INNER JOIN public.employee ep on u.id = ep.user_id
             WHERE u.id = {id} and u.is_deleted = false;
         """
         return query
