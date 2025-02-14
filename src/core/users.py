@@ -13,7 +13,7 @@ class UsersCore:
 
     def __init__(self, user_id: int, *args, **kwargs) -> None:
         self.pg = PgAdmin()
-        self.model = UserModels(user_id)
+        self.model = UserModels(user_id=user_id)
         self.user_id = user_id
 
     def list_users(self, data: dict):

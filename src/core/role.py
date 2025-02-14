@@ -53,7 +53,7 @@ class RoleCore:
             self.pg.execute_query(query=self.models.add_role(data=data))
             self.pg.commit()
         except UniqueViolation:
-            return Response().response(status_code=400, message_id="role_name_already_exists", metadata={"dict": data})
+            return Response().response(status_code=400, message_id="role_name_already_exists")
         except Exception as e:
             return Response().response(status_code=500, message_id="role_error", exception=str(e))
     
