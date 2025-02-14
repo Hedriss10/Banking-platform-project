@@ -7,10 +7,8 @@ from src.service.response import Response
 from src.service.token import token_required
 from src.resource.swagger.factorypayloadsUser import PaylaodFactoryUser
 
-
 # namespace
 users_ns = Namespace("user", description="user")
-
 
 pagination_arguments_customer = PaylaodFactoryUser.pagination_arguments_parser()
 payload_add_user = PaylaodFactoryUser.add_user_payload(users_ns)
@@ -74,7 +72,7 @@ class UserResourceManager(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))  
 
-            return UsersCore(user_id=user_id).edit_user(id=id, data=request.get_json())
+            return UsersCore(user_id=user_id).update_user(id=id, data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
         

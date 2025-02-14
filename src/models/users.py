@@ -1,6 +1,5 @@
 from werkzeug.security import generate_password_hash
 
-
 class UserModels:
 
     def __init__(self, user_id: int, *args, **kwargs) -> None:
@@ -9,12 +8,12 @@ class UserModels:
     def list_users(self, pagination: dict):
         query_filter = ""
         if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.role) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
+            query_filter = f"""AND (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.cpf) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
         
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY u.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
+
         query = f"""
             SELECT 
                 id,
@@ -23,13 +22,14 @@ class UserModels:
                 lastname,
                 email,
                 role,
+                typecontract,
                 is_first_acess,
                 is_deleted,
                 is_block,
                 is_acctive,
-                TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at,
-                typecontract
-            FROM public.user u
+                TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at
+            FROM 
+                public.user u
             WHERE u.is_deleted = false AND u.is_block = false {query_filter}
             ORDER BY u.id desc 
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
@@ -39,9 +39,18 @@ class UserModels:
     def get_user(self, id: int) -> None:
         query = f"""
             SELECT 
-                id, cpf, username, lastname, email, role, is_first_acess, create_at, COUNT(*) OVER() AS full_count
-            FROM public.user u
-            WHERE u.is_acctive=false and u.id={id}
+                id,
+                cpf, 
+                username, 
+                lastname, 
+                email, 
+                role,
+                is_first_acess,
+                typecontract,
+                TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at
+            FROM 
+                public.user u
+            WHERE u.id = {id} and u.is_deleted = false;
         """
         return query
         
@@ -82,7 +91,7 @@ class UserModels:
         """
         return query
                 
-    def edit_user(self, id: int, data: dict):
+    def update_user(self, id: int, data: dict):
         """
             Updates a user in the appropriate table based on the provided data.
         Args:

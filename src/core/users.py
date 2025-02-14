@@ -1,10 +1,9 @@
-import math
 from src.models.users import UserModels
 from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination
 from werkzeug.security import generate_password_hash
-from psycopg2.errors import UniqueViolation, DuplicateCursor
+from psycopg2.errors import UniqueViolation
 from src.utils.log import setup_logger
 
 log = setup_logger(__name__)
@@ -21,7 +20,7 @@ class UsersCore:
         current_page, rows_per_page = int(data.get("current_page", 1)), int(
             data.get("rows_per_page", 10))
 
-        if current_page < 1:  # Force variables min values
+        if current_page < 1:
             current_page = 1
         if rows_per_page < 1:
             rows_per_page = 1
@@ -76,13 +75,13 @@ class UsersCore:
         except UniqueViolation:
             return Response().response(status_code=400, message_id="cpf_with_email_already_exists", error=True, exception="CPF with this cpf already exists")
         
-    def edit_user(self, id: int, data):
+    def update_user(self, id: int, data):
         try:
             if not id and data:
                 log.warning("Bad request id or data is required")
                 return Response().response(status_code=400, message_id="id_or_data_is_required", exception="ID or Data is required")
             
-            users = self.model.edit_user(id=id, data=data)
+            users = self.model.update_user(id=id, data=data)
             for user in users:
                 self.pg.execute_query(query=user)
                 
