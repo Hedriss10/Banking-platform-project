@@ -39,13 +39,12 @@ class UserModels:
     def get_user(self, id: int) -> None:
         query = f"""
             SELECT 
-                id,
-                cpf, 
-                username, 
-                lastname, 
-                email, 
-                role,
-                is_first_acess,
+                u.id,
+                u.cpf, 
+                u.username, 
+                u.lastname, 
+                u.email, 
+                u.role,
                 typecontract,
                 TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at,
                 ep.matricula,
@@ -53,7 +52,7 @@ class UserModels:
                 ep.situacao_cadastro
             FROM 
                 public.user u
-                INNER JOIN public.employee ep on u.id = ep.user_id
+                INNER JOIN public.employee ep ON u.id = ep.user_id
             WHERE u.id = {id} and u.is_deleted = false;
         """
         return query
