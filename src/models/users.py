@@ -23,10 +23,8 @@ class UserModels:
                 email,
                 role,
                 typecontract,
-                is_first_acess,
                 is_deleted,
                 is_block,
-                is_acctive,
                 TO_CHAR(create_at, 'YYYY-MM-DD') AS create_at
             FROM 
                 public.user u
