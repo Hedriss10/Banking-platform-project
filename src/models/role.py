@@ -1,6 +1,4 @@
-
 class RoleModel:
-    
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         
@@ -12,7 +10,7 @@ class RoleModel:
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
+
         query = f"""
             SELECT 
                 r.id,
@@ -33,9 +31,6 @@ class RoleModel:
         
     def delete_role(self, id: int):
         query = f"""
-            UPDATE public.role
-            SET
-                is_deleted = true
-            WHERE id= {id};
+            DELETE FROM public.role WHERE id = {id};
         """
         return query

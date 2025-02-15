@@ -52,6 +52,7 @@ class RoleCore:
                 return Response().response(status_code=400, message_id="role_is_name_required", exception="Name role is required")
             self.pg.execute_query(query=self.models.add_role(data=data))
             self.pg.commit()
+            return Response().response(status_code=200, message_id="add_role_succesfully")
         except UniqueViolation:
             return Response().response(status_code=400, message_id="role_name_already_exists")
         except Exception as e:
