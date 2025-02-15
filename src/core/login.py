@@ -50,10 +50,10 @@ class LoginCore:
             logger.warning("Incorrect password")
             return Response().response(message_id="incorrect_password", status_code=401, error=True)
 
-    def reset_password_authorization(self, data: dict):
+    def reset_password_authorization(self, user_id: int, data: dict):
         try:
             new_password = generate_password_hash(password="123@bs", method="scrypt")
-            id = self.pg.fetch_to_dict(query=self.model.reset_password_master(id=data.get("id"), password=new_password, user_id=self.user_id))
+            id = self.pg.fetch_to_dict(query=self.model.reset_password_master(id=data.get("id"), user_id=user_id, password=new_password))
             if not id:
                 return Response().response(message_id="id_not_found", status_code=404, error=True)
 

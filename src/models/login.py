@@ -72,7 +72,7 @@ class LoginModels:
         """
         return query
     
-    def reset_password_master(self, id: int, password: str, user_id: int):
+    def reset_password_master(self, id: int, user_id: int,password: str):
         query = f"""
             UPDATE public.user
             SET

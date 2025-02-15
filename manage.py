@@ -9,8 +9,8 @@ class Middleware:
         self.app = app
 
     def __call__(self, environ, start_response):
-        environ.update({"Id": os.getenv("MIDDLEWARE_USER")})
-        environ.update({"email": os.getenv("MIDDLEWARE_EMAIL")})
+        environ.update({"Id": os.getenv("DB_MIDDLEWARE_USER")})
+        environ.update({"email": os.getenv("DB_MIDDLEWARE_EMAIL")})
         return self.app(environ, start_response)
 
 app = create_app()
