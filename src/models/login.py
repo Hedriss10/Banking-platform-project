@@ -73,16 +73,13 @@ class LoginModels:
         return query
     
     def reset_password_master(self, id: int, password: str, user_id: int):
-        logs = {"user_id": user_id, "reset": "This was reset by the master"}
-        
         query = f"""
             UPDATE public.user
             SET
                 is_first_acess=true,
                 password='{password}',
                 reset_password_by = {user_id},
-                reset_password_at = NOW(),
-                action_reset_password_text = ARRAY['{json.dumps({'action': 'insert', 'user_id': user_id, **logs})}']
+                reset_password_at = NOW()
             WHERE id = {id}
             RETURNING id;
         """
