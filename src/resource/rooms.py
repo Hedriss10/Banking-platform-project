@@ -70,7 +70,7 @@ class RoomnsManage(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
             
-            return RoomsCore(user_id=user_id).edit_rooms(id=id, data=request.get_json())
+            return RoomsCore(user_id=user_id).update_rooms(id=id, data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
     

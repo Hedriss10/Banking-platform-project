@@ -3,7 +3,7 @@ from src.service.response import Response
 from src.utils.pagination import Pagination
 from src.models.rooms import RoomsModel
 from src.utils.log import setup_logger
-from psycopg2.errors import UniqueViolation, DuplicateObject
+from psycopg2.errors import UniqueViolation
 
 logger = setup_logger(__name__)
 
@@ -51,12 +51,12 @@ class RoomsCore:
             if not data.get("name"):
                 logger.warning(f"Name is required")
                 return Response().response(status_code=401, error=True, message_id="rooms_is_required", exception="Rooms Name Is Required")
-            
-            rooms = self.pg.execute_query(query=self.models.add_rooms(data=data))
+
+            self.pg.execute_query(query=self.models.add_rooms(data=data))
             self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="rooms_add_successful", data=data, metadata={"message_id": "rooms_add_successful"})   
+            return Response().response(status_code=200, error=False, message_id="rooms_add_successful", data=data) 
         except UniqueViolation:
-            return Response().response(status_code=401, error=True, message_id="room_name_already_exists", data=data, metadata={"message_id": "room_name_already_exists"})  
+            return Response().response(status_code=401, error=True, message_id="room_name_already_exists", data=data)  
   
     def get_rooms(self, id: int):
         try:
@@ -68,12 +68,12 @@ class RoomsCore:
         except Exception as e:
             return Response().response(status_code=409, error=False, message_id="error_processing_rooms", data=rooms, metadata={"error: error_processing_rooms"})
                  
-    def edit_rooms(self, id: int, data: dict):
+    def update_rooms(self, id: int, data: dict):
         try:
             if not data.get("name"):
                 logger.warning(f"Rooms is Name Required.")
                 return Response().response(status_code=401, error=True, message_id="name_is_required", exception="Rooms Name Is Required")
-            self.pg.execute_query(query=self.models.edit_rooms(data=data, id=id))
+            self.pg.execute_query(query=self.models.update_rooms(data=data, id=id))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="rooms_update_successful") 
         except UniqueViolation:
@@ -121,8 +121,7 @@ class RoomsCore:
 
             self.pg.execute_query(self.models.add_rooms_user(data.get("ids"), data.get("rooms_id")))
             self.pg.commit()
-            return Response().response(status_code=200, message_id="user_added_to_room", exception="User successfully added to room" )
-
+            return Response().response(status_code=200, message_id="user_add_to_room", exception="User successfully added to room" )
         except Exception as e:
             logger.error(f"Exception occurred: {e}")
             return Response().response(status_code=500, error=True, message_id="error_add_rooms_user", exception=str(e))

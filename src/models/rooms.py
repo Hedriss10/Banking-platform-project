@@ -42,7 +42,7 @@ class RoomsModel:
         """
         return query
 
-    def edit_rooms(self, id: int, data: dict):
+    def update_rooms(self, id: int, data: dict):
         query = f"""
             UPDATE rooms SET name='{data.get("name")}' where id = {id}
         """
@@ -64,7 +64,7 @@ class RoomsModel:
                 rooms r 
                 INNER JOIN public.rooms_users ru on ru.rooms_id = r.id
                 INNER JOIN public.user u on ru.user_id = u.id
-            WHERE r.id = {id} AND r.is_deleted = false
+            WHERE r.id = {id} AND r.is_deleted = false AND u.is_deleted = false
             ORDER BY u.id
         """
         return query
