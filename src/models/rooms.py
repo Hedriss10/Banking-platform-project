@@ -54,18 +54,28 @@ class RoomsModel:
         """
         return query
 
-    def rooms_user(self, id: int):
+    def rooms_user(self, id: int, pagination: dict):
+        query_filter = ""
+        if pagination["filter_by"]:
+            query_filter = f"""AND (unaccent(r.name) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
+        
+        query_order_by = ""
+        if pagination["sort_by"] and pagination["order_by"]:
+            query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
+            
         query = f"""
             SELECT
                 u.id,
+                r.name as room_name,
                 initcap(trim(u.username)) as name,
                 initcap(trim(u.role)) as role
             FROM 
-                rooms r 
+                rooms r
                 INNER JOIN public.rooms_users ru on ru.rooms_id = r.id
                 INNER JOIN public.user u on ru.user_id = u.id
-            WHERE r.id = {id} AND r.is_deleted = false AND u.is_deleted = false
-            ORDER BY u.id
+            WHERE r.id = {id} AND r.is_deleted = false AND u.is_deleted = false {query_filter}
+            {query_order_by}
+            OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
     

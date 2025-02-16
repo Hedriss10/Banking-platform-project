@@ -93,12 +93,13 @@ class RoomsManageUserById(Resource):
     
     # @jwt_required()
     @rooms_ns.doc(description="List Users Room")
+    @rooms_ns.expect(pagination_arguments_customer, validate=True)
     @cross_origin()  
     def get(self, id: int):
         """List all users_rooms associate by id room"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return RoomsCore(user_id=user_id).rooms_user(id=id)
+            return RoomsCore(user_id=user_id).rooms_user(id=id, data=request.args.to_dict())
 
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
