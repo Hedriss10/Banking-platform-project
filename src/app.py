@@ -10,7 +10,6 @@ from src.resource.users import users_ns
 from src.resource.login import login_ns
 from src.resource.datacatalog import datacatalog_ns
 from src.resource.hourspoint import hourspoint_ns
-from src.resource.financialagreements import financial_agreements_ns
 from src.resource.bankerfinance import bankers_ns
 from src.resource.operational import operatinal_ns
 from src.resource.proposal import proposal_ns
@@ -62,7 +61,6 @@ def create_app():
     api.add_namespace(login_ns)
     api.add_namespace(datacatalog_ns)
     api.add_namespace(hourspoint_ns)
-    api.add_namespace(financial_agreements_ns)
     api.add_namespace(bankers_ns)
     api.add_namespace(operatinal_ns)
     api.add_namespace(proposal_ns)

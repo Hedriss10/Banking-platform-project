@@ -41,7 +41,7 @@ class BankerFinanceCore:
         return Response().response(status_code=200, message_id="bankers_list_bankers_successful", data=bankers, metadata=metadata)
 
     def get_banker(self, id: int):
-        banker = self.pg.fetch_to_dict(query=self.models.get_banker(id=id))
+        banker = self.pg.fetch_to_dict(query=self.models.get_banker(banker_id=id))
         if not banker:
             logger.warning(f"Banker Not Found.")
             return Response().response(status_code=404, error=True, message_id="banker_not_found", exception="Not found", data=banker)
@@ -60,6 +60,45 @@ class BankerFinanceCore:
 
         except UniqueViolation:
             return Response().response(status_code=400, message_id="name_banker_already_exists", error=True, exception="Name Banker with this name already exists")
+        
+    def add_financial_agreements(self, data):
+        try:
+            if not data.get("name"):
+                logger.warning(f"Finncial Agreements Name Is Required")
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="financial_agreements_is_required",
+                    exception="Financial Agreements Name Is Required",
+                )
+
+            financial_agreements = self.pg.fetch_to_dict(query=self.models.add_financial_agreements(name=data.get("name"), banker_id=data.get("banker_id")))
+            self.pg.commit()
+
+            return Response().response(status_code=200, error=False, message_id="financial_agreements_successful", data={"id": financial_agreements})
+        except Exception as e:
+            logger.error(f"Error Adds financial agreements, {e}", exc_info=True)
+            return Response().response(status_code=400, error=True, message_id="financial_agreements_add_error")
+    
+    def update_financial_agreements(self, id: int, data: dict):
+        try: 
+            try:
+                if not data.get("name"):
+                    logger.warning(f"Financial Agreements is Name Required.")
+                    return Response().response(
+                        status_code=401,
+                        error=True,
+                        message_id="financial_agreements_is_required",
+                        exception="Financial Agreements Name Is Required",)
+
+                financial_agreements = self.pg.fetch_to_dict(query=self.models.update_financial_agreements(name=data.get("name"), id=id))
+                self.pg.commit()
+                return Response().response(status_code=200, error=False, message_id="banker_update_successful", data={"id": financial_agreements})
+            except Exception as e:
+                return Response().response(status_code=200, error=True, message_id="banker_update_successful", data={"id": financial_agreements})
+        except Exception as e:
+            logger.error(f"Error Edit financial agreements, {e}", exc_info=True)
+            return Response().response(status_code=400, error=True, message_id="financial_agreements_edit_error")
 
     def update_banker(self, id: int, data: dict):
         try:
@@ -78,8 +117,33 @@ class BankerFinanceCore:
             if not id:
                 logger.warning(f"Banker Id is Required.")
                 return Response().response(status_code=401, error=True, message_id="banker_name_id_is_required", exception="Banker Id Is Required")
-            banker = self.pg.fetch_to_dict(query=self.models.delete_bankers(id=id))
-            self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="banker_delete_successful", data={"id": banker})
+            
+            bankers = self.pg.fetch_to_dict(query=self.models.delete_bankers(banker_id=id))
+            print(bankers)
+            if bankers[0]["banker_exists"] == True: 
+                self.pg.commit()
+                return Response().response(status_code=200, error=False, message_id="banker_delete_successful")
+            else: 
+                return Response().response(status_code=404, error=True, message_id="banker_not_found", exception="Banker Not Found")
+
         except Exception as e:
             return Response().response(status_code=401, error=True, message_id="erro_delete_banker")
+        
+        
+    def delete_financial_agreements(self, id: int):
+        try:                
+            if not id:
+                logger.warning(f"Financial Agreements is Required ID.")
+                return Response().response(
+                    status_code=401,
+                    error=True,
+                    message_id="financial_agreements_is_required",
+                    exception="Financial Agreements Id Is Required",
+                )
+
+            financial_agreements = self.pg.fetch_to_dict(query=self.models.delete_financial_agreements(id=id))
+            self.pg.commit()
+            return Response().response(status_code=200, error=False, message_id="banker_delete_successful", data={"id": financial_agreements})        
+        except Exception as e:
+            logger.error(f"Error Delete financial agreements, {e}", exc_info=True)
+            return Response().response(status_code=400, error=True, message_id="financial_agreements_delete_error")

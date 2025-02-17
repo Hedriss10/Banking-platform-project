@@ -1,3 +1,7 @@
+## TODO refatorar a listagem de convenios com os bancos - > removida
+## TODO mandar um dict sobre os convenios e bancos
+
+
 class BankerFinanceModels:
 
     def __init__(self, user_id: int) -> None:
@@ -26,16 +30,21 @@ class BankerFinanceModels:
         """
         return query
 
-    def get_banker(self, id: int):
+    def get_banker(self, banker_id: int):
         query = f"""
             SELECT
-                fa.id,
-                INITCAP(TRIM(fa.name)) AS name_financial_agreements
-            FROM 
-                financial_agreements fa
-            INNER JOIN bankers b on fa.banker_id = b.id
-            WHERE fa.is_deleted = false AND b.id = {id} AND fa.is_deleted = false AND fa.is_deleted = false
-            ORDER BY fa.id
+                b.id AS bank_id,
+                initcap(trim(b.name)) AS name_bank,
+                json_agg(
+                    json_build_object(
+                        'id_financialagreements', fa.id,
+                        'financialagreements_name', initcap(trim(fa.name))
+                    )
+                ) AS financial_agreements
+            FROM public.bankers b
+            INNER JOIN public.financial_agreements fa ON b.id = fa.banker_id
+            WHERE fa.is_deleted = false AND b.is_deleted = false and b.id = {banker_id}
+            GROUP BY b.id, b.name;
         """
         return query
 
@@ -50,25 +59,67 @@ class BankerFinanceModels:
             RETURNING id;
         """
         return query
+    
+    def add_financial_agreements(self, name: str, banker_id: int) -> None:
+        query = f"""
+            INSERT INTO public.financial_agreements (name, create_at, banker_id, is_deleted) 
+            VALUES (
+                '{name}', 
+                NOW(),
+                {banker_id},
+                false
+            ) 
+            RETURNING name;
+        """
+        return query
 
     def update_bankers(self, name: str, id: int) -> None:
         query = f"""
             UPDATE public.bankers AS b
-            set
+            SET
                 name='{name}'
             WHERE b.id = {id}
             RETURNING b.name
         """
         return query
 
-    def delete_bankers(self, id: int):
+    def delete_bankers(self, banker_id: int):
         query = f"""
-            UPDATE public.bankers AS b
-            set
+            WITH updated AS (
+                UPDATE public.bankers AS b
+                SET
+                    is_deleted = true,
+                    deleted_by = {self.user_id},
+                    deleted_at = NOW()
+                WHERE b.id = {banker_id}
+                RETURNING b.name
+            )
+            SELECT 
+                CASE 
+                    WHEN EXISTS (SELECT 1 FROM updated) THEN true
+                    ELSE false
+                END AS banker_exists;
+        """
+        return query
+    
+    def update_financial_agreements(self, name: str, id: int) -> None:
+        query = f"""
+            UPDATE public.financial_agreements AS b
+            SET
+                name='{name}'
+            WHERE b.id = {id}
+            RETURNING b.id;
+        """
+        return query
+    
+    def delete_financial_agreements(self, id: int):
+        query = f"""
+            UPDATE public.financial_agreements AS b
+            SET
                 is_deleted=true,
-                deleted_by={self.user_id},
+                deleted_by= {self.user_id},
                 deleted_at = NOW()
             WHERE b.id = {id}
-            RETURNING b.name
+            RETURNING b.name;
         """
         return query
