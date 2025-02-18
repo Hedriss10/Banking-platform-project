@@ -86,7 +86,6 @@ class FactoryPayloadsTablesFinance:
         return api.model(
             "AddTablesFinance",
             {
-                "banker_id": fields.Integer(required=True, example=1),
                 "financial_agreements_id": fields.Integer(required=True, example=1),
                 "name": fields.String(required=True, example="INSS Flex 6"),
                 "table_code": fields.String(required=True, example="40028922"),

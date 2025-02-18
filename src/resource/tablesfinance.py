@@ -16,7 +16,6 @@ paylaod_delete_ids = FactoryPayloadsTablesFinance.payload_delete_tables_finance(
 
 # payload parser for import tables
 payload_parser = reqparse.RequestParser()
-payload_parser.add_argument('banker_id', type=int, required=True, help='Id filter banker', location='form')
 payload_parser.add_argument('financialagreements_id', type=int, required=True, help='Id financialagreements', location='form')
 payload_parser.add_argument('issue_date', type=str, required=True, help='Date issue of table', location='form')
 payload_parser.add_argument('file', type=FileStorage, required=True, help='With upload .xlsx', location='files')
@@ -28,7 +27,6 @@ class TablesFinanceImportResource(Resource):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.payload_parser = reqparse.RequestParser()
-        self.payload_parser.add_argument('banker_id', type=int, required=True, help='id ', location='form')
         self.payload_parser.add_argument('financialagreements_id', type=int, required=True, help='Id financialagreements', location='form')
         self.payload_parser.add_argument('issue_date', type=str, required=True, help='Date issue of table', location='form')
         self.payload_parser.add_argument('file', type=FileStorage, required=True, help='With upload .xlsx', location='files')
@@ -41,13 +39,11 @@ class TablesFinanceImportResource(Resource):
         """Import tables finance"""
         try:
             args = self.payload_parser.parse_args()
-            print(args)
-            banker_id = args['banker_id']
             issue_date = args['issue_date']
             financialagreements_id = args['financialagreements_id']
             file = args['file']
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return TablesFinanceCore(user_id=user_id).add_tables_finance(data={'banker_id': banker_id, 'financialagreements_id': financialagreements_id, 'issue_date': issue_date}, file=file)
+            return TablesFinanceCore(user_id=user_id).add_tables_finance(data={'financialagreements_id': financialagreements_id, 'issue_date': issue_date}, file=file)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 

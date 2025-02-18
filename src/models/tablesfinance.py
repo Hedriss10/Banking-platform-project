@@ -49,7 +49,7 @@ class TablesFinanceModels:
 
     def add_tables_finance(self, name: str, type_table: str, table_code: str, start_term: str, end_term: str, rate: float, financial_agreements_id: int, issue_date: str) -> None:
         query = f"""
-            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, banker_id, financial_agreements_id, issue_date, create_at)
+            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, create_at)
             VALUES (
                 '{name}',
                 '{type_table}',
