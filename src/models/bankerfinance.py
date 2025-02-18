@@ -34,6 +34,7 @@ class BankerFinanceModels:
         query = f"""
             SELECT
                 b.id AS bank_id,
+                fa.id AS financial_agreements_id,
                 initcap(trim(b.name)) AS name_bank,
                 json_agg(
                     json_build_object(
