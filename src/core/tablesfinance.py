@@ -78,17 +78,9 @@ class TablesFinanceCore:
             dftmp = read_excel(filepath, dtype="object", engine="openpyxl")
 
             for index, row in dftmp.iterrows():
-                self.pg.execute_query(query=self.models.add_tables_finance(
-                    name=row['Tabela'],
-                    type_table=row['Tipo'],
-                    table_code=row['Cod Tabela'],
-                    start_term=row['Prazo Inicio'],
-                    end_term=row['Prazo Fim'],
-                    rate=row['Flat'],
-                    banker_id=data.get("banker_id"),
-                    financial_agreements_id=data.get("financialagreements_id"),
-                    issue_date=data.get("issue_date")
-                ))
+                self.pg.execute_query(query=self.models.add_tables_finance(name=row['Tabela'], type_table=row['Tipo'], table_code=row['Cod Tabela'], 
+                start_term=row['Prazo Inicio'], end_term=row['Prazo Fim'], rate=row['Flat'], banker_id=data.get("banker_id"), 
+                financial_agreements_id=data.get("financialagreements_id"), issue_date=data.get("issue_date")))
             self.pg.commit()
             os.remove(filepath)
 
@@ -106,28 +98,6 @@ class TablesFinanceCore:
             logger.error(f"Error Processing Xlsx. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_processing_xlsx", exception=str(e))
 
-    def list_bankers_financial_agreements(self, data: dict) -> None:
-        current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
-
-        if current_page < 1:  # Force variables min values
-            current_page = 1
-        if rows_per_page < 1:
-            rows_per_page = 1
-
-        pagination = Pagination().pagination(current_page=current_page, rows_per_page=rows_per_page, sort_by=data.get("sort_by", ""), order_by=data.get("order_by", ""), filter_by=data.get("filter_by", ""))
-
-        list_bankers_fiancial = self.pg.fetch_to_dict(query=self.models.list_bankers_financial_agreements(pagination=pagination))
-
-        metadata = Pagination().metadata(
-            current_page=current_page,
-            rows_per_page=rows_per_page,
-            sort_by=pagination["sort_by"],
-            order_by=pagination["order_by"],
-            filter_by=pagination["filter_by"]
-        )
-
-        return Response().response(status_code=200, error=False, message_id="list_bankers_financial_agreements_successful", data=list_bankers_fiancial, metadata=metadata)
-
     def list_board_table(self, data: dict, banker_id: int, financial_agreements_id: int) -> None:
         current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
 
@@ -136,26 +106,22 @@ class TablesFinanceCore:
         if rows_per_page < 1:
             rows_per_page = 1
 
-        pagination = Pagination().pagination(current_page=current_page, rows_per_page=rows_per_page, sort_by=data.get("sort_by", ""), order_by=data.get("order_by", ""), filter_by=data.get("filter_by", ""))
-
-        board_table = self.pg.fetch_to_dict(query=self.models.list_board_tables(pagination=pagination, banker_id=banker_id, financial_agreements=financial_agreements_id))
-
-        metadata = Pagination().metadata(
+        pagination = Pagination().pagination(
             current_page=current_page,
             rows_per_page=rows_per_page,
-            sort_by=pagination["sort_by"],
-            order_by=pagination["order_by"],
-            filter_by=pagination["filter_by"],
-            total_pages=math.ceil(board_table[0]["full_count"] / rows_per_page) if len(board_table) > 0 else 0,
-            total_rows=board_table[0]["full_count"] if len(board_table) > 0 else 0,
+            sort_by=data.get("sort_by", ""),
+            order_by=data.get("order_by", ""),
+            filter_by=data.get("filter_by", ""),
         )
 
-        return Response().response(status_code=200, error=False, message_id="list_board_tables_successful", data=board_table, metadata=metadata)
+        board_table = self.pg.fetch_to_dict(query=self.models.list_board_tables(pagination=pagination, banker_id=banker_id, financial_agreements=financial_agreements_id))
+        if not board_table:
+            logger.warning(f"Board Table Not Found.")
+            return Response().response(status_code=404, error=True, message_id="board_table_not_found", exception="Not found", data=board_table)
 
-    def delete_tables(self, id: int, banker_id: int, financial_agreements_id: int):
-        logger.info("Delete Tables Sucessfull.")
-        table = self.pg.execute_query(query=self.models.delete_tables(id=id, banker_id=banker_id, financial_agreements_id=financial_agreements_id))
-        return Response().response(status_code=200, error=False, message_id="delete_table_successful", data=table)
+        metadata = Pagination().metadata(current_page=current_page, rows_per_page=rows_per_page, sort_by=pagination["sort_by"], order_by=pagination["order_by"], filter_by=pagination["filter_by"])
+
+        return Response().response(status_code=200, error=False, message_id="list_board_tables_successful", data=board_table, metadata=metadata)
 
     def delete_tabels_ids(self, data: dict, banker_id: int, financial_agreements_id: int) -> None:
         logger.info("Delete Tables Ids Sucessfull.")

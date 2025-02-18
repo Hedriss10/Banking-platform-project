@@ -1,7 +1,3 @@
-## TODO refatorar a listagem de convenios com os bancos - > removida
-## TODO mandar um dict sobre os convenios e bancos
-
-
 class BankerFinanceModels:
 
     def __init__(self, user_id: int) -> None:
