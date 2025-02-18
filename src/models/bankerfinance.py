@@ -41,9 +41,10 @@ class BankerFinanceModels:
                         'financialagreements_name', initcap(trim(fa.name))
                     )
                 ) AS financial_agreements
-            FROM public.bankers b
-            INNER JOIN public.financial_agreements fa ON b.id = fa.banker_id
-            WHERE fa.is_deleted = false AND b.is_deleted = false and b.id = {banker_id}
+            FROM 
+                public.bankers b
+                LEFT JOIN public.financial_agreements fa ON b.id = fa.banker_id AND fa.is_deleted = false
+            WHERE b.is_deleted = false AND b.id = {banker_id}
             GROUP BY b.id, b.name;
         """
         return query
