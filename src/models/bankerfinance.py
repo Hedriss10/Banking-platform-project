@@ -34,7 +34,6 @@ class BankerFinanceModels:
         query = f"""
             SELECT
                 b.id AS bank_id,
-                fa.id AS financial_agreements_id,
                 initcap(trim(b.name)) AS name_bank,
                 json_agg(
                     json_build_object(
@@ -46,7 +45,7 @@ class BankerFinanceModels:
                 public.bankers b
                 LEFT JOIN public.financial_agreements fa ON b.id = fa.banker_id AND fa.is_deleted = false
             WHERE b.is_deleted = false AND b.id = {banker_id}
-            GROUP BY b.id, b.name, fa.id;
+            GROUP BY b.id, b.name;
         """
         return query
 
