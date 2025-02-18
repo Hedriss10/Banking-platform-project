@@ -72,7 +72,7 @@ class TablesFinanceModels:
     def list_board_tables(self, pagination: dict, banker_id: int, financial_agreements: int) -> None:
         query_filter = ""
         if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(tf.name) ILIKE unaccent('%{pagination["filter_by"]}%')) AND (unaccent(tf.table_code) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
+            query_filter = f"""AND (unaccent(tf.name) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(tf.table_code) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
 
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
