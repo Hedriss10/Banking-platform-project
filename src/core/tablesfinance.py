@@ -1,4 +1,3 @@
-import math
 import os
 from pandas import read_excel
 from src.models.tablesfinance import TablesFinanceModels
