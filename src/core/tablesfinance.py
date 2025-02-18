@@ -50,7 +50,7 @@ class TablesFinanceCore:
 
     def add_table(self, data: dict) -> None:
         try:
-            if not data.get("banker_id") and data.get("financial_agreements_id"):
+            if not data.get("financial_agreements_id"):
                 logger.warning(f"Is Banker and Financialagreements Required")
                 return Response().response(status_code=400, error=True, message_id="is_banker_and_financialagreements_required")
 
@@ -78,8 +78,7 @@ class TablesFinanceCore:
 
             for index, row in dftmp.iterrows():
                 self.pg.execute_query(query=self.models.add_tables_finance(name=row['Tabela'], type_table=row['Tipo'], table_code=row['Cod Tabela'], 
-                start_term=row['Prazo Inicio'], end_term=row['Prazo Fim'], rate=row['Flat'], banker_id=data.get("banker_id"), 
-                financial_agreements_id=data.get("financialagreements_id"), issue_date=data.get("issue_date")))
+                start_term=row['Prazo Inicio'], end_term=row['Prazo Fim'], rate=row['Flat'], financial_agreements_id=data.get("financialagreements_id"), issue_date=data.get("issue_date")))
             self.pg.commit()
             os.remove(filepath)
 
@@ -97,7 +96,7 @@ class TablesFinanceCore:
             logger.error(f"Error Processing Xlsx. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_processing_xlsx", exception=str(e))
 
-    def list_board_table(self, data: dict, banker_id: int, financial_agreements_id: int) -> None:
+    def list_board_table(self, data: dict, financial_agreements_id: int) -> None:
         current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
 
         if current_page < 1:  # Force variables min values
@@ -113,7 +112,7 @@ class TablesFinanceCore:
             filter_by=data.get("filter_by", ""),
         )
 
-        board_table = self.pg.fetch_to_dict(query=self.models.list_board_tables(pagination=pagination, banker_id=banker_id, financial_agreements=financial_agreements_id))
+        board_table = self.pg.fetch_to_dict(query=self.models.list_board_tables(pagination=pagination, financial_agreements=financial_agreements_id))
         if not board_table:
             logger.warning(f"Board Table Not Found.")
             return Response().response(status_code=404, error=True, message_id="board_table_not_found", exception="Not found", data=board_table)

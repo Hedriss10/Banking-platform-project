@@ -1,5 +1,3 @@
-
-
 class TablesFinanceModels:
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
@@ -33,7 +31,7 @@ class TablesFinanceModels:
 
     def add_tables(self, data: dict):  
         query = f"""
-            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, banker_id, financial_agreements_id, issue_date, create_at)
+            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, create_at)
             VALUES (
                 '{data.get("name")}',
                 '{data.get("type_table")}',
@@ -42,7 +40,6 @@ class TablesFinanceModels:
                 '{data.get("end_term")}',
                 {data.get("rate")},
                 false,
-                {data.get("banker_id")},
                 {data.get("financial_agreements_id")},
                 '{data.get("issue_date")}',
                 NOW()
@@ -50,7 +47,7 @@ class TablesFinanceModels:
         """
         return query
 
-    def add_tables_finance(self, name: str, type_table: str, table_code: str, start_term: str, end_term: str, rate: float, banker_id: int, financial_agreements_id: int, issue_date: str) -> None:
+    def add_tables_finance(self, name: str, type_table: str, table_code: str, start_term: str, end_term: str, rate: float, financial_agreements_id: int, issue_date: str) -> None:
         query = f"""
             INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, banker_id, financial_agreements_id, issue_date, create_at)
             VALUES (
@@ -61,7 +58,6 @@ class TablesFinanceModels:
                 '{end_term}',
                 {rate},
                 false,
-                {banker_id},
                 {financial_agreements_id},
                 '{issue_date}',
                 NOW()
@@ -69,7 +65,7 @@ class TablesFinanceModels:
         """
         return query
 
-    def list_board_tables(self, pagination: dict, banker_id: int, financial_agreements: int) -> None:
+    def list_board_tables(self, pagination: dict, financial_agreements: int) -> None:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(tf.name) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(tf.table_code) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
@@ -89,18 +85,18 @@ class TablesFinanceModels:
                 rate
             FROM 
                 tables_finance as tf
-            WHERE tf.banker_id = {banker_id} AND tf.financial_agreements_id = {financial_agreements} AND tf.is_deleted = false {query_filter}
+            WHERE tf.financial_agreements_id = {financial_agreements} AND tf.is_deleted = false {query_filter}
             GROUP BY tf.id
             {query_order_by}
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
 
-    def delete_tables_ids(self, ids: dict, banker_id: int, financial_agreements_id: int) -> None:
+    def delete_tables_ids(self, financial_agreements_id: int, ids: dict) -> None:
         ids_str = ', '.join(map(str, ids))
         query = f"""
             UPDATE public.tables_finance AS tf
                 SET is_deleted = TRUE
-            WHERE tf.banker_id = {banker_id} AND tf.financial_agreements_id = {financial_agreements_id} AND tf.id IN ({ids_str});
+            WHERE tf.financial_agreements_id = {financial_agreements_id} AND tf.id IN ({ids_str});
         """
         return query
