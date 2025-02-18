@@ -44,7 +44,6 @@ def create_app():
         description="Backend Athenas.",
     )
 
-    cors = CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
     CORS(app, resources={r"/*": {"origins": "*"}})
 
