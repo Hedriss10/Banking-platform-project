@@ -121,7 +121,7 @@ class TablesFinanceCore:
 
         return Response().response(status_code=200, error=False, message_id="list_board_tables_successful", data=board_table, metadata=metadata)
 
-    def delete_tabels_ids(self, data: dict, banker_id: int, financial_agreements_id: int) -> None:
+    def delete_tabels_ids(self, id: int, data: dict) -> None:
         logger.info("Delete Tables Ids Sucessfull.")
-        tables_ids = self.pg.execute_query(query=self.models.delete_tables_ids(ids=data.get("ids"), banker_id=banker_id, financial_agreements_id=financial_agreements_id))
+        tables_ids = self.pg.execute_query(query=self.models.delete_tables_ids(ids=data.get("ids"), financial_agreements_id=id))
         return Response().response(status_code=200, error=False, message_id="delete_table_ids_successful", data=tables_ids)

@@ -81,12 +81,12 @@ class TablesFinanceResourceById(Resource):
     @tables_finance_ns.doc(description="Delete all tables with ids")
     @tables_finance_ns.expect(paylaod_delete_ids, validate=True)
     @cross_origin()
-    def delete(self, banker_id, financial_agreements_id):
+    def delete(self, id: int):
         """Delete all tables with ids"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return TablesFinanceCore(user_id=user_id).delete_tabels_ids(data=request.get_json(), banker_id=banker_id, financial_agreements_id=financial_agreements_id)
+            return TablesFinanceCore(user_id=user_id).delete_tabels_ids(data=request.get_json(), id=id)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
