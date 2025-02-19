@@ -175,8 +175,8 @@ class DeleteResource(Resource):
     @report_ns.doc(description="Delete imports of platform")
     @report_ns.expect(payload_delete_payments, validate=True)
     @cross_origin()
-    def post(self):
-        """Delete imports of platform"""
+    def delete(self):
+        """Delete imports reports of platform"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
@@ -193,7 +193,7 @@ class FlagsListResource(Resource):
     @report_ns.expect(pagination_arguments_customer, validate=True)
     @cross_origin()
     def get(self):
-        """list of flags"""
+        """List of flags"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
@@ -221,11 +221,10 @@ class FlagsDeleteResource(Resource):
     @report_ns.doc(description="delete flags")
     @report_ns.expect(payload_delete_ids, validate=True)
     @cross_origin()
-    def post(self):
-        """delete flags"""
+    def delete(self):
+        """Delete flags of platform"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            print(request.get_json())
             return ReportCore(user_id=user_id).delete_flag(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
@@ -235,11 +234,11 @@ class FlagsDeleteResource(Resource):
 class ListSellersResource(Resource):
 
     # @jwt_required()
-    @report_ns.doc(description="list of Sellers")
+    @report_ns.doc(description="list of sellers that contain a paid proposal, parameter has report and contains a paid proposal but is not in the report")
     @report_ns.expect(pagination_customer_sellers, validate=True)
     @cross_origin()
     def get(self):
-        """list of Sellers"""
+        """list of sellers that contain a paid proposal, parameter has report and contains a paid proposal but is not in the report"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
