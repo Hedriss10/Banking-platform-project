@@ -284,11 +284,11 @@ class ReportCore:
 
             self.pg.execute_query(query=self.models.add_flag(data=data))
             self.pg.commit()
-            return Response().response(status_code=200, error=True, message_id="add_flags_successfully")
+            return Response().response(status_code=200, error=False, message_id="add_flags_successfully")
         except UniqueViolation:
             return Response().response(status_code=409, error=True, message_id="name_already_exists")
-
         except Exception as e:
+            print(e)
             return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
 
     def delete_flag(self, data: dict):
