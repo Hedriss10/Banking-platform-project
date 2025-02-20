@@ -1,10 +1,4 @@
-## TODO - listar pagamento processados (Data, cpf, nome do vendedor e número da proposta)
-## TODO - listar importação de relatórios (Nome do relatório, importado por quem, data de importação)
-## TODO - Ajustar a listagem de sellers para que possa mostrar aqueles que estão em um relatório e não estão em relatório (tendo ambos propostas pagas)
-## TODO - Quantitativo de propostas pagas e não pagas
-## TODO - Deletar pagamentos processados todos ou apenas de um vendedor
-## TODO - Baixar relatorio de comissão paga
-
+## TODO - Quantitativo de propostas pagas e não pagas (Ex... Total ou por vendedor ou por sala)
 
 class ReportModels:
 

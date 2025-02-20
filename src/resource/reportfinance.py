@@ -125,7 +125,7 @@ class DeleteProcessingPayments(Resource):
     @report_ns.doc(description="Delete process payments")
     @report_ns.expect(payload_delete_payments, validate=True)
     @cross_origin()
-    def post(self):
+    def delete(self):
         """Delete process payments"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
