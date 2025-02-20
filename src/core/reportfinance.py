@@ -299,7 +299,7 @@ class ReportCore:
 
             self.pg.execute_query(query=self.models.delete_flag(ids=data.get("ids")))
             self.pg.commit()
-            return Response().response(status_code=200, error=True, message_id="delete_flags_successfully")
+            return Response().response(status_code=200, error=False, message_id="delete_flags_successfully")
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
 
@@ -314,7 +314,7 @@ class ReportCore:
             if just_mine.lower() == 'true':
                 self.pg.execute_query(query=self.models.delete_import())
                 self.pg.commit()
-                return Response().response(status_code=200, error=True, message_id="delete_import_successfully")
+                return Response().response(status_code=200, error=False, message_id="delete_import_successfully")
             else:
                 return Response().response(status_code=409, error=True, message_id="just_mine_false", exception="Just mine false")
 
