@@ -65,13 +65,13 @@ class ReportModels:
         valid_sellers = {user['sellers_id'] for user in user_ids}
 
         values = ", ".join(
-            f"({proposal['sellers_id']}, {flag_id}, {proposal['proposal_id']}, now(), {self.user_id})"
+            f"({proposal['sellers_id']}, {flag_id}, {proposal['proposal_id']}, now(), {self.user_id}, TRUE)"
             for proposal in proposals
             if proposal['sellers_id'] in valid_sellers
         )
                 
         query = f"""
-            INSERT INTO public.flags_processing_payments (user_id, flag_id, proposal_id, created_at, created_by)
+            INSERT INTO public.flags_processing_payments (user_id, flag_id, proposal_id, created_at, created_by, is_payment)
             VALUES {values};
         """
         return query
@@ -79,58 +79,21 @@ class ReportModels:
     def list_decision_maker(self, ids: int):
         ids_str = ', '.join(map(str, ids))
         query = f"""
-            WITH associated_proposals AS (
-                SELECT
-                    DISTINCT 
-                    p.id AS proposal_id,
-                    u.username AS name_sellers,
-                    p.nome AS name_client,
-                    rd.cpf AS cpf_client,
-                    rd.id AS report_id,
-                    INITCAP(TRIM(rd.name)) AS name_report
-                FROM 
-                    proposal p
-                    INNER JOIN public.user u ON u.id = p.user_id
-                    INNER JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-                    INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-                    INNER JOIN public.manage_operational mo ON mo.proposal_id = p.id
-                    INNER JOIN public.report_data rd ON rd.cpf = p.cpf
-                    INNER JOIN public.tables_finance tf ON tf.table_code = rd.table_code 
-                        AND rd.number_proposal::bigint = mo.number_proposal 
-                        AND pl.valor_operacao = CAST(rd.value_operation AS double precision)
-                WHERE 
-                    rd.is_validated = true
-                    AND rd.is_deleted = false
-                    AND p.is_deleted = false
-            ), decision_maker AS (
-                SELECT
-                    p.id AS proposal_id,
-                    initcap(trim(p.nome)) AS name_client,
-                    p.cpf AS cpf_client,
-                    pl.valor_operacao,
-                    ps.contrato_pago,
-                    u.id AS sellers_id,
-                    initcap(trim(u.username)) AS username
-                FROM 
-                    proposal p
-                LEFT JOIN associated_proposals ap ON ap.proposal_id = p.id
-                LEFT JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-                LEFT JOIN public.report_data rd ON rd.id = ap.report_id
-                LEFT JOIN public.proposal_status ps on ps.proposal_id = p.id
-                LEFT JOIN public.user u on u.id = p.user_id
-                LEFT JOIN flags_processing_payments fpp on fpp.proposal_id = p.id
-                WHERE 
-                    p.is_deleted = false
-                    AND u.is_deleted = false AND u.is_block = false AND u.is_acctive = true
-                    AND ps.contrato_pago = true
-                    AND ap.proposal_id IS NULL
-                    AND u.id IN({ids_str})
-                ORDER BY
-                    p.id
-            )
             SELECT 
-                * 
-            FROM decision_maker;
+                p.id AS proposal_id,
+                u.id AS sellers_id
+            FROM 
+                proposal p
+                INNER JOIN public.user u ON u.id = p.user_id
+                INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
+            WHERE p.is_deleted = false
+                AND u.is_deleted = false AND u.is_block = false
+                AND ps.contrato_pago = true  
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM flags_processing_payments fpp
+                    WHERE fpp.proposal_id = p.id AND fpp.is_payment = true AND fpp.is_deleted = false
+                ) AND u.id IN({ids_str});
         """
         return query
     
@@ -228,7 +191,7 @@ class ReportModels:
                     AND NOT EXISTS (
                         SELECT 1
                         FROM flags_processing_payments fpp
-                        WHERE fpp.user_id = u.id
+                        WHERE fpp.proposal_id = p.id AND fpp.is_payment = true AND fpp.is_deleted = false
                     )
                     {where_has_report[0] if where_has_report else where_has_report}
             )
@@ -240,7 +203,7 @@ class ReportModels:
         """
         return query
 
-    def list_payment_report(self, pagination: dict):
+    def list_processing_payments(self, pagination: dict):
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(p.cpf) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) """
@@ -252,6 +215,7 @@ class ReportModels:
         query = f"""
             WITH processing_payments AS (
                 SELECT 
+                    w.id,
                     p.cpf,
                     u.username,
                     mo.number_proposal AS number_proposal,
@@ -325,9 +289,9 @@ class ReportModels:
         """
         return query
     
-    def delete_import(self):
+    def delete_import(self, name: str):
         query = f"""
-            DELETE FROM report_data;
+            DELETE FROM report_data WHERE name = '{name}';
         """
         return query
 
@@ -378,8 +342,14 @@ class ReportModels:
         """
         return query
 
-    def delete_processing_payment(self, just_mine: str):
+    def delete_processing_payment(self, ids: list):
+        ids_str = ', '.join(map(str, ids))
         query = f"""
-            DELETE FROM flags_processing_payments;
+            UPDATE flags_processing_payments 
+            SET
+                is_deleted = true,
+                updated_at = NOW(),
+                updated_by = {self.user_id}
+            WHERE id IN ({ids_str});
         """
         return query

@@ -91,6 +91,9 @@ class ReportCore:
         try:
             if data.get("decision_maker"):
                 decision_maker = self.pg.fetch_to_all(query=self.models.list_decision_maker(ids=data.get("user_id")))
+                if not decision_maker:
+                    logger.warning("No decision maker")
+                    return Response().response(status_code=409, error=True, message_id="no_decision_maker", exception="No decision maker")
                 self.pg.execute_query(query=self.models.processing_payment(proposals=decision_maker, data=data, user_ids=decision_maker))
                 self.pg.commit()
             else:
@@ -106,10 +109,8 @@ class ReportCore:
             return Response().response(status_code=200, error=False, message_id="payments_process_successfull")
         except ForeignKeyViolation as fk:
             return Response().response(status_code=409, error=True, message_id="flag_or_user_is_not_present_database", exception=str(fk))
-
         except UniqueViolation as q:
             return Response().response(status_code=409, error=True, message_id="duplicate_proposal_processing_payments", exception=str(q))
-
         except Exception as e:
             return Response().response(status_code=417, error=True, message_id="error_processing_payment", exception=str(e))
 
@@ -128,7 +129,7 @@ class ReportCore:
             filter_by=data.get("filter_by", ""),
         )
 
-        list_payments = self.pg.fetch_to_dict(query=self.models.list_payment_report(pagination=pagination))
+        list_payments = self.pg.fetch_to_dict(query=self.models.list_processing_payments(pagination=pagination))
 
         if not list_payments:
             logger.warning(f"List processing payments List Not Found.")
@@ -303,30 +304,20 @@ class ReportCore:
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
 
-    def delete_imports(self, data: dict):
+    def delete_imports(self, name: str):
         try:
-            if not data.get("just_mine"):
-                logger.warning("Just_mine is required")
-                return Response().response(status_code=400, error=True, message_id="id_is_required", exception="Just_mine is required")
-
-            just_mine = data.get("just_mine")
-
-            if just_mine.lower() == 'true':
-                self.pg.execute_query(query=self.models.delete_import())
-                self.pg.commit()
-                return Response().response(status_code=200, error=False, message_id="delete_import_successfully")
-            else:
-                return Response().response(status_code=409, error=True, message_id="just_mine_false", exception="Just mine false")
-
+            self.pg.execute_query(query=self.models.delete_import(name=name))
+            self.pg.commit()
+            return Response().response(status_code=200, error=False, message_id="delete_report_import_successfully")
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
 
     def delete_processing_payment(self, data: dict):
         try:
-            if not data.get("just_mine"):
-                return Response().response(status_code=409, error=True, message_id="just_mine_is_required", exception="Just Mine is required")
-            self.pg.execute_query(query=self.models.delete_processing_payment(just_mine=data.get("just_mine")))
+            if not data.get("ids"):
+                return Response().response(status_code=409, error=True, message_id="ids_is_required", exception="IDS is required")
+            self.pg.execute_query(query=self.models.delete_processing_payment(ids=data.get("ids")))
             self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="delete_processing_payments")
+            return Response().response(status_code=200, error=False, message_id="delete_processing_payments_successfully")
         except Exception as e:
-            return Response().response(status_code=500, error=False, message_id="erro_processing_delete_payments", metadata={"data": data})
+            return Response().response(status_code=500, error=False, message_id="erro_processing_delete_payments",)

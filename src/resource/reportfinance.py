@@ -46,7 +46,8 @@ processing_ns_payload = report_ns.model("ProcessingFlagsPayaments", {"flags_id":
 
 payload_add_flags = report_ns.model("AddFlag", {"name": fields.String(required=True, example="Flag Black"), "rate": fields.Float(required=True, example=3.6)})
 
-payload_delete_payments = report_ns.model("DeletePayments", {"just_mine": fields.String(require=True, example="true")})
+payload_delete_payments = report_ns.model("DeletePayments", {"ids": fields.List(fields.Integer, required=True, example=[2, 3, 4, 5, 6])})
+
 
 payload_delete_ids = report_ns.model(
     "DeleteFlagsIds",
@@ -61,7 +62,6 @@ payload_add_decision_maker = report_ns.model(
         "proposal_ids": fields.List(fields.Integer, required=True, example=[2, 3, 4]),
     },
 )
-
 
 
 @report_ns.route("/import-reports")
@@ -168,19 +168,17 @@ class ListImportResource(Resource):
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
 
-@report_ns.route("/delete-imports")
+@report_ns.route("/delete-imports/<string:name>")
 class DeleteResource(Resource):
-
     # @jwt_required()
     @report_ns.doc(description="Delete imports of platform")
-    @report_ns.expect(payload_delete_payments, validate=True)
     @cross_origin()
-    def delete(self):
+    def delete(self, name: str):
         """Delete imports reports of platform"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return ReportCore(user_id=user_id).delete_imports(data=request.get_json())
+            return ReportCore(user_id=user_id).delete_imports(name=name)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
