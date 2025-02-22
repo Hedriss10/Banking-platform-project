@@ -22,7 +22,7 @@ from src.resource.token import token_ns
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="static")
     app.config.from_object(config)
     
     authorizations = {
@@ -43,9 +43,8 @@ def create_app():
         title="Athenas Backend API micro serviços",
         description="Backend Athenas.",
     )
-
     app.config["CORS_HEADERS"] = "Content-Type"
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": "*"}, r"/static/*": {"origins": "*"}})
 
     app.config["JWT_SECRET_KEY"] = "bsconsig"
     app.config["JWT_TOKEN_LOCATION"] = ["headers"]

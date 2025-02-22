@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv 
 from src.app import create_app 
 
+from flask import url_for
+
 load_dotenv()
 
 class Middleware:

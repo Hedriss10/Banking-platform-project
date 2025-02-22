@@ -133,8 +133,6 @@ class ListProposalResource(Resource):
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
-        
-
 @proposal_ns.route("/<int:id>")    
 class ProposalResource(Resource):
     
