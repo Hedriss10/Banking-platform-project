@@ -236,7 +236,7 @@ class ReportModels:
                     INNER JOIN public.flags_processing_payments w ON w.proposal_id = p.id
                     INNER JOIN public.flags fl on fl.id = w.flag_id
                     INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-                WHERE ps.contrato_pago = true AND p.is_deleted= false {query_filter}
+                WHERE ps.contrato_pago = true AND p.is_deleted= false AND u.is_deleted = false AND u.is_block = false AND w.is_deleted = false {query_filter}
             )
             SELECT * FROM processing_payments as ps
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
