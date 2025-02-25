@@ -168,22 +168,27 @@ class SellerModels:
 
     def proposal_loan(self, data: dict, proposal_id: int):
         data = data.to_dict(flat=True)
-
-        int_fields = ['tables_finance_id', 'financial_agreements_id', 'loan_operation_id']
+        int_fields = ['tables_finance_id', 'financial_agreements_id', 'loan_operation_id', 'user_id']
 
         for field in int_fields:
-            if data.get(field) is not None:
-                try:
-                    data[field] = int(data[field])
-                except ValueError:
-                    raise ValueError(f"Campo {field} precisa ser um número inteiro válido.")
+            value = data.get(field, "").strip()
+            if value.isdigit():
+                data[field] = int(value)
+            elif value == "":
+                data[field] = None
+            else:
+                raise ValueError(f"Campo {field} precisa ser um número inteiro válido.")
+
+        for key, value in data.items():
+            if isinstance(value, str) and value.strip() == "":
+                data[key] = None
 
         columns_register = {
             "senha_servidor": data.get("senha_servidor"),
             "matricula": data.get("matricula"),
             "data_dispacho": data.get("data_dispacho"),
             "margem": data.get("margem"),
-            "prazo_inicio": data.get("prazo_inicio"),
+            "prazo_inicio": data.get("prazo_inicio"), 
             "prazo_fim": data.get("prazo_fim"),
             "valor_operacao": data.get("valor_operacao"),
             "proposal_id": proposal_id,
@@ -201,13 +206,13 @@ class SellerModels:
             if value is None:
                 col_values.append("NULL")
             elif isinstance(value, str):
-                col_values.append(f"'{value}'")
+                col_values.append(f"'{value}'")  # Aspas para strings
             else:
-                col_values.append(value)
+                col_values.append(str(value))  # Mantém números sem aspas
 
         query = f"""
             INSERT INTO proposal_loan ({', '.join(col_names)})
-            VALUES ({', '.join(map(str, col_values))});
+            VALUES ({', '.join(col_values)});
         """
         return query
 

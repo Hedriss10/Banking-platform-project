@@ -119,7 +119,6 @@ class BankerFinanceCore:
                 return Response().response(status_code=401, error=True, message_id="banker_name_id_is_required", exception="Banker Id Is Required")
             
             bankers = self.pg.fetch_to_dict(query=self.models.delete_bankers(banker_id=id))
-            print(bankers)
             if bankers[0]["banker_exists"] == True: 
                 self.pg.commit()
                 return Response().response(status_code=200, error=False, message_id="banker_delete_successful")

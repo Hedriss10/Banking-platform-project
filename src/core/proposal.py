@@ -51,16 +51,16 @@ class SellerCore:
         try:
             data_dict = data.to_dict(flat=True)
             image_data = image_data.to_dict(flat=False)
-
-            if not data_dict.get("cpf"):
+            new_data = {k: v for k, v in data_dict.items() if v} # filter empty values
+            if not new_data.get("cpf"):
                 logger.warning("cpf_is_required")
                 return Response().response(status_code=400, error=True, message_id="cpf_is_required")
 
-            proposal = self.pg.fetch_to_dict(query=self.models.add_proposal(data=data_dict))
+            proposal = self.pg.fetch_to_dict(query=self.models.add_proposal(data=new_data))
             self.pg.commit()
 
             if proposal:
-                self.pg.execute_query(query=self.models.proposal_benefit(benefit_id=data_dict.get("benefit_id"), proposal_id=proposal[0]["id"]))
+                self.pg.execute_query(query=self.models.proposal_benefit(benefit_id=new_data.get("benefit_id"), proposal_id=proposal[0]["id"]))
                 self.pg.execute_query(query=self.models.status_proposal(proposal_id=proposal[0]["id"]))
                 self.pg.execute_query(query=self.models.proposal_wallet(data=data, proposal_id=proposal[0]["id"]))
                 self.pg.execute_query(query=self.models.proposal_loan(data=data, proposal_id=proposal[0]["id"]))
@@ -71,7 +71,6 @@ class SellerCore:
             return Response().response(status_code=200, error=False, message_id="proposal_add_successful", data={"id": proposal[0]["id"]})
 
         except Exception as e:
-            print("ERRROOOOO", e)
             logger.warning(f"Error Processing Proposal {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_in_add_proposal", exception=str(e))
 

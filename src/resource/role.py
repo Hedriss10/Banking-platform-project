@@ -52,5 +52,4 @@ class RoleManagerId(Resource):
             return RoleCore(user_id=user_id).delete_role(id=id)
 
         except Exception as e:
-            print(e)
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
