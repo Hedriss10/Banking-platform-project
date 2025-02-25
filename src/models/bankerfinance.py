@@ -40,7 +40,7 @@ class BankerFinanceModels:
             FROM 
                 public.bankers b
                 LEFT JOIN public.financial_agreements fa ON b.id = fa.banker_id AND fa.is_deleted = false
-            WHERE b.is_deleted = false AND b.id = {banker_id}
+            WHERE b.is_deleted = false AND fa.is_deleted = false AND b.id = {banker_id}
             GROUP BY b.id, b.name;
         """
         return query

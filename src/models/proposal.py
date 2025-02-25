@@ -5,7 +5,7 @@ class SellerModels:
     def list_proposal(self, pagination: dict) -> None:
         query_filter = ""
         if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(p.cpf) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
+            query_filter = f"""AND (unaccent(p.cpf) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(p.nome) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
 
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
@@ -66,7 +66,7 @@ class SellerModels:
                 LEFT JOIN public.proposal_loan pl ON pl.proposal_id = p.id
                 LEFT JOIN public.loan_operation lo ON lo.id = pl.loan_operation_id
                 LEFT JOIN contract_paid_cte cp ON cp.proposal_id = p.id
-            WHERE p.is_deleted = false AND p.user_id = {self.user_id} AND u.is_deleted=FALSE {query_filter}
+            WHERE p.is_deleted = false AND u.id = {self.user_id} AND u.is_deleted=FALSE {query_filter}
             GROUP BY p.id, u.username, lo.name, cp.status_updated_by_name, cp.current_status
             ORDER BY p.created_at DESC
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
