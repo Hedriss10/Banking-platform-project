@@ -20,8 +20,8 @@ class TablesFinanceModels:
                 tf.rate
             FROM 
                 tables_finance tf
-                INNER JOIN public.bankers b ON b.id = tf.banker_id 
                 INNER JOIN public.financial_agreements fa ON fa.id = tf.financial_agreements_id
+                INNER JOIN public.bankers b ON b.id = fa.banker_id 
             WHERE tf.is_deleted = false {query_filter} AND fa.is_deleted = false AND b.is_deleted = false
             GROUP BY tf.id, b.id, fa.id
             ORDER BY tf.id asc
