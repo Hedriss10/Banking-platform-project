@@ -203,10 +203,20 @@ class OperationaModel:
                 ps.contrato_pendente_banco,
                 ps.aguardando_pagamento,
                 ps.contrato_pago,
-                mo.number_proposal 
+                mo.number_proposal,
+                json_agg(
+                    json_build_object(
+                        'user_description:', u.username,
+                        'description', initcap(trim(h.description)),
+                        'created_at', TO_CHAR(h.created_at, 'YYYY-MM-DD HH:MM:SS')
+                    )
+                ) AS reports
             FROM 
-                proposal_status ps 
+                proposal_status ps
                 LEFT JOIN manage_operational mo on mo.proposal_id = ps.proposal_id 
+                LEFT JOIN public.history h on h.proposal_id = ps.proposal_id
+                INNER JOIN public.user u on u.id = h.user_id
             WHERE ps.proposal_id = {id}
+            GROUP BY ps.id, mo.id
         """
         return query
