@@ -6,7 +6,7 @@ class OperationaModel:
     def list_proposal(self, pagination: dict):
         query_filter = ""
         if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(p.cpf) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(cp.current_status) ILIKE unaccent('%{pagination["filter_by"]}%')) """
+            query_filter = f"""AND (unaccent(nome_digitador) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(cp.current_status) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(p.nome) ILIKE unaccent('%{pagination["filter_by"]}%')) """
         
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
@@ -49,10 +49,10 @@ class OperationaModel:
                 initcap(trim(cp.digitador_por)) AS digitador_por
             FROM 
                 proposal p 
-            LEFT JOIN proposal_loan pl ON pl.proposal_id = p.id
-            LEFT JOIN loan_operation lo ON lo.id = pl.loan_operation_id 
-            LEFT JOIN status_proposal cp ON cp.proposal_id = p.id
-            LEFT JOIN public.user u ON u.id = p.user_id
+                LEFT JOIN proposal_loan pl ON pl.proposal_id = p.id
+                LEFT JOIN loan_operation lo ON lo.id = pl.loan_operation_id 
+                LEFT JOIN status_proposal cp ON cp.proposal_id = p.id
+                LEFT JOIN public.user u ON u.id = p.user_id
             WHERE p.is_deleted = FALSE AND pl.is_deleted = FALSE {query_filter}
             GROUP BY p.id, u.username, p.nome, p.cpf, p.created_at, cp.current_status, lo.name, cp.digitado_as, cp.digitador_por
             ORDER BY p.created_at DESC
@@ -154,10 +154,11 @@ class OperationaModel:
                         WHEN ps.aceite_feito_analise_banco THEN 'Aceite Feito - Análise Banco'
                         WHEN ps.contrato_pendente_banco THEN 'Contrato Pendente - Banco'
                     END AS current_status
-                FROM public.proposal_status ps
-                LEFT JOIN public.proposal p on ps.proposal_id = p.id
-                LEFT JOIN public.manage_operational mo ON mo.proposal_id = ps.proposal_id
-                LEFT JOIN public.user u ON u.id = ps.action_by
+                FROM 
+                    public.proposal_status ps
+                    LEFT JOIN public.proposal p on ps.proposal_id = p.id
+                    LEFT JOIN public.manage_operational mo ON mo.proposal_id = ps.proposal_id
+                    LEFT JOIN public.user u ON u.id = ps.action_by
                 WHERE p.is_deleted = FALSE
             )
             SELECT
@@ -182,8 +183,9 @@ class OperationaModel:
                 u.username AS criado_por,
                 TO_CHAR(h.created_at , 'DD-MM-YYYY HH24:MI') AS criado_as,
                 initcap(trim(h.description)) AS descricao 
-            FROM public.history h
-            INNER JOIN public.user AS u on h.user_id = u.id 
+            FROM 
+                public.history h
+                INNER JOIN public.user AS u on h.user_id = u.id 
             WHERE h.proposal_id = {proposal_id}
             ORDER BY criado_as DESC
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
@@ -202,8 +204,9 @@ class OperationaModel:
                 ps.aguardando_pagamento,
                 ps.contrato_pago,
                 mo.number_proposal 
-            FROM proposal_status ps 
-            LEFT JOIN manage_operational mo on mo.proposal_id = ps.proposal_id 
+            FROM 
+                proposal_status ps 
+                LEFT JOIN manage_operational mo on mo.proposal_id = ps.proposal_id 
             WHERE ps.proposal_id = {id}
         """
         return query
