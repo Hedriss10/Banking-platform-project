@@ -6,7 +6,7 @@ class OperationaModel:
     def list_proposal(self, pagination: dict):
         query_filter = ""
         if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(nome_digitador) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(cp.current_status) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(p.nome) ILIKE unaccent('%{pagination["filter_by"]}%')) """
+            query_filter = f"""AND (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(cp.current_status) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(p.nome) ILIKE unaccent('%{pagination["filter_by"]}%')) """
         
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
