@@ -17,7 +17,9 @@ class TablesFinanceModels:
                 initcap(trim(tf.name)) AS table,
                 initcap(trim(b.name)) AS name_banker,
                 tf.table_code,
-                tf.rate
+                tf.rate,
+                tf.start_term,
+                tf.end_term
             FROM 
                 tables_finance tf
                 INNER JOIN public.financial_agreements fa ON fa.id = tf.financial_agreements_id
