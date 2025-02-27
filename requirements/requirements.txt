@@ -13,6 +13,7 @@ et_xmlfile==2.0.0
 etelemetry==0.3.1
 filelock==3.17.0
 fire==0.7.0
+fitz==0.0.1.dev2
 Flask==3.0.3
 Flask-Cors==5.0.0
 Flask-JWT-Extended==4.6.0
@@ -49,11 +50,10 @@ puremagic==1.28
 pydot==3.0.4
 Pygments==2.19.1
 PyJWT==2.9.0
-PyMuPDF==1.25.2
+PyMuPDF==1.25.3
 pyparsing==3.2.1
 pytest==8.3.3
 pytest-cov==6.0.0
-pytest-md==0.2.0
 pytest-report==0.2.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
