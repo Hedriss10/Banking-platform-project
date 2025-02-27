@@ -2,7 +2,22 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,windows,flask
 
 
+# ignore static
+static.
+static/ 
+
+
+# ignore rav.yaml
+rav.yaml
+
+
+# ignore folders
+commands
+db_backups
+
+
 .DS_Store
+
 
 
 .vscode/

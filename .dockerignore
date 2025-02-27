@@ -1,0 +1,58 @@
+# Ignorar diretórios e arquivos de ambiente virtual
+venv/
+.envrc/
+
+# ignore log
+src.log/
+.src.log
+
+
+# Ignorar arquivos de cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+
+# Ignorar arquivos de configuração local
+*.local
+
+# Ignorar arquivos de IDE e editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignorar arquivos de log
+*.log
+logs/
+
+# Ignorar arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos de teste e desenvolvimento
+tests/
+test/
+coverage/
+htmlcov/
+.pytest_cache/
+
+# Ignorar arquivos de versionamento (Git)
+.git/
+.gitignore
+
+# Ignorar arquivos de build e distribuição
+dist/
+build/
+*.egg-info/
+*.egg
+*.whl
+
+# Ignorar arquivos de documentação
+docs/
+doc/
+_build/
+
+# Ignorar arquivos de cache do pip
+.pip-cache/

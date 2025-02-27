@@ -1,97 +1,178 @@
-# Banking-project ™️
+# Backend Athenas ™️ 🚀
 
-## Technologies Used on the Platform 💻
+Bem-vindo ao **Backend Athenas**, a espinha dorsal da nossa plataforma de CRM! Este projeto foi desenvolvido com foco em eficiência, segurança e escalabilidade, utilizando tecnologias modernas e boas práticas de desenvolvimento.
 
-- Flask 
-- PostgreSQL
-- Flask-SQLAlchemy
-- Flask Alembic
+---
 
-## Project Architecture
+## 📚 Introdução ao Swagger
 
-### Modular Architecture
+<img src="docs/img/swagger.png" alt="Swagger Documentation" width="500"/>
 
-This project uses a modular architecture, organized within a monolith. Modularization facilitates maintenance, scalability, and code comprehension, allowing different parts of the application to be developed and managed separately.
+**Descrição**:  
+Desenvolvemos endpoints robustos e seguros, utilizando `Flask-JWT-Extended` para garantir a autenticação e proteção dos dados. A documentação completa da API está disponível via **Swagger**, facilitando a integração e o entendimento dos recursos disponíveis.
 
-### Directory Structure
+---
 
-The project's directory structure is organized as follows:
+## 🛠️ Tecnologias Utilizadas
 
+Aqui estão as principais tecnologias que alimentam o **Backend Athenas**:
+
+- **Flask** 🐍: Leve e poderoso, ideal para APIs rápidas e escaláveis.
+- **Flask-RESTx** 🔧: Facilita a criação de APIs RESTful com suporte a Swagger.
+- **Pandas** 🐼: Para manipulação eficiente de dados.
+- **Gunicorn** 🦄: Servidor WSGI para produção.
+- **Docker** 🐳: Containerização para fácil deploy e escalabilidade.
+
+**Descrição**:  
+Essas ferramentas foram escolhidas a dedo para garantir um desenvolvimento ágil e uma infraestrutura robusta. Ao instalar as dependências, outras bibliotecas podem ser incluídas automaticamente no arquivo `.env`.
+
+---
+
+## 📌 Índice
+
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Uso](#-uso)
+- [Tomada de Decisão](#-tomada-de-decisão)
+- [Objetivo](#-objetivo)
+
+---
+
+## 🛠️ Instalação
+
+Siga os passos abaixo para configurar o projeto localmente:
+
+1. **Clone o repositório**:
+    ```bash
+    git clone https://github.com/Hedriss10/Banking-platform-project.git
+    ```
+
+2. **Navegue até o diretório do projeto**:
+    ```bash
+    cd banking-platform-project
+    ```
+
+3. **Crie um ambiente virtual**:
+    ```bash
+    python3 -m venv venv
+    ```
+
+4. **Ative o ambiente virtual**:
+    - **macOS/Linux**:
+        ```bash
+        source venv/bin/activate
+        ```
+    - **Windows**:
+        ```bash
+        .\venv\Scripts\activate
+        ```
+
+5. **Instale as dependências**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+---
+
+## 🐳 Docker
+
+### Desenvolvimento
+
+**Gerar a imagem**:
+```bash
+docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t platform-athenas --load .
 ```
-docs/
-LICENSE
-local.py
-README.md
-requirements.txt
-src/
-    auth/
-    config.py
-    __init__.py
-    models/
-    __pycache__/
-    static/
-    templates/
-    utils/
-    routes/
-    wsgi.py
-test/
+
+**Salvar imagem de desenvolvimento**:
+```bash
+docker save -o platform-athenas-app.tar platform-athenas 
 ```
 
-### Directory and File Descriptions
-
-- **docs/**: Contains the project's documentation.
-- **instance/**: Stores instance-specific configuration files that are not versioned.
-- **LICENSE**: Information about the project's licensing.
-- **local.py**: Local configuration file, used for environment-specific settings during development.
-- **migrations/**: Directory containing database migrations, typically managed with `Flask-Migrate` and `Alembic`.
-- **proposta/**: Directory that may contain specifications or proposal documents for the project.
-- **README.md**: Provides an overview of the project, including installation and usage instructions.
-- **requirements.txt**: List of Python dependencies required for the project.
-- **src/**: Main directory for the application's source code.
-  - **auth/**: Module responsible for authentication, containing blueprints, forms, and related logic.
-  - **config.py**: Configuration file defining different environments (development, production, etc.).
-  - **__init__.py**: Contains the factory function to create and configure the Flask instance.
-  - **models/**: Module containing the database model definitions.
-  - **__pycache__/**: Automatically generated directory by Python for storing compiled bytecode files.
-  - **static/**: Directory for static files such as CSS, JavaScript, and images.
-  - **templates/**: Directory for HTML templates to be rendered by views.
-  - **utils/**: Module with utility functions and helpers used across different parts of the application.
-  - **routes/**: Module containing the application's views where routes are defined.
-  - **wsgi.py**: Entry point for WSGI servers, used to deploy the application.
-- **test/**: Directory for unit and integration tests.
-
-
-
-### Factory Pattern
-
-The project follows the factory pattern to create and configure the Flask instance, which allows for greater flexibility and ease of testing. An example of a factory function can be found in the `src/__init__.py` file:
-
-```python
-from flask import Flask
-
-def create_app():
-    app = Flask(__name__)
-    
-    # Load configuration
-    app.config.from_object('config')
-
-    # Register blueprints
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint)
-    
-    # More initializations and registrations...
-
-    return app
+**Executar o container**:
+```bash
+docker run --rm -it -p 5001:5001 platform-athenas
 ```
 
-### Benefits of Modular Architecture
+### Produção
 
-- **Maintainability**: Code organized in modules facilitates maintenance and updates.
-- **Scalability**: Allows different modules to be scaled independently as needed.
-- **Comprehension**: Clear and well-defined structure makes it easier for new developers to understand the project.
-- **Reusability**: Modules can be reused in different parts of the application or in other projects.
+**Gerar a imagem de produção**:
+```bash
+docker buildx build --platform linux/amd64 -f Dockerfile.prd -t platform-athenas:prd --load .
+```
 
+**Salvar imagem de produção**:
+```bash
+docker save -o platform-athenas-prd.tar platform-athenas:prd
+```
 
+### Comandos Úteis
 
-<p><a href="docs/bs-system-develop.md">Docs Development</a></p>
+**Compactar o projeto**:
+```bash
+tar --exclude=".DS_Store" --exclude="__MACOSX" -czvf platform-athenas.tar src .gitignore Dockerfile.dev docker-compose.yml manage.py
+```
+
+**Executar o build com Docker Compose**:
+```bash
+docker-compose up --build
+```
+
+---
+
+## ⚙️ Configuração
+
+1. **Crie um arquivo `.env`** na raiz do projeto e adicione as seguintes variáveis de ambiente:
+    ```env
+    FLASK_APP=app.py
+    FLASK_ENV=development
+    JWT_SECRET_KEY=your_secret_key
+    ```
+
+---
+
+## 🚀 Uso
+
+**Como rodar o projeto**:
+
+1. **Inicie o servidor Flask**:
+    ```bash
+    flask run
+    ```
+
+2. **Acesse a documentação Swagger**:
+    ```
+    http://127.0.0.1:5000/docs
+    ```
+
+**Executando com Gunicorn**:
+```bash
+gunicorn -w 4 -b 0.0.0.0:5001 'src.app:create_app()'
+```
+
+---
+
+## 🤔 Tomada de Decisão
+
+Após uma análise detalhada das necessidades da empresa, optamos por desenvolver um **CRM básico** totalmente personalizado. Inicialmente, consideramos o uso de `Django`, mas devido à sua natureza "pesada" com muitas libs desnecessárias, escolhemos o **Flask** por sua flexibilidade e leveza.
+
+**Estrutura de Conexão**:
+
+<img src="docs/img/intro-server.png" alt="Server Connection Structure" width="500"/>
+
+A decisão de utilizar `Flask` permitiu um controle maior sobre o processo e a adoção de boas práticas de servidor, mesmo em um ambiente local.
+
+---
+
+## 🎯 Objetivo
+
+<img src="docs/img/setores.png" alt="Company Sectors" width="500"/>
+
+**Descrição**:  
+O **Backend Athenas** foi criado para garantir a **persistência de dados** na empresa, conectando setores de forma ágil e sem perda de informações. Nosso objetivo é proporcionar uma comunicação eficiente entre os setores, garantindo que todos os dados estejam sempre disponíveis e seguros.
+
+---
+
+Autor -> Hedris Pereira | **Backend Athenas ™️**  
+🚀 **Inovação e Eficiência em cada linha de código.**
+
 ---
