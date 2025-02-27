@@ -26,7 +26,7 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip
-        pip install -r requirements.txt
+        cd requirements && pip install -r requirements.txt
         pip install pytest pytest-cov coverage
 
     - name: Run tests with coverage
