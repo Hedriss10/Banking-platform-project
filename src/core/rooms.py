@@ -131,6 +131,6 @@ class RoomsCore:
 
             self.pg.execute_query(query=self.models.delete_rooms_user(ids=data.get("ids"), rooms_id=id))
             self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="rooms_users_succesfull")
+            return Response().response(status_code=200, error=False, message_id="rooms_user_delete_successful")
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="error_delete_rooms_user", exception=str(e))
