@@ -97,30 +97,6 @@ class ListLoanOperationResource(Resource):
 
 @datacatalog_ns.route("/<int:id>")
 class ManageLoanOperation(Resource):
-
-    # @jwt_required() 
-    @datacatalog_ns.doc(description="Get Id Loan Operation")
-    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)    
-    def get(self, id):
-        """Get Id Loan Operation"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).get_loan_operation(id=id)
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-    
-    # @jwt_required()
-    @datacatalog_ns.doc(description="Edit Loan Operation")
-    @datacatalog_ns.expect(edit_payload_loan, validate=True)   
-    def put(self, id):
-        """Edit Loan Operation"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).edit_loan_operation(id=id, data=request.get_json())
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
     
     # @jwt_required()
     @datacatalog_ns.doc(description="Delete Loan Operation")
@@ -134,53 +110,14 @@ class ManageLoanOperation(Resource):
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
-@datacatalog_ns.route("/list-rank")
-class ListRankTables(Resource):
-    
-    # @jwt_required()
-    @datacatalog_ns.doc(description="List rank tables")
-    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)
-    @cross_origin()
-    def get(self):
-        """List rank tables""" 
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).list_rank_tables(data=request.args.to_dict())
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-        
 @datacatalog_ns.route("/benefit/<int:id>")
 class ManageBenefitOperation(Resource):
-
-    # @jwt_required() 
-    @datacatalog_ns.doc(description="Get Id Benefit")
-    def get(self, id):
-        """Get Id Benefit"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).get_benifit(id=id)
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-    
-    # @jwt_required()
-    @datacatalog_ns.doc(description="Edit Benefit")
-    @datacatalog_ns.expect(payload_edit_benefit, validate=True)   
-    def put(self, id):
-        """Edit Benefit"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).edit_benefit(id=id, data=request.get_json())
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-    
+        
     # @jwt_required()
     @datacatalog_ns.doc(description="Delete Benefit")
     @datacatalog_ns.expect(validate=True) 
     def delete(self, id):
-        """Delete LBenefit"""
+        """Delete Benefit"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
@@ -245,30 +182,7 @@ class ListBankOperation(Resource):
     
 @datacatalog_ns.route("/bank/<int:id>")
 class ManageBankOperation(Resource):
-    
-    # @jwt_required() 
-    @datacatalog_ns.doc(description="Get Id Bank")
-    def get(self, id):
-        """Get Id Bank"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).get_bank(id=id)
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-    
-    # @jwt_required()
-    @datacatalog_ns.doc(description="Edit Bank")
-    @datacatalog_ns.expect(edit_payload_bank, validate=True)   
-    def put(self, id):
-        """Edit Bank"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-            return DataCatalogCore(user_id=user_id).edit_bank(id=id, data=request.get_json())
-        except Exception as e:
-            return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-    
+        
     # @jwt_required()
     @datacatalog_ns.doc(description="Delete Bank")
     @datacatalog_ns.expect(validate=True) 
@@ -280,19 +194,3 @@ class ManageBankOperation(Resource):
             return DataCatalogCore(user_id=user_id).delete_bank(id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
-
-# @datacatalog_ns.route("/tables")
-# class ListTablesofOperation(Resource):
-    
-#     # @jwt_required()
-#     @datacatalog_ns.doc(description="Get All Tables")
-#     @datacatalog_ns.expect(pagination_arguments_customer, validate=True)
-#     @cross_origin()
-#     def get(self):
-#         """Get All Tables"""
-#         try:
-#             user_id = request.headers.get("Id", request.environ.get("Id"))      
-            
-#             return DataCatalogCore(user_id=user_id).list_tables(data=request.args.to_dict())
-#         except Exception as e:
-#             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())

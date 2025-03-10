@@ -33,8 +33,3 @@ jobs:
       run: |
         source venv/bin/activate
         pytest --cov=src --cov-report=term-missing
-
-    - name: Report coverage
-      run: |
-        source venv/bin/activate
-        coverage report

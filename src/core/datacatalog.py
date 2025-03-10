@@ -4,19 +4,10 @@ from src.utils.log import setup_logger
 from src.utils.pagination import Pagination
 from src.db.pg import PgAdmin
 
-
 logger = setup_logger(__name__)
 
-
 class DataCatalogCore:
-    """
-        Data Catalog of sellers
-        has loan operation of sellers
-        has list tables filter with table code
-        has manager bank for sellers
-    Returns:
-        _type_: flaskapisretx
-    """
+
     def __init__(self, user_id: int, *args, **kwargs) -> None:
         self.user_id = user_id
         self.models = DataCatalogModels(user_id=user_id)
@@ -58,23 +49,6 @@ class DataCatalogCore:
         except Exception as e:
             logger.error(f"Error processing loan operation. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
-        
-    def get_loan_operation(self, id: int):
-        try:
-            if not id:
-                logger.warning(f"Id is required.")
-                return Response().response(status_code=400, error=True, message_id="id_is_required", exception="Id is required")
-            
-            loan_operation = self.pg.fetch_to_dict(query=self.models.get_loan_operation(id=id))
-            
-            if not loan_operation:
-                logger.warning(f"Loan Operation not found.")
-                return Response().response(status_code=404, error=True, message_id="loan_operation_not_found", exception="Loan Operation Not Found")
-            
-            return Response().response(status_code=200, message_id="loan_operation_successful", data=loan_operation)
-        except Exception as e:
-            logger.error(f"Error processing Loan Operation. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_benefit", exception=str(e))
            
     def add_loan_operation(self, data: dict):
         name = data.get("name")
@@ -90,15 +64,6 @@ class DataCatalogCore:
             logger.error(f"Error processing loan operation. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
         
-    def edit_loan_operation(self, id: int, data: dict):
-        try:
-            self.pg.execute_query(query=self.models.edit_loan_operation(id=id, name=data.get("name")))
-            self.pg.commit()
-            return Response().response(status_code=200, message_id="loan_operation_edit_successful")
-        except Exception as e:
-            logger.error(f"Error processing loan operation. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
-    
     def delete_loan_operation(self, id: int):
         try:
             self.pg.execute_query(query=self.models.delete_loan_operation(id=id))
@@ -194,32 +159,7 @@ class DataCatalogCore:
         except Exception as e:
             logger.error(f"Error processing loan operation. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_befinit_opeartion", exception=str())
-    
-    def get_benifit(self, id: int):
-        try:
-            if not id:
-                logger.warning(f"Id is required.")
-                return Response().response(status_code=400, error=True, message_id="id_is_required", exception="Id is required")
-            
-            benefit = self.pg.fetch_to_dict(query=self.models.get_benefit(id=id))
-            if not benefit:
-                logger.warning(f"Benefit not found.")
-                return Response().response(status_code=404, error=True, message_id="benfit_no_found", exception="Benefit Not Found")
-            
-            return Response().response(status_code=200, message_id="benefit_successful", data=benefit)
-        except Exception as e:
-            logger.error(f"Error processing benefit. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_benefit", exception=str(e))
-    
-    def edit_benefit(self, id: int, data: dict):
-        try:
-            self.pg.execute_query(query=self.models.edit_benefit(id=id, name=data.get("name")))
-            self.pg.commit()
-            return Response().response(status_code=200, message_id="benefit_edit_successful")
-        except Exception as e:
-            logger.error(f"Error processing benefit operation. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_benefit_opeartion", exception=str(e))
-    
+        
     def delete_benefit(self, id: int):
         try:
             self.pg.execute_query(query=self.models.delete_benefit(id=id))
@@ -229,8 +169,7 @@ class DataCatalogCore:
         except Exception as e:
             logger.error(f"Error processing loan operation. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
-        
-    # bank
+
     def add_bank(self, data: dict):
         name = data.get("name")
         id_bank = data.get("id_bank")
@@ -283,31 +222,6 @@ class DataCatalogCore:
             logger.error(f"Error processing loan operation. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_list_bank", exception=str(e))
     
-    def get_bank(self, id: int):
-        try:
-            if not id:
-                logger.warning(f"Id is required.")
-                return Response().response(status_code=400, error=True, message_id="id_is_required", exception="Id is required")
-            
-            bank = self.pg.fetch_to_dict(query=self.models.get_bank(id=id))
-            if not bank:
-                logger.warning(f"Bank not found.")
-                return Response().response(status_code=404, error=True, message_id="bank_no_found", exception="Bank Not Found")
-            
-            return Response().response(status_code=200, message_id="bank_successful", data=bank)
-        except Exception as e:
-            logger.error(f"Error processing bank. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_get_bank", exception=str(e))
-    
-    def edit_bank(self, id: int, data: dict):
-        try:
-            self.pg.execute_query(query=self.models.edit_bank(id=id, name=data.get("name")))
-            self.pg.commit()
-            return Response().response(status_code=200, message_id="bank_edit_successful")
-        except Exception as e:
-            logger.error(f"Error processing bank operation. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_bank_edit", exception=str(e))
-    
     def delete_bank(self, id: int):
         try:
             self.pg.execute_query(query=self.models.delete_bank(id=id))
@@ -317,41 +231,3 @@ class DataCatalogCore:
         except Exception as e:
             logger.error(f"Error processing banker. {e}", exc_info=True)
             return Response().response(status_code=400, error=True, message_id="error_bank_delete", exception=str(e))
-
-    # list tables register in database of forms proposal
-    def list_tables(self, data: dict):
-        try:
-            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
-
-            if current_page < 1:  # Force variables min values
-                current_page = 1
-            if rows_per_page < 1:
-                rows_per_page = 1
-
-            pagination = Pagination().pagination(
-                current_page=current_page,
-                rows_per_page=rows_per_page,
-                sort_by=data.get("sort_by", ""),
-                order_by=data.get("order_by", ""),
-                filter_by=data.get("filter_by", "")
-            )
-
-            tables = self.pg.fetch_to_dict(query=self.models.list_tables(pagination=pagination))
-            
-            if not tables:
-                logger.warning(f"Tables List Not Found.")
-                return Response().response(status_code=404, error=True, message_id="tables_list_not_found", exception="Not found", data=tables)
-            
-            metadata = Pagination().metadata(
-                current_page=current_page,
-                rows_per_page=rows_per_page,
-                sort_by=pagination["sort_by"],
-                order_by=pagination["order_by"],
-                filter_by=pagination["filter_by"]
-            )
-            
-            return Response().response(status_code=200, message_id="tables_list_successful", data=tables, metadata=metadata)
-            
-        except Exception as e:
-            logger.error(f"Error processing tables. {e}", exc_info=True)
-            return Response().response(status_code=400, error=True, message_id="error_list_tables", exception=str(e))
