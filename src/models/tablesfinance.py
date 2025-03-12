@@ -1,3 +1,26 @@
+from typing import Optional
+from src.utils.log import logs_and_save_db
+
+class TablesFinance:
+    name: Optional[str] = None
+    type_table: Optional[str] = None
+    table_code: Optional[str] = None
+    start_term: Optional[str] = None
+    end_term: Optional[str] = None
+    rate: float
+    financial_agreements_id: int
+    issue_date: Optional[str] = None
+    start_rate: str
+    end_rate: str
+    
+    # check arguments
+    def validate(self):
+        missing_fields = [
+            field for field, value in self.__dict__.items() if value is None
+        ]
+        if missing_fields:
+            logs_and_save_db("warning", message=f"Not arguments invalid {missing_fields}")
+
 class TablesFinanceModels:
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
@@ -31,9 +54,9 @@ class TablesFinanceModels:
         """
         return query
 
-    def add_tables(self, data: dict):  
+    def add_tables(self, data: dict) -> TablesFinance:
         query = f"""
-            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, create_at)
+            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, start_rate, end_rate, create_at)
             VALUES (
                 '{data.get("name")}',
                 '{data.get("type_table")}',
@@ -44,6 +67,8 @@ class TablesFinanceModels:
                 false,
                 {data.get("financial_agreements_id")},
                 '{data.get("issue_date")}',
+                '{data.get("start_rate", "")}'
+                '{data.get("end_rate", "")}'
                 NOW()
             );
         """

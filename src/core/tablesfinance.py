@@ -12,13 +12,13 @@ logger = setup_logger(__name__)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "upload")
 
-
 class TablesFinanceCore:
 
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         self.pg = PgAdmin()
         self.models = TablesFinanceModels(user_id=user_id)
+        
 
     def rank_comission(self, data: dict) -> None:
         current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
