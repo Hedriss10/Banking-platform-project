@@ -10,7 +10,7 @@ from src.utils.pagination import Pagination
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from openpyxl import Workbook
-from src.utils.log import setup_logger, logdb
+from src.utils.log import logdb
 from psycopg2.errors import UniqueViolation
 from psycopg2.errors import ForeignKeyViolation
 
