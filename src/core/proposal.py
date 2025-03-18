@@ -8,8 +8,7 @@ from src.utils.pagination import Pagination
 from src.db.pg import PgAdmin
 from werkzeug.datastructures import FileStorage
 from datetime import datetime
-from uuid import uuid4
-from werkzeug.utils import secure_filename
+
 
 
 FIELDS_WITH_IMAGES = [
