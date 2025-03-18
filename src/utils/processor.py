@@ -1,9 +1,7 @@
 import io
 import os
 import fitz
-import shutil
 from PIL import Image
-from werkzeug.datastructures import FileStorage
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
