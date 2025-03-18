@@ -6,9 +6,7 @@ from src.service.response import Response
 from src.utils.pagination import Pagination
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from src.utils.log import setup_logger, logs_and_save_db
-
-logger = setup_logger(__name__)
+from src.utils.log import logs_and_save_db
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "upload")
 
@@ -120,8 +118,8 @@ class TablesFinanceCore:
         )
 
         board_table = self.pg.fetch_to_dict(query=self.models.list_board_tables(pagination=pagination, financial_agreements=financial_agreements_id))
+        
         if not board_table:
-            logger.warning(f"Board Table Not Found.")
             return Response().response(status_code=404, error=True, message_id="board_table_not_found", exception="Not found", data=board_table)
 
         metadata = Pagination().metadata(
