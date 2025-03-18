@@ -4,10 +4,7 @@ from src.db.pg import PgAdmin
 from src.service.response import Response
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import create_access_token
-from src.utils.log import setup_logger
-
-
-logger = setup_logger(__name__)
+from src.utils.log import logdb
 
 
 class LoginCore:
@@ -25,7 +22,6 @@ class LoginCore:
         user = self.pg.fetch_to_dict(query=self.model.get_user_login(data.get("email")))
         
         if not user or not user[0]['id']:
-            logger.warning("User not found")
             return Response().response(message_id="user_not_found", status_code=404, error=True)
 
         self.user_id = user[0]["id"]
@@ -36,7 +32,6 @@ class LoginCore:
         user_info = self.pg.fetch_to_dict(query=self.model.get_user_list_info(id=self.user_id))
 
         if not password:
-            logger.warning("Password not user")
             return Response().response(message_id="password_not_user", status_code=400, error=True)
 
         is_valid = check_password_hash(user[0]["password"], password)
@@ -47,7 +42,7 @@ class LoginCore:
             
             return Response().response(message_id="user_logged_in_successfully", status_code=200, error=False, data=user_info, metadata={'access_token': self.compact_token(access_token)})
         else:
-            logger.warning("Incorrect password")
+            logdb("warning", message="Incorrect password")
             return Response().response(message_id="incorrect_password", status_code=401, error=True)
 
     def reset_password_authorization(self, user_id: int, data: dict):

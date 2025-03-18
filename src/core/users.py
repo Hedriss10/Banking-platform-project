@@ -4,9 +4,7 @@ from src.service.response import Response
 from src.utils.pagination import Pagination
 from werkzeug.security import generate_password_hash
 from psycopg2.errors import UniqueViolation
-from src.utils.log import setup_logger
-
-log = setup_logger(__name__)
+from src.utils.log import logdb
 
 
 class UsersCore:
@@ -73,12 +71,12 @@ class UsersCore:
             return Response().response(status_code=200, message_id="user_add_successful", metadata={"dict": data})
 
         except UniqueViolation:
+            logdb("warning", "CPF with this cpf already exists")
             return Response().response(status_code=400, message_id="cpf_with_email_already_exists", error=True, exception="CPF with this cpf already exists")
         
     def update_user(self, id: int, data):
         try:
             if not id and data:
-                log.warning("Bad request id or data is required")
                 return Response().response(status_code=400, message_id="id_or_data_is_required", exception="ID or Data is required")
             
             users = self.model.update_user(id=id, data=data)
@@ -89,11 +87,11 @@ class UsersCore:
             return Response().response(status_code=200, message_id="user_edit_successful")
         
         except UniqueViolation:
-            log.error(f"Error eidt user cpf duplicate {e}", exc_info=True)
+            logdb("warning", message=f"CPF with this cpf already exists {e}")
             return Response().response(status_code=400, message_id="cpf_with_email_already_exists", error=True, exception="CPF with this cpf already exists")
         
         except Exception as e:
-            log.error(f"Error edit user {e}", exc_info=True)
+            logdb("error", message=f"Error edit user {e}")
             return Response().response(status_code=400, message_id="error_edit_user", error=True, exception="bad request")
         
     def delete_user(self, id):

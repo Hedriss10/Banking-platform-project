@@ -6,7 +6,7 @@ from src.service.response import Response
 from src.utils.pagination import Pagination
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from src.utils.log import logs_and_save_db
+from src.utils.log import logdb
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "upload")
 
@@ -53,7 +53,7 @@ class TablesFinanceCore:
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="tables_add_sucessfull")
         except Exception as e:
-            logs_and_save_db("error", message=f"Error Processing add tables  {e}")
+            logdb("error", message=f"Error processing add tables: {e}")
             return Response().response(status_code=500, error=True, message_id="error_add_tables", exception=str(e))
 
     def add_tables_finance(self, data: dict, file: FileStorage) -> None:
@@ -91,14 +91,14 @@ class TablesFinanceCore:
             return Response().response(status_code=200, error=False, message_id="tables_import_successfull", metadata={"file": filename})
         except FileNotFoundError as fnf_err:
             os.remove(filepath)
-            logs_and_save_db("error", message=f"Error Processing add tables  {e}")
+            logdb("error", message=f"Erro processing tables:  {e}")
             return Response().response(status_code=400, error=True, message_id="xlsx_is_not_save", exception=str(fnf_err))
         except KeyError as key_err:
             os.remove(filepath)
-            logs_and_save_db("error", message=f"Error Processing add tables  {e}")
+            logdb("error", message=f"Erro processing tables:  {e}")
             return Response().response(status_code=400, error=True, message_id="excel_with_missing_rows_or_columns", exception=str(key_err))
         except Exception as e:
-            logs_and_save_db("error", message=f"Error Processing add tables  {e}")
+            logdb("error", message=f"Erro processing tables:  {e}")
             return Response().response(status_code=400, error=True, message_id="error_processing_xlsx", exception=str(e))
 
     def list_board_table(self, data: dict, financial_agreements_id: int) -> None:
@@ -137,4 +137,4 @@ class TablesFinanceCore:
             tables_ids = self.pg.execute_query(query=self.models.delete_tables_ids(ids=data.get("ids"), financial_agreements_id=id))
             return Response().response(status_code=200, error=False, message_id="delete_table_ids_successful", data=tables_ids)
         except Exception as e:
-            logs_and_save_db("error", message=f"Error Processing add tables  {e}")
+            logdb("error", message=f"Erro processing tables:  {e}")

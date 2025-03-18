@@ -1,44 +1,35 @@
-# import pytest
-# from src import create_app, db as _db
-# from src.config import TestingConfig
+import pytest
+from src.app import create_app
+from src.settings._base import config
 
-# @pytest.fixture(scope='session')
-# def app():
-#     """Instance of main Flask app."""
-#     app = create_app()
-#     app.config.from_object(TestingConfig)
+
+@pytest.fixture(scope='session')
+def app():
+    """Instance of main Flask app."""
+    app = create_app()
+    app.config.from_object(config)
     
-#     with app.app_context():
-#         yield app
+    with app.app_context():
+        yield app
 
-# @pytest.fixture(scope='session')
-# def db(app):
-#     """Session-wide test database."""
-#     _db.app = app
-#     _db.create_all()
+@pytest.fixture(scope='function')
+def session(db):
+    """Creates a new database session for a test."""
+    connection = db.engine.connect()
+    transaction = connection.begin()
 
-#     yield _db
+    options = dict(bind=connection, binds={})
+    session = db.create_scoped_session(options=options)
 
-#     _db.drop_all()
+    db.session = session
 
-# @pytest.fixture(scope='function')
-# def session(db):
-#     """Creates a new database session for a test."""
-#     connection = db.engine.connect()
-#     transaction = connection.begin()
+    yield session
 
-#     options = dict(bind=connection, binds={})
-#     session = db.create_scoped_session(options=options)
+    transaction.rollback()
+    connection.close()
+    session.remove()
 
-#     db.session = session
-
-#     yield session
-
-#     transaction.rollback()
-#     connection.close()
-#     session.remove()
-
-# @pytest.fixture(scope='function')
-# def client(app):
-#     """A test client for the app."""
-#     return app.test_client()
+@pytest.fixture(scope='function')
+def client(app):
+    """A test client for the app."""
+    return app.test_client()

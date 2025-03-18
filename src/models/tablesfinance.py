@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from src.utils.log import logs_and_save_db
+from src.utils.log import logdb
 
 class TablesFinanceModels:
     name: Optional[str] = None
@@ -19,7 +19,7 @@ class TablesFinanceModels:
             field for field, value in self.__dict__.items() if value is None
         ]
         if missing_fields:
-            logs_and_save_db("warning", message=f"Not arguments invalid {missing_fields}")
+            logdb("warning", message=f"Not arguments invalid {missing_fields}")
             return False
         return True
 

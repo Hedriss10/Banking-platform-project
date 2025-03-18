@@ -2,11 +2,8 @@ from src.models.role import RoleModel
 from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination
-from src.utils.log import setup_logger
+from src.utils.log import logdb
 from psycopg2.errors import UniqueViolation
-
-
-logger = setup_logger(__name__)
 
 class RoleCore:
     
@@ -34,7 +31,6 @@ class RoleCore:
         role = self.pg.fetch_to_dict(query=self.models.list_role(pagination=pagination))
         
         if not role:
-            logger.warning(f"Role List Not Found.")
             return Response().response(status_code=404, error=True, message_id="role_list_not_found", exception="Not found", data=role)
 
         metadata = Pagination().metadata(
@@ -50,12 +46,15 @@ class RoleCore:
         try:
             if not data:
                 return Response().response(status_code=400, message_id="role_is_name_required", exception="Name role is required")
+            
             self.pg.execute_query(query=self.models.add_role(data=data))
             self.pg.commit()
             return Response().response(status_code=200, message_id="add_role_succesfully")
         except UniqueViolation:
+            logdb("warning", message="Role name already exists")
             return Response().response(status_code=400, message_id="role_name_already_exists")
         except Exception as e:
+            logdb("error", message=f"Error adding role: {e}")
             return Response().response(status_code=500, message_id="role_error", exception=str(e))
     
     def delete_role(self, id: int):

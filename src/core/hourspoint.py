@@ -2,9 +2,7 @@ from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination
 from src.models.hourspoint import HourspointModel
-from src.utils.log import setup_logger
-
-logger = setup_logger(__name__)
+from src.utils.log import logdb
 
 class HourspointCore:
     
@@ -32,7 +30,6 @@ class HourspointCore:
         employee = self.pg.fetch_to_dict(query=self.models.list_employee(pagination=pagination))
         
         if not employee:
-            logger.warning(f"Employee List Not Found.")
             return Response().response(status_code=404, error=True, message_id="employee_list_not_found", exception="Not found", data=employee)
 
         metadata = Pagination().metadata(
@@ -43,45 +40,17 @@ class HourspointCore:
             filter_by=pagination["filter_by"]
         )
         return Response().response(status_code=200, message_id="employee_list_successful", data=employee,  metadata=metadata)
-        
-    def edit_employee(self, id: int, data: dict):
-        try:
-            if not id:
-                logger.warning(f"Id is required.")
-                return Response().response(status_code=401, error=True, message_id="id_is_required", exception="Id employee is required.")
-            
-            self.pg.execute_query(query=self.models.edit_employee(data=data, id=id))
-            self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="employee_update_successful")
-        except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
-            return Response().response(status_code=400, message_id="error_employee_update", error=True, exception="Bad Request")
-       
-    def delete_employee(self, id: int):
-        try:
-            if not id:
-                logger.warning(f"Id is required.")
-                return Response().response(status_code=401, error=True, message_id="id_is_required", exception="Id employee is required.")
-            
-            self.pg.execute_query(query=self.models.delete_employee(id=id))
-            self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="employee_delete_successful")
-        except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
-            return Response().response(status_code=400, message_id="error_employee_delete", error=True, exception="Bad Request")
-       
+               
     def add_holiday(self, data: dict):
         try:
             if not data.get("data"):
-                logger.warning(f"Data is required")
                 return Response().response(status_code=401, error=True, message_id="data_is_required", exception="Data Name Is Required")
             
             holiday = self.pg.execute_query(query=self.models.add_holiday(data=data))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="holiday_add_successful")
-        
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error add holiday: {e}")
             return Response().response(status_code=400, error=True, message_id="holiday_error", exception="Error Add Holiday", traceback=str(e))
     
     def list_holiday(self, data: dict):
@@ -103,7 +72,6 @@ class HourspointCore:
         holiday = self.pg.fetch_to_dict(query=self.models.list_holiday(pagination=pagination))
 
         if not holiday:
-            logger.warning(f"holiday List Not Found.")
             return Response().response(status_code=404, error=True, message_id="holiday_list_not_found", exception="Not found", data=holiday)
 
         metadata = Pagination().metadata(
@@ -118,20 +86,18 @@ class HourspointCore:
     def delete_holiday(self, id: int):
         try:
             if not id:
-                logger.warning(f"Id is required.")
                 return Response().response(status_code=401, error=True, message_id="id_is_required", exception="Id Holiday is required.")
             
             self.pg.execute_query(query=self.models.delete_holiday(id=id))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="holiday_delete_successful")
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error delete holiday: {e}")
             return Response().response(status_code=400, message_id="error_holiday_delete", error=True, exception="Bad Request")
     
     def add_absence(self, data: dict):
         try:
             if not data.get("data") and data.get("descricao") and data.get("justificavel"):
-                logger.warning(f"Data and description and justify")
                 return Response().response(status_code=401, error=True, message_id="data_and_description_justify_is_required", exception="Data, Description, is Required")
             
             absence = self.pg.fetch_to_dict(query=self.models.add_absence_resource(decription=data.get("descricao"), justified=data.get("justificavel")))
@@ -142,11 +108,11 @@ class HourspointCore:
                return Response().response(status_code=200, error=False, message_id="absence_add_successful")                
             
             else:
-                logger
+                logdb("error", message=f"Error add absence: {absence}")
                 return Response().response(status_code=400, error=False, message_id="absence_error", data=absence)
              
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error add absence: {e}")
             return Response().response(status_code=400, error=True, message_id="absence_error", exception="Error Add Abscence", traceback=str(e))
         
     def list_absence_resource(self, data: dict):
@@ -168,7 +134,6 @@ class HourspointCore:
         absence = self.pg.fetch_to_dict(query=self.models.list_absence(pagination=pagination))
 
         if not absence:
-            logger.warning(f"Absence List Not Found.")
             return Response().response(status_code=404, error=True, message_id="absence_list_not_found", exception="Not found", data=absence)
 
         metadata = Pagination().metadata(
@@ -183,79 +148,76 @@ class HourspointCore:
     def edit_absence(self, id: int, data: dict):
         try:
             if not id:
-                logger.warning(f"Id is required.")
                 return Response().response(status_code=401, error=True, message_id="id_is_required", exception="Id Absence is required.")
             
             self.pg.execute_query(query=self.models.edit_absence_reason(id=id, description=data.get("descricao"), justified=data.get("justificavel")))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="absence_delete_successful")
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error edit absence: {e}")
             return Response().response(status_code=400, message_id="error_absence_edit", error=True, exception="Bad Request")
         
     def add_vacation(self, data: dict):
         try:
             if not data.get("employee_id"):
-                logger.warning(f"Name is required")
                 return Response().response(status_code=401, error=True, message_id="employee_is_required", exception="Employee_id Is Required")
             
             self.pg.execute_query(query=self.models.add_vacation(data=data))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="vacation_add_successful")
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error add vacation: {e}")
             return Response().response(status_code=400, error=True, message_id="vacation_error", exception="Error ad Vacation", traceback=str(e))
               
     def edit_vacation(self, id: int, data: dict):
         try:
             if not id:
-                logger.warning(f"Id is required")
                 return Response().response(status_code=401, error=True, message_id="id_is_required", exception="Id Is Required")
             
             self.pg.execute_query(query=self.models.edit_vacation(id=id, data=data))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="vacation_edit_successful")
+        
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error edit vacation: {e}")
             return Response().response(status_code=400, error=True, message_id="vacation_error", exception="Error ad Vacation", traceback=str(e))
 
     def delete_vaction(self, id: int):
         try:
             if not id:
-                logger.warning(f"Id is required")
                 return Response().response(status_code=401, error=True, message_id="id_is_required", exception="Id Is Required")
             
             self.pg.execute_query(query=self.models.delete_vacation(id=id))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="vacation_delete_successful")
+        
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error delete vacation: {e}")
             return Response().response(status_code=400, error=True, message_id="vacation_error", exception="Error ad Vacation", traceback=str(e))
         
     def add_time_point(self, data: dict):
         try:
             if not data.get("employee_id"):
-                logger.warning(f"Name is required")
                 return Response().response(status_code=401, error=True, message_id="employee_is_required", exception="Employee_id Is Required")
             
             self.pg.execute_query(query=self.models.add_time_point(data=data))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="time_point_add_successful")
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error add time_point: {e}")
             return Response().response(status_code=400, error=True, message_id="time_point_error", exception="Error ad Timepoint", traceback=str(e))
         
     def add_justification_for_delay(self, data: dict):
         try:
             if not data.get("employee_id"):
-                logger.warning(f"Name is required")
                 return Response().response(status_code=401, error=True, message_id="employee_is_required", exception="Employee_id Is Required")
             
             self.pg.execute_query(query=self.models.add_justification_for_delay(data=data))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="add_justification_for_delay_successful")
+        
         except Exception as e:
-            logger.error(f"Error processing holiday {e}", exc_info=True)
+            logdb("error", message=f"Error add add_justification_for_delay: {e}")
             return Response().response(status_code=400, error=True, message_id="add_justification_for_delay_error", exception="Error ad add_justification_for_delay", traceback=str(e))
         
     def list_day_offs(self, data: dict):
@@ -277,7 +239,6 @@ class HourspointCore:
         list_day_offs = self.pg.fetch_to_dict(query=self.models.list_day_offs(pagination=pagination))
         
         if not list_day_offs:
-            logger.warning(f"List_day_offs List Not Found.")
             return Response().response(status_code=404, error=True, message_id="list_day_offs_not_found", exception="Not found", data=list_day_offs)
 
         metadata = Pagination().metadata(
@@ -308,7 +269,6 @@ class HourspointCore:
         list_works_hours_overtime = self.pg.fetch_to_dict(query=self.models.list_works_hours_overtime(pagination=pagination))
         
         if not list_works_hours_overtime:
-            logger.warning(f"list_works_hours_overtime List Not Found.")
             return Response().response(status_code=404, error=True, message_id="list_works_hours_overtime_not_found", exception="Not found", data=list_works_hours_overtime)
 
         metadata = Pagination().metadata(
@@ -339,7 +299,6 @@ class HourspointCore:
         list_works_delay = self.pg.fetch_to_dict(query=self.models.list_works_delay(pagination=pagination))
         
         if not list_works_delay:
-            logger.warning(f"list_works_delay List Not Found.")
             return Response().response(status_code=404, error=True, message_id="list_works_delay_not_found", exception="Not found", data=list_works_delay)
 
         metadata = Pagination().metadata(
@@ -370,7 +329,6 @@ class HourspointCore:
         list_vocation_apply = self.pg.fetch_to_dict(query=self.models.list_vocation_apply(pagination=pagination))
         
         if not list_vocation_apply:
-            logger.warning(f"list_vocation_apply List Not Found.")
             return Response().response(status_code=404, error=True, message_id="list_vocation_apply_not_found", exception="Not found", data=list_vocation_apply)
 
         metadata = Pagination().metadata(
@@ -401,7 +359,6 @@ class HourspointCore:
         list_ranking_user_delayed_works_employess = self.pg.fetch_to_dict(query=self.models.list_ranking_user_delayed_works_employess(pagination=pagination))
         
         if not list_ranking_user_delayed_works_employess:
-            logger.warning(f"list_ranking_user_delayed_works_employess List Not Found.")
             return Response().response(status_code=404, error=True, message_id="list_ranking_user_delayed_works_employess_not_found", exception="Not found", data=list_ranking_user_delayed_works_employess)
 
         metadata = Pagination().metadata(
