@@ -92,6 +92,8 @@ class FactoryPayloadsTablesFinance:
                 "type_table": fields.String(required=True, example="Margem Livre"),
                 "start_term": fields.String(required=True, example="76"),
                 "end_term": fields.String(required=True, example="76"),
+                "start_rate": fields.String(required=True, example="2.4"),
+                "end_rate": fields.String(required=True, example="3.0"),
                 "rate": fields.Float(required=True, example=3.6),
                 "issue_date": fields.DateTime(required=True,  example="2025-01-10")
             },

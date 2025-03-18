@@ -1,4 +1,28 @@
+from typing import Optional, Dict
+from src.utils.log import logs_and_save_db
+
 class TablesFinanceModels:
+    name: Optional[str] = None
+    type_table: Optional[str] = None
+    table_code: Optional[str] = None
+    start_term: Optional[str] = None
+    end_term: Optional[str] = None
+    rate: float = 0.0
+    financial_agreements_id: int = 0
+    issue_date: Optional[str] = None
+    start_rate: str
+    end_rate: str
+    
+    # check arguments
+    def validate(self) -> bool:
+        missing_fields = [
+            field for field, value in self.__dict__.items() if value is None
+        ]
+        if missing_fields:
+            logs_and_save_db("warning", message=f"Not arguments invalid {missing_fields}")
+            return False
+        return True
+
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
 
@@ -31,9 +55,23 @@ class TablesFinanceModels:
         """
         return query
 
-    def add_tables(self, data: dict):  
+    def add_tables(self, data: Dict[str, str]) -> str:
+        self.name = data.get("name")
+        self.type_table = data.get("type_table")
+        self.table_code = data.get("table_code")
+        self.start_term = data.get("start_term")
+        self.end_term = data.get("end_term")
+        self.rate = float(data.get("rate", 0.0))
+        self.financial_agreements_id = int(data.get("financial_agreements_id", 0))
+        self.issue_date = data.get("issue_date")
+        self.start_rate = data.get("start_rate", "")
+        self.end_rate = data.get("end_rate", "")
+        
+        if not self.validate():
+            raise ValueError("Invalid arguments")
+        
         query = f"""
-            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, create_at)
+            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, start_rate, end_rate, created_at)
             VALUES (
                 '{data.get("name")}',
                 '{data.get("type_table")}',
@@ -41,27 +79,31 @@ class TablesFinanceModels:
                 '{data.get("start_term")}',
                 '{data.get("end_term")}',
                 {data.get("rate")},
-                false,
+                FALSE,
                 {data.get("financial_agreements_id")},
                 '{data.get("issue_date")}',
+                '{data.get("start_rate", "")}',
+                '{data.get("end_rate", "")}',
                 NOW()
             );
         """
         return query
 
-    def add_tables_finance(self, name: str, type_table: str, table_code: str, start_term: str, end_term: str, rate: float, financial_agreements_id: int, issue_date: str) -> None:
+    def add_tables_finance(self, data: dict, financial_agreements_id: int, issue_date: str) -> str:
         query = f"""
-            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, create_at)
+            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, start_rate, end_rate, created_at)
             VALUES (
-                '{name}',
-                '{type_table}',
-                '{table_code}',
-                '{start_term}',
-                '{end_term}',
-                {rate},
-                false,
+                '{data.get("name")}',
+                '{data.get("type_table")}',
+                '{data.get("table_code")}',
+                '{data.get("start_term")}',
+                '{data.get("end_term")}',
+                {data.get("rate")},
+                FALSE,
                 {financial_agreements_id},
                 '{issue_date}',
+                '{data.get("start_rate", "")}',
+                '{data.get("end_rate", "")}',
                 NOW()
             );
         """

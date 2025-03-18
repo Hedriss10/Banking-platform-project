@@ -6,8 +6,6 @@ Bem-vindo ao **Backend Athenas**, a espinha dorsal da nossa plataforma de CRM! E
 
 ## 📚 Introdução ao Swagger
 
-<img src="docs/img/swagger.png" alt="Swagger Documentation" width="500"/>
-
 **Descrição**:  
 Desenvolvemos endpoints robustos e seguros, utilizando `Flask-JWT-Extended` para garantir a autenticação e proteção dos dados. A documentação completa da API está disponível via **Swagger**, facilitando a integração e o entendimento dos recursos disponíveis.
 
@@ -157,15 +155,11 @@ Após uma análise detalhada das necessidades da empresa, optamos por desenvolve
 
 **Estrutura de Conexão**:
 
-<img src="docs/img/intro-server.png" alt="Server Connection Structure" width="500"/>
-
 A decisão de utilizar `Flask` permitiu um controle maior sobre o processo e a adoção de boas práticas de servidor, mesmo em um ambiente local.
 
 ---
 
 ## 🎯 Objetivo
-
-<img src="docs/img/setores.png" alt="Company Sectors" width="500"/>
 
 **Descrição**:  
 O **Backend Athenas** foi criado para garantir a **persistência de dados** na empresa, conectando setores de forma ágil e sem perda de informações. Nosso objetivo é proporcionar uma comunicação eficiente entre os setores, garantindo que todos os dados estejam sempre disponíveis e seguros.
