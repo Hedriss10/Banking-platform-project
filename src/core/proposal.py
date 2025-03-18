@@ -2,7 +2,7 @@ import os
 from flask import url_for
 from src.models.proposal import SellerModels
 from src.service.response import Response
-from src.utils.log import setup_logger
+from src.utils.log import logdb
 from src.utils.processor import UploadProposal
 from src.utils.pagination import Pagination
 from src.db.pg import PgAdmin
@@ -10,8 +10,6 @@ from werkzeug.datastructures import FileStorage
 from datetime import datetime
 from uuid import uuid4
 from werkzeug.utils import secure_filename
-
-logger = setup_logger(__name__)
 
 
 FIELDS_WITH_IMAGES = [
@@ -41,7 +39,6 @@ class SellerCore:
         proposal = self.pg.fetch_to_dict(query=self.models.list_proposal(pagination=pagination))
 
         if not proposal:
-            logger.warning(f"Proposal List Not Found.")
             return Response().response(status_code=404, error=True, message_id="proposal_list_not_found", exception="Not found", data=proposal)
 
         metadata = Pagination().metadata(current_page=current_page, rows_per_page=rows_per_page, sort_by=pagination["sort_by"], order_by=pagination["order_by"], filter_by=pagination["filter_by"])
@@ -52,8 +49,8 @@ class SellerCore:
             data_dict = data.to_dict(flat=True)
             image_data = image_data.to_dict(flat=False)
             new_data = {k: v for k, v in data_dict.items() if v} # filter empty values
+            
             if not new_data.get("cpf"):
-                logger.warning("cpf_is_required")
                 return Response().response(status_code=400, error=True, message_id="cpf_is_required")
 
             proposal = self.pg.fetch_to_dict(query=self.models.add_proposal(data=new_data))
@@ -71,14 +68,14 @@ class SellerCore:
             return Response().response(status_code=200, error=False, message_id="proposal_add_successful", data={"id": proposal[0]["id"]})
 
         except Exception as e:
-            logger.warning(f"Error Processing Proposal {e}", exc_info=True)
+            logdb("error", message=f"Error Processing Proposal {e}")
             return Response().response(status_code=400, error=True, message_id="error_in_add_proposal", exception=str(e))
 
     def get_proposal(self, id: int):
         try:
             proposal = self.pg.fetch_to_dict(query=self.models.get_proposal(id=id))
+            
             if not proposal:
-                logger.warning("Proposal Not Found")
                 return Response().response(status_code=404, error=True, message_id="proposal_not_found", exception="Not Found")
 
             created_at = datetime.strptime(proposal[0]['created_at'], "%d-%m-%Y %H:%M")
@@ -117,13 +114,13 @@ class SellerCore:
 
             return Response().response( status_code=200,  error=False,  message_id="proposal_get_successful",  data={"proposal": proposal, "image_urls": image_urls})
         except ValueError as ve:
-            logger.error(f"Error parsing date: {ve}", exc_info=True)
+            logdb("error", message=f"Error parsing date: {ve}")
             return Response().response(status_code=400, error=True, message_id="date_parsing_error", exception=str(ve))
         except FileNotFoundError as fe:
-            logger.error(f"Directory not found: {fe}", exc_info=True)
+            logdb("error", message=f"Directory not found: {fe}")
             return Response().response(status_code=404, error=True, message_id="directory_not_found", exception=str(fe))
         except Exception as e:
-            logger.error(f"Error processing get proposal filter by id {e}", exc_info=True)
+            logdb("error", message=f"Error processing get proposal: {e}")
             return Response().response(status_code=500, error=True, message_id="error_in_get_proposal", exception=str(e))
 
     def update_proposal(self, data, image: FileStorage, proposal_id: int):
@@ -145,7 +142,7 @@ class SellerCore:
             return Response().response(status_code=200, error=False, message_id="proposal_update_successful")
 
         except Exception as e:
-            logger.warning(f"Error Processing Proposal Edit {e}", exc_info=True)
+            logdb("error", message=f"Error Processing Proposal Edit {e}")
             return Response().response(status_code=400, error=True, message_id="proposal_update_failed", exception=str(e))
 
     def delete_proposal(self, proposal_id: int):

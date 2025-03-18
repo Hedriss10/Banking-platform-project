@@ -36,11 +36,11 @@ def log_to_db(logger_name: str, level: str, message: str):
 # config loggs
 logger = setup_logger("AppLogger")
 
-def logs_and_save_db(level, message):
+def logdb(level, message):
     # logg save in db
     log_function = getattr(logger, level.lower())
     log_function(message)
     log_to_db("AppLogger", level.upper(), message)
 
 
-# logs_and_save_db("warning", "Not found") example
+# logdb("warning", "Not found") example

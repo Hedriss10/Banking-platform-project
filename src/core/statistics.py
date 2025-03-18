@@ -1,12 +1,8 @@
 from src.models.statistics import StatisticsModel
 from src.service.response import Response
-from src.utils.log import setup_logger
+from src.utils.log import logdb
 from src.utils.pagination import Pagination
 from src.db.pg import PgAdmin
-
-
-logger = setup_logger(__name__)
-
 
 class StatisticsCore:
     
@@ -14,8 +10,7 @@ class StatisticsCore:
         self.user_id = user_id
         self.models = StatisticsModel(user_id=user_id)
         self.pg = PgAdmin()
-        
-        
+
     def list_hold_profit_sellers(self, data: dict):
         try:
             current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
@@ -35,7 +30,6 @@ class StatisticsCore:
 
             list_rank_tables = self.pg.fetch_to_dict(query=self.models.list_hold_profit_sellers(pagination=pagination))
             if not list_rank_tables:
-                logger.warning(f"List Profit Not Found.")
                 return Response().response(status_code=404, error=True, message_id="list_profit_list_not_found", exception="Not found", data=list_rank_tables)
             
             metadata = Pagination().metadata(
@@ -48,6 +42,6 @@ class StatisticsCore:
             return Response().response(status_code=200, message_id="list_profit_successful", data=list_rank_tables, metadata=metadata)
             
         except Exception as e:
-            logger.error(f"Error processing loan operation. {e}", exc_info=True)
+            logdb("error", message=f"Error processing loan operation. {e}")
             return Response().response(status_code=400, error=True, message_id="list_rank_tables_ranks", exception=str(e))
         

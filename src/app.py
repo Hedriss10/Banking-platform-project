@@ -5,7 +5,6 @@ from flask_restx import Api
 from os import environ
 from flask_jwt_extended import JWTManager
 from src.settings._base import config, flask_env
-
 from src.resource.users import users_ns
 from src.resource.login import login_ns
 from src.resource.datacatalog import datacatalog_ns
@@ -18,7 +17,6 @@ from src.resource.role import roles_ns
 from src.resource.rooms import rooms_ns
 from src.resource.statistics import profit_ns
 from src.resource.tablesfinance import tables_finance_ns
-from src.resource.token import token_ns
 
 
 def create_app():
@@ -67,6 +65,5 @@ def create_app():
     api.add_namespace(rooms_ns)
     api.add_namespace(profit_ns)
     api.add_namespace(tables_finance_ns)
-    api.add_namespace(token_ns)
 
     return app

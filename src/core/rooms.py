@@ -2,11 +2,8 @@ from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination
 from src.models.rooms import RoomsModel
-from src.utils.log import setup_logger
+from src.utils.log import logdb
 from psycopg2.errors import UniqueViolation
-
-logger = setup_logger(__name__)
-
 
 class RoomsCore:
 
@@ -28,7 +25,6 @@ class RoomsCore:
         rooms = self.pg.fetch_to_dict(query=self.models.list_rooms(pagination=pagination))
 
         if not rooms:
-            logger.warning(f"Rooms List Not Found.")
             return Response().response(status_code=404, error=True, message_id="rooms_list_not_found", exception="Not found", data=rooms)
 
         metadata = Pagination().metadata(current_page=current_page, rows_per_page=rows_per_page, sort_by=pagination["sort_by"], order_by=pagination["order_by"], filter_by=pagination["filter_by"])
@@ -37,7 +33,6 @@ class RoomsCore:
     def add_rooms(self, data: dict):
         try:
             if not data.get("name"):
-                logger.warning(f"Name is required")
                 return Response().response(status_code=401, error=True, message_id="rooms_is_required", exception="Rooms Name Is Required")
 
             self.pg.execute_query(query=self.models.add_rooms(data=data))
@@ -50,7 +45,6 @@ class RoomsCore:
         try:
             rooms = self.pg.fetch_to_dict(query=self.models.get_rooms(id=id))
             if not rooms:
-                logger.warning(f"Room Not Found")
                 return Response().response(status_code=404, error=True, message_id="rooms_not_found", exception="Not found", data=rooms)
             return Response().response(status_code=200, error=False, message_id="rooms_add_successful", data=rooms)
         except Exception as e:
@@ -59,8 +53,8 @@ class RoomsCore:
     def update_rooms(self, id: int, data: dict):
         try:
             if not data.get("name"):
-                logger.warning(f"Rooms is Name Required.")
                 return Response().response(status_code=401, error=True, message_id="name_is_required", exception="Rooms Name Is Required")
+            
             self.pg.execute_query(query=self.models.update_rooms(data=data, id=id))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="rooms_update_successful")
@@ -69,7 +63,6 @@ class RoomsCore:
 
     def delete_rooms(self, id: int):
         if not id:
-            logger.warning(f"Roomns Id Is Required.")
             return Response().response(status_code=401, error=True, message_id="rooms_is_required", exception="Roomns Id Is Required")
 
         self.pg.execute_query(query=self.models.delete_roooms(id=id))
@@ -93,8 +86,8 @@ class RoomsCore:
                 filter_by=data.get("filter_by", ""),
             )
             rooms = self.pg.fetch_to_dict(query=self.models.rooms_user(id=id, pagination=pagination))
+            
             if not rooms:
-                logger.warning(f"Room Users Not Found")
                 return Response().response(status_code=404, error=True, message_id="rooms_found", exception="Not found", data=rooms)
 
             return Response().response(status_code=200, error=False, message_id="list_rooms_user_successfull", data=rooms)
@@ -104,13 +97,12 @@ class RoomsCore:
     def add_rooms_user(self, data: dict):
         try:
             if not data.get("ids") or not data.get("rooms_id"):
-                logger.warning("Ids and rooms_id are required.")
                 return Response().response(status_code=401, error=True, message_id="ids_and_rooms_id", exception="Ids and rooms_id are required")
 
             check_user = self.pg.fetch_to_dict(query=self.models.check_users_rooms(user_id=data.get("ids"), rooms_id=data.get("rooms_id")))
 
             if not check_user or not isinstance(check_user, list) or "user_exists_in_room" not in check_user[0]:
-                logger.error("Database query returned invalid or empty result.")
+                logdb("error", message="Database query returned invalid or empty result.")
                 return Response().response(status_code=500, error=True, message_id="invalid_query_result", exception="Invalid result returned from database query")
 
             if check_user[0]["user_exists_in_room"]:
@@ -120,13 +112,12 @@ class RoomsCore:
             self.pg.commit()
             return Response().response(status_code=200, message_id="user_add_to_room", exception="User successfully added to room")
         except Exception as e:
-            logger.error(f"Exception occurred: {e}")
+            logdb("error", message=f"Error adding user to room: {e}")
             return Response().response(status_code=500, error=True, message_id="error_add_rooms_user", exception=str(e))
 
     def delete_rooms_user(self, data: dict, id: int):
         try:
             if not data.get("ids") and data.get("rooms_id"):
-                logger.warning(f"Ids and rooms_id is Name Required.")
                 return Response().response(status_code=401, error=True, message_id="ids_and_rooms_id", exception="Ids, rooms_id Is Required")
 
             self.pg.execute_query(query=self.models.delete_rooms_user(ids=data.get("ids"), rooms_id=id))
