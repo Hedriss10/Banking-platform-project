@@ -4,7 +4,6 @@ from flask_restx import Resource, Namespace
 from flask_cors import cross_origin
 from src.core.users import UsersCore
 from src.service.response import Response
-from src.service.token import token_required
 from src.resource.swagger.factorypayloadsUser import PaylaodFactoryUser
 
 # namespace
@@ -18,7 +17,7 @@ payload_edit_user = PaylaodFactoryUser.edit_user_payload(users_ns)
 @users_ns.route("")
 class UserResource(Resource):
     
-    # @token_required
+    
     @users_ns.doc(description="Add user")
     @users_ns.expect(payload_add_user, validate=True)
     @cross_origin()
@@ -31,7 +30,7 @@ class UserResource(Resource):
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
 
-    # @token_required
+    
     @users_ns.doc(description="List Users")
     @users_ns.expect(pagination_arguments_customer, validate=True)
     @cross_origin()
@@ -49,7 +48,7 @@ class UserResource(Resource):
 @users_ns.route("/<int:id>")
 class UserResourceManager(Resource):
     
-    # @token_required
+    
     @users_ns.doc(description="Get User Filter by ID")
     @cross_origin()
     def get(self, id):
@@ -62,7 +61,7 @@ class UserResourceManager(Resource):
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong",  traceback=traceback.format_exc())
     
-    # @token_required
+    
     @users_ns.doc(description="Edit user filter by id")
     @users_ns.expect(payload_edit_user, validate=True)
     @cross_origin()
@@ -76,7 +75,7 @@ class UserResourceManager(Resource):
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
         
-    # @token_required
+    
     @users_ns.doc(description="Delete user filter by id")
     @cross_origin()
     def delete(self, id):

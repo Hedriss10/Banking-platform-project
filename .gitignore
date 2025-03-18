@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,linux,windows,flask
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,windows,flask
 
+## ignore report
+report.
+report/
+
 
 # ignore static
 static.
