@@ -97,17 +97,11 @@ class RoomsCore:
     def add_rooms_user(self, data: dict):
         try:
             if not data.get("ids") or not data.get("rooms_id"):
-                return Response().response(status_code=401, error=True, message_id="ids_and_rooms_id", exception="Ids and rooms_id are required")
-
-            check_user = self.pg.fetch_to_dict(query=self.models.check_users_rooms(user_id=data.get("ids"), rooms_id=data.get("rooms_id")))
-
-            if not check_user or not isinstance(check_user, list) or "user_exists_in_room" not in check_user[0]:
-                logdb("error", message="Database query returned invalid or empty result.")
-                return Response().response(status_code=500, error=True, message_id="invalid_query_result", exception="Invalid result returned from database query")
-
-            if check_user[0]["user_exists_in_room"]:
-                return Response().response(status_code=400, error=True, message_id="user_already_in_room", exception="User already exists in the room")
-
+                return Response().response(status_code=401, 
+                    error=True, message_id="ids_and_rooms_id",
+                    exception="Ids and rooms_id are required"
+                )
+            
             self.pg.execute_query(self.models.add_rooms_user(data.get("ids"), data.get("rooms_id")))
             self.pg.commit()
             return Response().response(status_code=200, message_id="user_add_to_room", exception="User successfully added to room")

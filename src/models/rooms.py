@@ -81,35 +81,15 @@ class RoomsModel:
     
     def add_rooms_user(self, ids: list[int], rooms_id: list[int]):
         room_id = rooms_id[0]
-
         values = ', '.join(
             f"({user_id}, NOW(), {room_id}, false)" for user_id in ids
         )
-
         query = f"""
             INSERT INTO rooms_users (user_id, created_at, rooms_id, is_deleted)
-            VALUES {values};
+            VALUES {values} ON CONFLICT (user_id, rooms_id) DO NOTHING;
         """
         return query
-    
-    def check_users_rooms(self, rooms_id: int, user_id: list[int]):
-        user_ids_str = ",".join(map(str, user_id))
-        rooms_id_str = ",".join(map(str, rooms_id))
-        query = f"""
-            SELECT 
-                CASE
-                    WHEN EXISTS (
-                        SELECT 
-                            1
-                        FROM 
-                            rooms_users ru
-                        WHERE ru.user_id IN ({user_ids_str}) AND ru.rooms_id = {rooms_id_str}
-                    ) THEN TRUE
-                    ELSE FALSE
-                END AS user_exists_in_room;
-        """
-        return query
-    
+        
     def delete_rooms_user(self, ids: list[int], rooms_id: int):
         conditions = ' OR '.join(
             f"(user_id = {user_id} AND rooms_id = {rooms_id})" for user_id in ids
