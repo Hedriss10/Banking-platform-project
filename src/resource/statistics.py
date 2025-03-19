@@ -16,15 +16,15 @@ pagination_arguments_customer.add_argument("sort_by", help="Sort By", default=""
 pagination_arguments_customer.add_argument("filter_by", help="Filter By", default="", type=str, required=False)
 
 
-profit_ns = Namespace("profit", description="Profit Proposals of Sellers Manager")
+statistics_ns = Namespace("statistics", description="Statistics Manager")
 
 
-@profit_ns.route("")
+@statistics_ns.route("")
 class ListProfitResource(Resource):
     
     # @jwt_required()
-    @profit_ns.doc(description="Get List All Profit")
-    @profit_ns.expect(pagination_arguments_customer, validate=True)
+    @statistics_ns.doc(description="Get List All Profit")
+    @statistics_ns.expect(pagination_arguments_customer, validate=True)
     @cross_origin()
     def get(self):
         """Get List All Profit"""

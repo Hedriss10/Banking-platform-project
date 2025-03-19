@@ -1,5 +1,20 @@
 ## TODO - Quantitativo de propostas pagas e não pagas (Ex... Total ou por vendedor ou por sala)
 
+"""
+# TODO sobre o reportfinance
+Ajuste no relatório de comissão paga
+
+- Criar o fluxo de comissão paga [Deletar comissão paga] -> vai ficar no payment
+- Ajustar o check do relatorios importados [Podendo removelos ou não] 
+- Removendo a logica do flag do report finance -> foi para o arquivo flag.py
+- Removendo a logica do processar pagamento do relatorio, e deixando consolidado e separado no arquivo payment
+- Deixando somente a a logica do relatorio e checagem com as propostas pagas no arquivo `report`
+
+"""
+
+
+
+
 class ReportModels:
 
     def __init__(self, user_id: int, *args, **kwargs) -> None:
@@ -11,51 +26,6 @@ class ReportModels:
             UPDATE report_data 
             SET is_validated = true
             WHERE {conditions};
-        """
-        return query
-
-    def check_proposal(self, ids: int):
-        ids_str = ', '.join(map(str, ids))
-        query = f"""
-            SELECT DISTINCT
-                mo.proposal_id,
-                mo.number_proposal,
-                u.id AS sellers_id
-            FROM 
-                proposal p
-                INNER JOIN public.user u on u.id = p.user_id
-                INNER JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-                INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-                INNER JOIN public.manage_operational mo ON mo.proposal_id = p.id
-                INNER JOIN public.report_data rd ON rd.cpf = p.cpf
-                INNER JOIN public.tables_finance tf ON tf.table_code = rd.table_code AND rd.number_proposal::bigint = mo.number_proposal AND pl.valor_operacao = CAST(rd.value_operation AS double precision)
-            WHERE 
-                rd.is_deleted = false 
-                AND p.is_deleted = false
-                AND u.id IN ({ids_str})
-            ORDER BY mo.proposal_id;
-        """
-        return query
-
-    def list_flags(self, pagination: dict):
-        query_filter = ""
-        if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(f.name) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-
-        query_order_by = ""
-        if pagination["sort_by"] and pagination["order_by"]:
-            query_order_by = f"""ORDER BY f.{pagination["order_by"]} {pagination["sort_by"]}"""
-
-        query = f"""
-            SELECT
-                id,
-                name,
-                rate,
-                created_by 
-            FROM 
-                public.flags f 
-            WHERE f.is_deleted= false {query_filter}
-            OFFSET {pagination["offset"]} LIMIT {pagination["limit"]}; 
         """
         return query
 
@@ -73,27 +43,6 @@ class ReportModels:
         query = f"""
             INSERT INTO public.flags_processing_payments (user_id, flag_id, proposal_id, created_at, created_by, is_payment)
             VALUES {values};
-        """
-        return query
-
-    def list_decision_maker(self, ids: int):
-        ids_str = ', '.join(map(str, ids))
-        query = f"""
-            SELECT 
-                p.id AS proposal_id,
-                u.id AS sellers_id
-            FROM 
-                proposal p
-                INNER JOIN public.user u ON u.id = p.user_id
-                INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-            WHERE p.is_deleted = false
-                AND u.is_deleted = false AND u.is_block = false
-                AND ps.contrato_pago = true  
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM flags_processing_payments fpp
-                    WHERE fpp.proposal_id = p.id AND fpp.is_payment = true AND fpp.is_deleted = false
-                ) AND u.id IN({ids_str});
         """
         return query
     
@@ -114,96 +63,8 @@ class ReportModels:
         query += ",\n".join(values) + ";"
         return query
 
-    def list_sellers(self, name_report: str, has_report: str, pagination: dict):
-        query_filter = ""
-        if pagination.get("filter_by"):
-            query_filter = f"""WHERE (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%') OR unaccent(cpf) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-
-        query_order_by = ""
-        if pagination.get("sort_by") and pagination.get("order_by"):
-            query_order_by = f"""ORDER BY {pagination["order_by"]} {pagination["sort_by"]}"""
-
-        list_has_report = []
-        where_has_report = []
-        _name_report = ""
-        if has_report.lower() == "true":
-            list_has_report.append("""
-            INNER JOIN associated_proposals ap ON ap.proposal_id = p.id
-            INNER JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-            INNER JOIN public.report_data rd ON rd.id = ap.report_id
-            INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-            INNER JOIN public.user u ON u.id = p.user_id
-            """)
-            where_has_report.append(f"""
-            AND ap.proposal_id IS NOT NULL
-            """)
-            _name_report = f"""AND rd.name = '{name_report}' """
-        else:
-            list_has_report.append("""
-            LEFT JOIN associated_proposals ap ON ap.proposal_id = p.id
-            LEFT JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-            LEFT JOIN public.report_data rd ON rd.id = ap.report_id
-            LEFT JOIN public.proposal_status ps ON ps.proposal_id = p.id
-            LEFT JOIN public.user u ON u.id = p.user_id
-            """)
-            where_has_report.append("""
-            AND ap.proposal_id IS NULL
-            """)
-
-        query = f"""
-            WITH associated_proposals AS (
-                SELECT
-                    DISTINCT
-                    p.id AS proposal_id,
-                    u.username AS name_sellers,
-                    rd.id AS report_id
-                FROM 
-                    proposal p
-                    INNER JOIN public.user u ON u.id = p.user_id
-                    INNER JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-                    INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-                    INNER JOIN public.manage_operational mo ON mo.proposal_id = p.id
-                    INNER JOIN public.report_data rd ON rd.cpf = p.cpf
-                    INNER JOIN public.tables_finance tf ON tf.table_code = rd.table_code 
-                        AND rd.number_proposal::bigint = mo.number_proposal 
-                        AND pl.valor_operacao = CAST(rd.value_operation AS double precision)
-                WHERE
-                    rd.is_deleted = false
-                    AND p.is_deleted = false
-                    {_name_report}
-            ),
-            decision_maker AS (
-                SELECT
-                    DISTINCT
-                    u.id,
-                    u.username,
-                    u.cpf,
-                    u.role
-                FROM 
-                    proposal p
-                {list_has_report[0] if list_has_report[0] else list_has_report}
-                WHERE 
-                    p.is_deleted = false
-                    AND u.is_deleted = false
-                    AND u.is_block = false
-                    AND u.is_acctive = true
-                    AND ps.contrato_pago = true
-                    AND NOT EXISTS (
-                        SELECT 1
-                        FROM flags_processing_payments fpp
-                        WHERE fpp.proposal_id = p.id AND fpp.is_payment = true AND fpp.is_deleted = false
-                    )
-                    {where_has_report[0] if where_has_report else where_has_report}
-            )
-            SELECT 
-                DISTINCT
-                *
-            FROM decision_maker AS dm {query_filter}
-            OFFSET {pagination.get("offset", 0)} LIMIT {pagination.get("limit", 10)};
-        """
-        return query
-
     def list_processing_payments(self, pagination: dict):
+        
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(p.cpf) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) """
@@ -322,23 +183,6 @@ class ReportModels:
                 WHERE ps.contrato_pago = true
             )
             SELECT * FROM processing_payments as ps
-        """
-        return query
-
-    def add_flag(self, data: dict):
-        query = f"""
-            INSERT INTO flags (name, rate, created_at, is_deleted, created_by) VALUES ('{data.get("name")}', {data.get("rate")}, NOW(), FALSE, {self.user_id});
-        """
-        return query
-        
-    def delete_flag(self, ids: int):
-        ids_str = ', '.join(map(str, ids))
-        query = f"""
-            UPDATE flags 
-            SET
-                is_deleted = true,
-                updated_at = NOW()
-            WHERE id IN ({ids_str});
         """
         return query
 
