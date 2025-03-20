@@ -126,7 +126,9 @@ class TablesFinanceModels:
                 table_code,
                 start_term,
                 end_term,
-                rate
+                rate,
+                start_rate,
+                end_rate
             FROM 
                 tables_finance as tf
             WHERE tf.financial_agreements_id = {financial_agreements} AND tf.is_deleted = false {query_filter}
