@@ -69,7 +69,7 @@ class TablesFinanceCore:
             file.save(filepath)
 
             dftmp = read_excel(filepath, dtype="object", engine="openpyxl")
-
+            dftmp = dftmp.fillna("")
             for index, row in dftmp.iterrows():
                 self.pg.execute_query(query=self.models.add_tables_finance(
                     data={

@@ -90,20 +90,31 @@ class TablesFinanceModels:
         return query
 
     def add_tables_finance(self, data: dict, financial_agreements_id: int, issue_date: str) -> str:
+        _start_rate = data.get("start_rate", "")
+        _end_rate = data.get("end_rate", "")
+        
+        if _start_rate == "nan" or _start_rate is None:
+            _start_rate = ""
+        if _end_rate == "nan" or _end_rate is None:
+            _end_rate = ""
+        
         query = f"""
-            INSERT INTO public.tables_finance (name, type_table, table_code, start_term, end_term, rate, is_status, financial_agreements_id, issue_date, start_rate, end_rate, created_at)
+            INSERT INTO public.tables_finance (
+                name, type_table, table_code, start_term, end_term, rate, is_status, 
+                financial_agreements_id, issue_date, start_rate, end_rate, created_at
+            )
             VALUES (
-                '{data.get("name")}',
-                '{data.get("type_table")}',
-                '{data.get("table_code")}',
-                '{data.get("start_term")}',
-                '{data.get("end_term")}',
-                {data.get("rate")},
+                '{data.get("name", "")}',
+                '{data.get("type_table", "")}',
+                '{data.get("table_code", "")}',
+                '{data.get("start_term", "")}',
+                '{data.get("end_term", "")}',
+                {data.get("rate", 0.0)},
                 FALSE,
                 {financial_agreements_id},
                 '{issue_date}',
-                '{data.get("start_rate", "")}',
-                '{data.get("end_rate", "")}',
+                '{_start_rate}',
+                '{_end_rate}',
                 NOW()
             );
         """
@@ -126,7 +137,9 @@ class TablesFinanceModels:
                 table_code,
                 start_term,
                 end_term,
-                rate
+                rate,
+                start_rate,
+                end_rate
             FROM 
                 tables_finance as tf
             WHERE tf.financial_agreements_id = {financial_agreements} AND tf.is_deleted = false {query_filter}
