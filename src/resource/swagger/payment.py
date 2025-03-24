@@ -8,8 +8,9 @@ class PaymentsFactoryPayloads:
         return api.model(
             "ProcessingPayment",
             {
-                "flags_id": fields.Integer(required=True, example=1),
-                "rate": fields.Float(required=True, example=3.6)
+                "flag_id": fields.Integer(required=False, example=1),
+                "decision_maker": fields.Boolean(required=False, example=True),
+                "user_id": fields.List(fields.Integer, required=True, example=[1])
             }
         )
         

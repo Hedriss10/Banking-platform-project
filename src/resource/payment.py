@@ -42,6 +42,7 @@ class PaymentResource(Resource):
             user_id = request.headers.get("Id", request.environ.get("Id"))
             return PaymentsCore(user_id=user_id).processing_payments(data=request.get_json())
         except Exception as e:
+            print("RETORNO DO PAGAMENTO", e)
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
     @payment_ns.doc(description="Delete process payments")
