@@ -1,4 +1,4 @@
-from src.models.users import UserModels
+from src.models.user import UserModels
 from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination
