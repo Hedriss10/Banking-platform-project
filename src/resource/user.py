@@ -2,24 +2,24 @@ import traceback
 from flask import request
 from flask_restx import Resource, Namespace
 from flask_cors import cross_origin
-from src.core.users import UsersCore
+from src.core.user import UsersCore
 from src.service.response import Response
 from src.resource.swagger.factorypayloadsUser import PaylaodFactoryUser
 
 # namespace
-users_ns = Namespace("user", description="user")
+user_ns = Namespace("user", description="user")
 
 pagination_arguments_customer = PaylaodFactoryUser.pagination_arguments_parser()
-payload_add_user = PaylaodFactoryUser.add_user_payload(users_ns)
-payload_edit_user = PaylaodFactoryUser.edit_user_payload(users_ns)
+payload_add_user = PaylaodFactoryUser.add_user_payload(user_ns)
+payload_edit_user = PaylaodFactoryUser.edit_user_payload(user_ns)
 # resource apis
 
-@users_ns.route("")
+@user_ns.route("")
 class UserResource(Resource):
     
     
-    @users_ns.doc(description="Add user")
-    @users_ns.expect(payload_add_user, validate=True)
+    @user_ns.doc(description="Add user")
+    @user_ns.expect(payload_add_user, validate=True)
     @cross_origin()
     def post(self):
         """Add user with cpf is required and unique"""
@@ -31,8 +31,8 @@ class UserResource(Resource):
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
 
     
-    @users_ns.doc(description="List Users")
-    @users_ns.expect(pagination_arguments_customer, validate=True)
+    @user_ns.doc(description="List Users")
+    @user_ns.expect(pagination_arguments_customer, validate=True)
     @cross_origin()
     def get(self):
         """List Users"""
@@ -45,11 +45,11 @@ class UserResource(Resource):
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
 
 
-@users_ns.route("/<int:id>")
+@user_ns.route("/<int:id>")
 class UserResourceManager(Resource):
     
     
-    @users_ns.doc(description="Get User Filter by ID")
+    @user_ns.doc(description="Get User Filter by ID")
     @cross_origin()
     def get(self, id):
         """Get user filter by id"""
@@ -62,8 +62,8 @@ class UserResourceManager(Resource):
             return Response().response(status_code=400, error=True, message_id="something_went_wrong",  traceback=traceback.format_exc())
     
     
-    @users_ns.doc(description="Edit user filter by id")
-    @users_ns.expect(payload_edit_user, validate=True)
+    @user_ns.doc(description="Edit user filter by id")
+    @user_ns.expect(payload_edit_user, validate=True)
     @cross_origin()
     def put(self, id):
         """Edit user filter by id"""
@@ -76,7 +76,7 @@ class UserResourceManager(Resource):
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
         
     
-    @users_ns.doc(description="Delete user filter by id")
+    @user_ns.doc(description="Delete user filter by id")
     @cross_origin()
     def delete(self, id):
         """Delete user filter by id"""

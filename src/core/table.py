@@ -1,6 +1,6 @@
 import os
 from pandas import read_excel
-from src.models.tablesfinance import TablesFinanceModels
+from src.models.table import TablesFinanceModels
 from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination

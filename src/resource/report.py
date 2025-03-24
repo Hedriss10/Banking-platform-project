@@ -1,9 +1,9 @@
 import traceback
 from flask_jwt_extended import jwt_required
 from flask import request
-from flask_restx import Resource, Namespace, fields, reqparse
+from flask_restx import Resource, Namespace, reqparse
 from flask_cors import cross_origin
-from src.core.reportfinance import ReportCore
+from src.core.report import ReportCore
 from src.service.response import Response
 from werkzeug.datastructures import FileStorage
 
@@ -17,7 +17,7 @@ pagination_arguments_customer.add_argument("filter_by", help="Filter By", defaul
 
 report_argumnets_customer = reqparse.RequestParser()
 report_argumnets_customer.add_argument("file", type=str, required=True, help="Export", default="csv")
-report_ns = Namespace("reportfinance", description="Manage Report Finance")
+report_ns = Namespace("report", description="Manage Report Finance")
 
 payload_parser = reqparse.RequestParser()
 payload_parser.add_argument('name', type=str, required=True, help='Name', location='form')
@@ -33,11 +33,11 @@ class TablesFinanceImportResource(Resource):
         self.payload_parser.add_argument('file', type=FileStorage, required=True, help='With upload .xlsx or .csv', location='files')
 
     # @jwt_required()
-    @report_ns.doc(description="Import report banker")
+    @report_ns.doc(description="Import report of banker")
     @report_ns.expect(payload_parser, validate=True)
     @cross_origin()
     def post(self):
-        """Import report banker"""
+        """Import report of banker"""
         try:
             args = self.payload_parser.parse_args()
             name_report = args['name']
@@ -47,24 +47,6 @@ class TablesFinanceImportResource(Resource):
             return ReportCore(user_id=user_id).add_report(data={'name': name_report}, file=file)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong")
-
-
-@report_ns.route("/export-report")
-class ExportReportResource(Resource):
-
-    # @jwt_required()
-    @report_ns.doc(description="Export processing payment")
-    @report_ns.expect(report_argumnets_customer, validate=True)
-    @cross_origin()
-    def get(self):
-        """Export processing payments"""
-        try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))
-            file_type = request.args.get("file")
-
-            return ReportCore(user_id=user_id).export_processing_payments(file_type=file_type)
-        except Exception as e:
-            return Response().response(status_code=400, message_id="something_went_wrong", error=True, exception=str(e), traceback=traceback.format_exc(e))
 
 @report_ns.route("/list-import")
 class ListImportResource(Resource):

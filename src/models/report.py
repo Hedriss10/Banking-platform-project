@@ -1,14 +1,11 @@
-## TODO - Quantitativo de propostas pagas e não pagas (Ex... Total ou por vendedor ou por sala)
-
 """
-# TODO sobre o reportfinance
-Ajuste no relatório de comissão paga
 
-- Criar o fluxo de comissão paga [Deletar comissão paga] -> vai ficar no payment
-- Ajustar o check do relatorios importados [Podendo removelos ou não] 
-- Removendo a logica do flag do report finance -> foi para o arquivo flag.py
-- Removendo a logica do processar pagamento do relatorio, e deixando consolidado e separado no arquivo payment
-- Deixando somente a a logica do relatorio e checagem com as propostas pagas no arquivo `report`
+- checando os relatorios com o check report, onde podemos encontrar o \\
+    o CPF do cliente e o CPF do vendedor e o valor da comissão, \\
+        com o valor da operação e codigo de tabela
+        
+- removendo o namesapce de `reportfinance` para `report.py`
+- Ajustando o swagger 
 
 """
 
@@ -35,34 +32,6 @@ class ReportModels:
             )
 
         query += ",\n".join(values) + ";"
-        return query
-
-    def list_check_report_proposal(self, report_name: str, pagination: dict):
-        query_filter = ""
-        if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(rd.cpf) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-
-        query = f"""
-            SELECT
-                distinct(p.id),
-                u.username AS name_sellers,
-                p.nome AS name_client,
-                rd.cpf AS cpf_client, 
-                pl.valor_operacao
-            FROM 
-                proposal p
-                INNER JOIN public.user u ON u.id = p.user_id
-                INNER JOIN public.proposal_loan pl ON pl.proposal_id = p.id
-                INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-                INNER JOIN public.manage_operational mo ON mo.proposal_id = p.id
-                INNER JOIN public.report_data rd ON rd.cpf = p.cpf
-                INNER JOIN public.tables_finance tf ON tf.table_code = rd.table_code 
-                    AND rd.number_proposal::bigint = mo.number_proposal 
-                    AND pl.valor_operacao = CAST(rd.value_operation AS double precision)
-                WHERE rd.is_deleted = false AND rd.name = '{report_name}' {query_filter}
-            ORDER BY p.id
-            OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
-        """
         return query
 
     def list_import(self, pagination: dict):
@@ -116,17 +85,5 @@ class ReportModels:
                 WHERE ps.contrato_pago = true
             )
             SELECT * FROM processing_payments as ps
-        """
-        return query
-
-    def delete_processing_payment(self, ids: list):
-        ids_str = ', '.join(map(str, ids))
-        query = f"""
-            UPDATE flags_processing_payments 
-            SET
-                is_deleted = true,
-                updated_at = NOW(),
-                updated_by = {self.user_id}
-            WHERE id IN ({ids_str});
         """
         return query

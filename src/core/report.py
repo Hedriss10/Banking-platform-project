@@ -1,18 +1,15 @@
 import os
-import io
 import traceback
-from pandas import DataFrame
+
 from pandas import read_excel, read_csv
-from src.models.reportfinance import ReportModels
+from src.models.report import ReportModels
 from src.db.pg import PgAdmin
 from src.service.response import Response
 from src.utils.pagination import Pagination
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
-from openpyxl import Workbook
 from src.utils.log import logdb
 from psycopg2.errors import UniqueViolation
-from psycopg2.errors import ForeignKeyViolation
 
 dftmp = None
 REPORT_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "report")
@@ -85,7 +82,7 @@ class ReportCore:
             logdb("error", message=f"Error Processing Xlsx or Csv {e}")
             return Response().response(status_code=400, error=True, message_id="error_processing_xlsx_or_csv", exception=str(e))
 
-    def list_import(self, data: dict = {}) -> None:
+    def list_import(self, data: dict) -> None:
         try:
             current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
             if current_page < 1:

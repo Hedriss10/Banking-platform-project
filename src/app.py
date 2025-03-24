@@ -4,18 +4,18 @@ from flask_cors import CORS
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from src.settings._base import config
-from src.resource.users import users_ns
+from src.resource.user import user_ns
 from src.resource.login import login_ns
 from src.resource.datacatalog import datacatalog_ns
 from src.resource.hourspoint import hourspoint_ns
 from src.resource.bankerfinance import bankers_ns
 from src.resource.operational import operatinal_ns
 from src.resource.proposal import proposal_ns
-from src.resource.reportfinance import report_ns
+from src.resource.report import report_ns
 from src.resource.role import roles_ns
 from src.resource.rooms import rooms_ns
 from src.resource.statistics import statistics_ns
-from src.resource.tablesfinance import tables_finance_ns
+from src.resource.table import tables_ns
 from src.resource.flag import flag_ns
 from src.resource.payment import payment_ns
 
@@ -54,7 +54,7 @@ def create_app():
     jwt = JWTManager(app)
     
     # Namespaces registration
-    api.add_namespace(users_ns)
+    api.add_namespace(user_ns)
     api.add_namespace(login_ns)
     api.add_namespace(datacatalog_ns)
     api.add_namespace(hourspoint_ns)
@@ -65,7 +65,7 @@ def create_app():
     api.add_namespace(roles_ns)
     api.add_namespace(rooms_ns)
     api.add_namespace(statistics_ns)
-    api.add_namespace(tables_finance_ns)
+    api.add_namespace(tables_ns)
     api.add_namespace(flag_ns)
     api.add_namespace(payment_ns)
 
