@@ -19,33 +19,7 @@ class ReportModels:
 
     def __init__(self, user_id: int, *args, **kwargs) -> None:
         self.user_id = user_id
-
-    def report_validated(self, number_proposal: list):
-        conditions = " OR ".join(f""" (number_proposal = '{item['number_proposal']}') """ for item in number_proposal)
-        query = f"""
-            UPDATE report_data 
-            SET is_validated = true
-            WHERE {conditions};
-        """
-        return query
-
-    def processing_payment(self, proposals: list, data: dict, user_ids: list):
-        flag_id = data.get("flag_id")
-        
-        valid_sellers = {user['sellers_id'] for user in user_ids}
-
-        values = ", ".join(
-            f"({proposal['sellers_id']}, {flag_id}, {proposal['proposal_id']}, now(), {self.user_id}, TRUE)"
-            for proposal in proposals
-            if proposal['sellers_id'] in valid_sellers
-        )
-                
-        query = f"""
-            INSERT INTO public.flags_processing_payments (user_id, flag_id, proposal_id, created_at, created_by, is_payment)
-            VALUES {values};
-        """
-        return query
-    
+            
     def add_report(self, batch_list):
         query = """
         INSERT INTO public.report_data (name, create_at, cpf, number_proposal, table_code, value_operation, is_validated, is_deleted, user_id) 
@@ -61,47 +35,6 @@ class ReportModels:
             )
 
         query += ",\n".join(values) + ";"
-        return query
-
-    def list_processing_payments(self, pagination: dict):
-        
-        query_filter = ""
-        if pagination["filter_by"]:
-            query_filter = f"""AND (unaccent(p.cpf) ILIKE unaccent('%{pagination["filter_by"]}%')) OR (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%')) """
-
-        query_order_by = ""
-        if pagination["sort_by"] and pagination["order_by"]:
-            query_order_by = f"""ORDER BY p.{pagination["order_by"]} {pagination["sort_by"]}"""
-
-        query = f"""
-            WITH processing_payments AS (
-                SELECT 
-                    w.id,
-                    p.cpf,
-                    u.username,
-                    mo.number_proposal AS number_proposal,
-                    pl.valor_operacao AS value_operation,
-                    tf.rate AS taxe_comission,
-                    ROUND(CAST(ROUND(CAST(pl.valor_operacao AS NUMERIC), 2) * tf.rate / 100 AS NUMERIC), 2) AS value_base,
-                    fl.rate AS taxe_repasse,
-                    ROUND(CAST((fl.rate * ROUND(CAST(ROUND(CAST(pl.valor_operacao AS NUMERIC), 2) * tf.rate / 100 AS NUMERIC), 2) / 100) AS NUMERIC), 2) AS comission,
-                    tf.table_code AS table_code,
-                    TO_CHAR(w.created_at, 'DD-MM-YYYY HH24:MI:SS') AS created_at,
-                    TO_CHAR(w.updated_at, 'DD-MM-YYYY HH24:MI:SS') AS updated_at
-                FROM 
-                    proposal p
-                    INNER JOIN public.manage_operational mo ON mo.proposal_id = p.id
-                    INNER JOIN public.user u ON u.id = p.user_id
-                    INNER JOIN public.proposal_loan pl ON pl.proposal_id = p.id 
-                    INNER JOIN public.tables_finance tf ON tf.id = pl.tables_finance_id
-                    INNER JOIN public.flags_processing_payments w ON w.proposal_id = p.id
-                    INNER JOIN public.flags fl on fl.id = w.flag_id
-                    INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
-                WHERE ps.contrato_pago = true AND p.is_deleted= false AND u.is_deleted = false AND u.is_block = false AND w.is_deleted = false {query_filter}
-            )
-            SELECT * FROM processing_payments as ps
-            OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
-        """
         return query
 
     def list_check_report_proposal(self, report_name: str, pagination: dict):

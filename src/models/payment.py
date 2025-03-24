@@ -5,6 +5,15 @@ class PayamentsModels:
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
 
+    def report_validated(self, number_proposal: list):
+        conditions = " OR ".join(f""" (number_proposal = '{item['number_proposal']}') """ for item in number_proposal)
+        query = f"""
+            UPDATE report_data 
+            SET is_validated = true
+            WHERE {conditions};
+        """
+        return query
+
     def list_sellers(self, name_report: str, has_report: str, pagination: dict):
         query_filter = ""
         if pagination.get("filter_by"):

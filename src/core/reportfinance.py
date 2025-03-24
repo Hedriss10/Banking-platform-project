@@ -112,40 +112,6 @@ class ReportCore:
             logdb("error", message=f"Error Imports report proposal. {e}")
             return Response().response(status_code=400, error=True, message_id="error_list_import_proposal", exception=str(e), traceback=traceback.format_exc(e))
 
-    def list_sellers(self, data: dict) -> None:
-        try:
-            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
-
-            if current_page < 1:  # Force variables min values
-                current_page = 1
-            if rows_per_page < 1:
-                rows_per_page = 1
-
-            pagination = Pagination().pagination(
-                current_page=current_page,
-                rows_per_page=rows_per_page,
-                sort_by=data.get("sort_by", ""),
-                order_by=data.get("order_by", ""),
-                filter_by=data.get("filter_by", ""),
-            )
-
-            sellers = self.pg.fetch_to_dict(query=self.models.list_sellers(name_report=data.get("name_report"), has_report=data.get("has_report"), pagination=pagination))
-            
-            if not sellers:
-                return Response().response(status_code=404, error=True, message_id="sellers_not_found", exception="Not found", data=sellers)
-
-            metadata = Pagination().metadata(
-                current_page=current_page,
-                rows_per_page=rows_per_page,
-                sort_by=pagination["sort_by"],
-                order_by=pagination["order_by"],
-                filter_by=pagination["filter_by"],
-            )
-            return Response().response(status_code=200, message_id="sellers_successful", data=sellers, metadata=metadata)
-        except Exception as e:
-            logdb("error", message=f"Error check report proposal. {e}")
-            return Response().response(status_code=400, error=True, message_id="error_check_report_proposal", exception=str(e), traceback=traceback.format_exc(e))
-
     def delete_imports(self, name: str):
         try:
             self.pg.execute_query(query=self.models.delete_import(name=name))
@@ -153,14 +119,3 @@ class ReportCore:
             return Response().response(status_code=200, error=False, message_id="delete_report_import_successfully")
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
-
-    def delete_processing_payment(self, data: dict):
-        try:
-            if not data.get("ids"):
-                return Response().response(status_code=409, error=True, message_id="ids_is_required", exception="IDS is required")
-            
-            self.pg.execute_query(query=self.models.delete_processing_payment(ids=data.get("ids")))
-            self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="delete_processing_payments_successfully")
-        except Exception as e:
-            return Response().response(status_code=500, error=False, message_id="erro_processing_delete_payments",)

@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 from flask import request
 from flask_restx import Resource, Namespace
 from flask_cors import cross_origin
-from src.core.reportfinance import ReportCore
+from src.core.payment import PaymentsCore
 from src.service.response import Response
 from src.resource.swagger.payment import PaymentsFactoryPayloads
 
@@ -28,7 +28,7 @@ class PaymentResource(Resource):
         """List payments processing"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return ReportCore(user_id=user_id).list_processing_payments(data=request.args.to_dict())
+            return PaymentsCore(user_id=user_id).list_processing_payments(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
@@ -40,7 +40,7 @@ class PaymentResource(Resource):
         """Add process payments with id flag and ids users or unique id"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return ReportCore(user_id=user_id).processing_payments(data=request.get_json())
+            return PaymentsCore(user_id=user_id).processing_payments(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
@@ -51,7 +51,7 @@ class PaymentResource(Resource):
         """Delete process payments"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return ReportCore(user_id=user_id).delete_processing_payment(data=request.get_json())
+            return PaymentsCore(user_id=user_id).delete_processing_payment(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
@@ -67,6 +67,6 @@ class ListSellersResource(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return ReportCore(user_id=user_id).list_sellers(data=request.args.to_dict())
+            return PaymentsCore(user_id=user_id).list_sellers(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
