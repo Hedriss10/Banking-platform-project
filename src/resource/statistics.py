@@ -33,3 +33,19 @@ class ListProfitResource(Resource):
             return StatisticsCore(user_id=user_id).list_hold_profit_sellers(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
+
+@statistics_ns.route("/sellers-ranking") 
+class ListRankingProfitResource(Resource):
+    
+    # @jwt_required()
+    @statistics_ns.doc(description="Get List Sellers Profit")
+    @statistics_ns.expect(pagination_arguments_customer, validate=True)
+    @cross_origin()
+    def get(self):
+        """Get List Sellers Profit"""
+        try:
+            user_id = request.headers.get("Id", request.environ.get("Id"))
+            return StatisticsCore(user_id=user_id).list_ranking_sellers(data=request.args.to_dict())
+        except Exception as e:
+            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
+
