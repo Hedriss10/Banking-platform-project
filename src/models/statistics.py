@@ -1,8 +1,3 @@
-## TODO - Quantitativo de propostas pagas e não pagas (Ex... Total ou por vendedor ou por sala)
-## TODO - Quantitativo de ranking por sala ou por vendedor (Ex... Quem mais vendeu, quem menos vendeu)
-## TODO - Quantitativo total e descritivo da carteira do sistema(Ex... Saldo total sobre as quantidiades de propostas pagas, ou entre outro filtros)
-## TODO - Quantitativo de propostas pagas e seus status (Ex... foram reprovadas, aprovadas, etc)
-
 
 class StatisticsModel:
     
@@ -64,3 +59,34 @@ class StatisticsModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """ 
         return query
+
+    def list_ranking_sellers(self, pagination: dict):
+        query_filter = ""
+        if pagination["filter_by"]:
+            query_filter = f"""AND (unaccent(u.username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
+
+        query_order_by = ""
+        if pagination["sort_by"] and pagination["order_by"]:
+            query_order_by = f"""ORDER BY tf.{pagination["order_by"]} {pagination["sort_by"]}"""
+
+        query = f"""
+            SELECT
+                u.id AS seller_id,
+                u.username AS seller,
+                u.role AS role,
+                ROUND(SUM(COALESCE(pl.valor_operacao, 0))::numeric, 2)::money AS value_total_operations
+            FROM
+                public.user u
+            INNER JOIN public.proposal_loan pl ON pl.user_id = u.id
+            INNER JOIN public.proposal_status ps ON ps.proposal_id = pl.proposal_id AND ps.user_id = u.id
+            WHERE
+                u.is_deleted = false
+                AND ps.is_deleted = false
+                AND ps.contrato_pago = true
+                AND pl.is_deleted = false {query_filter}
+            GROUP BY u.id, u.username, u.role
+            ORDER BY value_total_operations DESC
+            OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
+        """
+        return query
+    

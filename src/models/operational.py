@@ -220,3 +220,21 @@ class OperationaModel:
             GROUP BY ps.id, mo.id
         """
         return query
+    
+    def check_summary_fields_proposal(self, proposal_id: int):
+        """
+            Checking proposal summary and validated fields
+        """
+        query = f"""
+            select
+                pl.prazo_inicio,
+                pl.prazo_fim,
+                pl.valor_operacao,
+                pl.financial_agreements_id
+            FROM
+                proposal_loan pl
+            WHERE pl.proposal_id = {proposal_id} AND pl.is_deleted = false;
+        """
+        return query
+    
+    

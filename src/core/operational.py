@@ -13,11 +13,28 @@ class OperationalCore:
 
     def typing_proposal(self, proposal_id: int, data: dict):
         try:
-            self.pg.execute_query(query=self.models.typing_proposal(proposal_id=proposal_id, data=data))
+            if data.get("contrato_pago"):
+                fields_proposal = self.pg.fetch_to_dict(query=self.models.check_summary_fields_proposal(proposal_id=proposal_id))
+
+                if not fields_proposal or any(field.get(key) is None for field in fields_proposal for key in ["prazo_inicio", "prazo_fim", "valor_operacao", "financial_agreements_id"]):
+                    return Response().response(
+                        status_code=409,
+                        error=True,
+                        message_id="proposal_summary_and_validated_fields"
+                    )
+            self.pg.execute_query(
+                query=self.models.typing_proposal(proposal_id=proposal_id, data=data)
+            )
             return Response().response(status_code=200, message_id="typing_proposal_successful")
         except Exception as e:
+            # Loga o erro e retorna uma resposta apropriada
             logdb("error", message=f"Error typing proposal: {e}")
-            return Response().response(status_code=400, error=True, message_id="error_typing_proposal", exception=str(e))
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="error_typing_proposal",
+                exception=str(e)
+            )
 
     def list_proposal(self, data: dict):
         current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
