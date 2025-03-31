@@ -1,4 +1,3 @@
-
 class DashBoardModels:
     
     def __init__(self, user_id: int, *args, **kwargs):
