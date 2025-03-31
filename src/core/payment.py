@@ -19,7 +19,6 @@ class PaymentsCore:
         self.models = PayamentsModels(user_id=user_id)
 
     def processing_payments(self, data: dict):
-        print(data)
         try:
             if data.get("decision_maker") == True:
                 decision_maker = self.pg.fetch_to_all(query=self.models.list_decision_maker(ids=data.get("user_id")))

@@ -67,6 +67,7 @@ class ListLoanOperationResource(Resource):
     # @jwt_required()
     @datacatalog_ns.doc(description="loan Operation Add")
     @datacatalog_ns.expect(payload_add, validate=True)
+    @cross_origin()
     def post(self):
         """Add Loan Operation"""
         try:
@@ -85,7 +86,8 @@ class ListLoanOperationResource(Resource):
 
     # @jwt_required()
     @datacatalog_ns.doc(description="Get All List Loan Operation")
-    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)    
+    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)
+    @cross_origin()   
     def get(self):
         """Get List All Loan Operation"""
         try:
@@ -100,7 +102,8 @@ class ManageLoanOperation(Resource):
     
     # @jwt_required()
     @datacatalog_ns.doc(description="Delete Loan Operation")
-    @datacatalog_ns.expect(validate=True) 
+    @datacatalog_ns.expect(validate=True)
+    @cross_origin()
     def delete(self, id):
         """Delete Loan Operation"""
         try:
@@ -115,7 +118,8 @@ class ManageBenefitOperation(Resource):
         
     # @jwt_required()
     @datacatalog_ns.doc(description="Delete Benefit")
-    @datacatalog_ns.expect(validate=True) 
+    @datacatalog_ns.expect(validate=True)
+    @cross_origin()
     def delete(self, id):
         """Delete Benefit"""
         try:
@@ -131,6 +135,7 @@ class ListBenefitOperation(Resource):
     # @jwt_required()
     @datacatalog_ns.doc(description="Benefit Add")
     @datacatalog_ns.expect(payload_add_benefit, validate=True)
+    @cross_origin()
     def post(self):
         """Benefit Add Operation"""
         try:
@@ -141,7 +146,8 @@ class ListBenefitOperation(Resource):
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
     
     @datacatalog_ns.doc(description="Get All List Benefit")
-    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)    
+    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)
+    @cross_origin()
     def get(self):
         """Get List All Benefit"""
         try:
@@ -158,6 +164,7 @@ class ListBankOperation(Resource):
     # @jwt_required()
     @datacatalog_ns.doc(description="Bank Add")
     @datacatalog_ns.expect(payload_add_bank, validate=True)
+    @cross_origin()
     def post(self):
         """Bank Add Operation"""
         try:
@@ -170,7 +177,8 @@ class ListBankOperation(Resource):
     
     # @jwt_required()
     @datacatalog_ns.doc(description="Get All List Bank")
-    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)    
+    @datacatalog_ns.expect(pagination_arguments_customer, validate=True)
+    @cross_origin()   
     def get(self):
         """Get List All Bank"""
         try:
@@ -185,7 +193,8 @@ class ManageBankOperation(Resource):
         
     # @jwt_required()
     @datacatalog_ns.doc(description="Delete Bank")
-    @datacatalog_ns.expect(validate=True) 
+    @datacatalog_ns.expect(validate=True)
+    @cross_origin()
     def delete(self, id):
         """Delete Bank"""
         try:

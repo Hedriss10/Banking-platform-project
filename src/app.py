@@ -18,6 +18,7 @@ from src.resource.statistics import statistics_ns
 from src.resource.table import tables_ns
 from src.resource.flag import flag_ns
 from src.resource.payment import payment_ns
+from src.resource.dashboard import dashboard_ns
 
 
 def create_app():
@@ -68,5 +69,6 @@ def create_app():
     api.add_namespace(tables_ns)
     api.add_namespace(flag_ns)
     api.add_namespace(payment_ns)
+    api.add_namespace(dashboard_ns)
 
     return app
