@@ -18,6 +18,7 @@ class RoleManager(Resource):
 
     @roles_ns.doc(description="Add role")
     @roles_ns.expect(paylaod_role_ns, validate=True)
+    @cross_origin()
     def post(self):
         """Add role"""
         try:

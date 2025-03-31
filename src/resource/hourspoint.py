@@ -24,6 +24,7 @@ class TimePointResourc(Resource):
 
     @hourspoint_ns.doc(description="Add timepoint")
     @hourspoint_ns.expect(payload_add_timepoint, validate=True)
+    @cross_origin()
     def post(self):
         """Add timepoint"""
         try:
@@ -39,6 +40,7 @@ class TimePointResourceID(Resource):
 
     @hourspoint_ns.doc(description="Add justifcation for delay user")
     @hourspoint_ns.expect(payload_add_justification_for_delay, validate=True)
+    @cross_origin()
     def post(self):
         """Add justifcation for delay user"""
         try:
@@ -54,6 +56,7 @@ class HolidayManagerResource(Resource):
 
     @hourspoint_ns.doc(description="Holiday add post")
     @hourspoint_ns.expect(payload_add_holiday, validate=True)
+    @cross_origin()
     def post(self):
         """Holiday add post"""
         try:
@@ -96,6 +99,7 @@ class AbsenceManager(Resource):
 
     @hourspoint_ns.doc(description="Add Absence")
     @hourspoint_ns.expect(payload_add_absence, validate=True)
+    @cross_origin()
     def post(self):
         """Absence Add Post"""
         try:
@@ -139,6 +143,7 @@ class VacationManager(Resource):
 
     @hourspoint_ns.doc(description="Vacation Add")
     @hourspoint_ns.expect(payload_add_vacation, validate=True)
+    @cross_origin()
     def post(self):
         """Vacation Add """
         try:
