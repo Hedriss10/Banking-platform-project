@@ -32,7 +32,13 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip install pytest pytest-cov
+        pip install PyMuPDF==1.23.7
         pip install -r requirements/requirements.txt
+
+    - name: Verify PyMuPDF installation
+      run: |
+        source venv/bin/activate
+        python -c "import fitz; print('PyMuPDF version:', fitz.__version__)"
 
     - name: Run tests with coverage
       run: |
