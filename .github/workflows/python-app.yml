@@ -24,7 +24,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libmupdf-dev mupdf mupdf-tools
+        sudo apt-get install -y libmupdf-dev mupdf mupdf-tools libfreetype6-dev libjpeg-dev
 
     - name: Install Python dependencies
       run: |
@@ -32,13 +32,15 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip install pytest pytest-cov
-        pip install PyMuPDF==1.23.7
+        # Instalar uma versão mais recente do PyMuPDF
+        pip install PyMuPDF==1.24.2
         pip install -r requirements/requirements.txt
 
-    - name: Verify PyMuPDF installation
+    - name: Debug PyMuPDF installation
       run: |
         source venv/bin/activate
-        python -c "import fitz; print('PyMuPDF version:', fitz.__version__)"
+        python -c "import site; print('Site packages:', site.getsitepackages())"
+        python -c "import fitz; print('PyMuPDF version:', fitz.__version__)" || echo "Failed to import fitz"
 
     - name: Run tests with coverage
       run: |
