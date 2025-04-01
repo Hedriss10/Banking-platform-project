@@ -32,8 +32,8 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip install pytest pytest-cov
-        # Instalar uma versão mais recente do PyMuPDF
-        pip install PyMuPDF==1.24.2
+        # Instalar usando o nome pymupdf
+        pip install pymupdf==1.24.2
         pip install -r requirements/requirements.txt
 
     - name: Debug PyMuPDF installation
@@ -41,6 +41,7 @@ jobs:
         source venv/bin/activate
         python -c "import site; print('Site packages:', site.getsitepackages())"
         python -c "import fitz; print('PyMuPDF version:', fitz.__version__)" || echo "Failed to import fitz"
+        ls -la venv/lib/python3.12/site-packages/fitz || echo "fitz directory not found"
 
     - name: Run tests with coverage
       run: |
