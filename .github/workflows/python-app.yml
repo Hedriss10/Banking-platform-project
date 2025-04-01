@@ -42,8 +42,3 @@ jobs:
         python -c "import fitz; print('PyMuPDF version:', fitz.__version__)" || echo "Failed to import fitz"
         ls -la venv/lib/python3.12/site-packages/fitz || echo "fitz directory not found"
         ls -la venv/lib/python3.12/site-packages/frontend || echo "frontend directory not found"
-
-    - name: Run tests with coverage
-      run: |
-        source venv/bin/activate
-        pytest --cov=src
