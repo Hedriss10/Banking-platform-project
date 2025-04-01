@@ -21,7 +21,12 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install dependencies
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libmupdf-dev mupdf mupdf-tools
+
+    - name: Install Python dependencies
       run: |
         python -m venv venv
         source venv/bin/activate
