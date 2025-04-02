@@ -226,7 +226,7 @@ class OperationaModel:
             Checking proposal summary and validated fields
         """
         query = f"""
-            select
+            SELECT
                 pl.prazo_inicio,
                 pl.prazo_fim,
                 pl.valor_operacao
