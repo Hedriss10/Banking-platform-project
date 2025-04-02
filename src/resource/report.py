@@ -1,11 +1,13 @@
 import traceback
-from flask_jwt_extended import jwt_required
+
 from flask import request
-from flask_restx import Resource, Namespace, reqparse
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, reqparse
+from werkzeug.datastructures import FileStorage
+
 from src.core.report import ReportCore
 from src.service.response import Response
-from werkzeug.datastructures import FileStorage
 
 pagination_arguments_customer = reqparse.RequestParser()
 pagination_arguments_customer.add_argument("current_page", help="Current Page", default=1, type=int, required=False)

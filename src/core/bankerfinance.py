@@ -1,9 +1,10 @@
-from src.models.bankerfinance import BankerFinanceModels
-from src.db.pg import PgAdmin
-from src.service.response import Response
-from src.utils.pagination import Pagination
 from psycopg2.errors import UniqueViolation
+
+from src.db.pg import PgAdmin
+from src.models.bankerfinance import BankerFinanceModels
+from src.service.response import Response
 from src.utils.log import logdb
+from src.utils.pagination import Pagination
 
 
 class BankerFinanceCore:

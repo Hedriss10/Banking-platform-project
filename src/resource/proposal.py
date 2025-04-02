@@ -1,11 +1,13 @@
 import traceback
-from flask_jwt_extended import jwt_required
+
 from flask import request
-from flask_restx import Resource, Namespace, reqparse, fields
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, fields, reqparse
+from werkzeug.datastructures import FileStorage
+
 from src.core.proposal import SellerCore
 from src.service.response import Response
-from werkzeug.datastructures import FileStorage
 
 # pagination arguments customer
 pagination_arguments_customer = reqparse.RequestParser()

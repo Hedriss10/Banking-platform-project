@@ -1,9 +1,11 @@
-from src.models.role import RoleModel
-from src.db.pg import PgAdmin
-from src.service.response import Response
-from src.utils.pagination import Pagination
-from src.utils.log import logdb
 from psycopg2.errors import UniqueViolation
+
+from src.db.pg import PgAdmin
+from src.models.role import RoleModel
+from src.service.response import Response
+from src.utils.log import logdb
+from src.utils.pagination import Pagination
+
 
 class RoleCore:
     

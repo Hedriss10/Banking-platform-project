@@ -1,5 +1,7 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 from src.utils.log import logdb
+
 
 class TablesFinanceModels:
     name: Optional[str] = None

@@ -1,11 +1,11 @@
 import os
-from pandas import read_excel
-from pandas import Series
-import pandas as pd
-from pandas import DataFrame, Series
 from typing import Optional
-from src.utils.log import logs_and_save_db
+
+import pandas as pd
+from pandas import DataFrame, Series, read_excel
+
 from src.service.response import Response
+from src.utils.log import logs_and_save_db
 
 
 class ExcelTablesBank:

@@ -1,11 +1,13 @@
 import traceback
-from src.resource.swagger.factorypayloadsOperational import PayloadFactoryHourspoint
+
 from flask import request
-from flask_restx import Resource, Namespace
 from flask_cors import cross_origin
-from src.core.hourspoint import HourspointCore
-from src.service.response import Response
 from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource
+
+from src.core.hourspoint import HourspointCore
+from src.resource.swagger.factorypayloadsOperational import PayloadFactoryHourspoint
+from src.service.response import Response
 
 hourspoint_ns = Namespace("hourspoint", description="Manage Hours Point")
 

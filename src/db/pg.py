@@ -1,9 +1,11 @@
-import psycopg2
 import os
-from psycopg2 import InterfaceError
-from psycopg2 import sql
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
+
+import psycopg2
+from psycopg2 import InterfaceError, sql
+
 from src.settings._base import config
+
 
 class PgAdmin(metaclass=type):
 

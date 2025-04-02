@@ -1,15 +1,15 @@
 import os
+from datetime import datetime
+
 from flask import url_for
+from werkzeug.datastructures import FileStorage
+
+from src.db.pg import PgAdmin
 from src.models.proposal import SellerModels
 from src.service.response import Response
 from src.utils.log import logdb
-from src.utils.processor import UploadProposal
 from src.utils.pagination import Pagination
-from src.db.pg import PgAdmin
-from werkzeug.datastructures import FileStorage
-from datetime import datetime
-
-
+from src.utils.processor import UploadProposal
 
 FIELDS_WITH_IMAGES = [
     'extrato_consignacoes', 'contracheque', 'rg_cnh_completo', 'rg_frente', 

@@ -1,5 +1,7 @@
 import logging
+
 from src.db.pg import PgAdmin
+
 
 def setup_logger(name: str):
     """

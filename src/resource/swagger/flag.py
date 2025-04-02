@@ -1,5 +1,6 @@
 from flask_restx import fields, reqparse
 
+
 class FlagsFactoryPayloads:
     @staticmethod
     def payload_add_flags(api):

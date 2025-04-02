@@ -1,5 +1,6 @@
 from flask_restx import fields, reqparse
 
+
 class PayloadFactoryLogin:
 
     @staticmethod

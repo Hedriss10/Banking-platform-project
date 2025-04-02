@@ -1,6 +1,6 @@
 import os
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -8,6 +8,7 @@ class Config:
     ENV = os.getenv("FLASK_ENV", "development")
     DEBUG = True
     DOCS = os.getenv("DOCS_DEV")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(Config):
     APPLICATION_ROOT = "/dev"
@@ -20,7 +21,7 @@ class DevelopmentConfig(Config):
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DOCS = os.getenv("DOCS_DEV")
-    
+    SQLALCHEMY_DATABASE_URI = os.getenv("DEV_DATABASE_URL")
 
 class ProductionConfig(Config):
     APPLICATION_ROOT = "/athenas"
@@ -33,7 +34,7 @@ class ProductionConfig(Config):
     DB_HOST = os.getenv("DB_PRD_HOST")
     DB_PORT = os.getenv("DB_PRD_PORT")
     DOCS = os.getenv("DOCS_PRD")
-    
+    SQLALCHEMY_DATABASE_URI = os.getenv("PRD_DATABASE_URL")
 
 config_by_name = {'development': DevelopmentConfig, 'production': ProductionConfig}
 

@@ -1,5 +1,6 @@
 import json
 
+
 class LoginModels:
     
     def __init__(self, email: str, user_id: int, *args, **kwargs):

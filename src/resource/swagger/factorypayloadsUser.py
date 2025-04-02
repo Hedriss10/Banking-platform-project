@@ -1,4 +1,6 @@
 from flask_restx import fields, reqparse
+
+
 class PaylaodFactoryUser:
     
     @staticmethod
