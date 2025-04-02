@@ -229,8 +229,7 @@ class OperationaModel:
             select
                 pl.prazo_inicio,
                 pl.prazo_fim,
-                pl.valor_operacao,
-                pl.financial_agreements_id
+                pl.valor_operacao
             FROM
                 proposal_loan pl
             WHERE pl.proposal_id = {proposal_id} AND pl.is_deleted = false;
