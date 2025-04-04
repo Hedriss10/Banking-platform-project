@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from src.db.database import db
-from src.models.user import User
+from src.models.models import User
 from src.service.response import Response
 from src.utils.log import logdb
 from src.utils.pagination import Pagination
@@ -100,7 +100,7 @@ class UsersCore:
             metadata=metadata
         )
 
-    def get_user(self, id):
+    def get_user(self, id: int):
         user = self.User.query.filter_by(id=id).first()
 
         if not user:
@@ -179,12 +179,13 @@ class UsersCore:
                     message_id="user_get_not_found",
                     exception="Not found"
                 )
-
+                        
             for key, value in data.items():
-                if key == "password" and value:
-                    value = generate_password_hash(value, method="scrypt")
-                if hasattr(user, key):
-                    setattr(user, key, value)
+                if value is not None:
+                    if key == "password" and value:
+                        value = generate_password_hash(value, method="scrypt")
+                    if hasattr(user, key):
+                        setattr(user, key, value)
 
             self.User.query.session.commit()
             return Response().response(
@@ -210,8 +211,8 @@ class UsersCore:
                 error=True,
                 exception="bad request"
             )
-
-    def delete_user(self, id):
+    
+    def delete_user(self, id: int):
         user = self.User.query.filter_by(id=id).first()
         if not user:
             return Response().response(
