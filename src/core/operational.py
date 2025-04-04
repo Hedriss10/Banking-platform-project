@@ -13,11 +13,12 @@ class OperationalCore:
         self.pg = PgAdmin()
 
     def typing_proposal(self, proposal_id: int, data: dict):
+        ## TODO - ajustar depois novamente o financial_agreements_id
         try:
             if data.get("contrato_pago"):
                 fields_proposal = self.pg.fetch_to_dict(query=self.models.check_summary_fields_proposal(proposal_id=proposal_id))
 
-                if not fields_proposal or any(field.get(key) is None for field in fields_proposal for key in ["prazo_inicio", "prazo_fim", "valor_operacao", "financial_agreements_id"]):
+                if not fields_proposal or any(field.get(key) is None for field in fields_proposal for key in ["prazo_inicio", "prazo_fim", "valor_operacao",]):
                     return Response().response(
                         status_code=409,
                         error=True,
