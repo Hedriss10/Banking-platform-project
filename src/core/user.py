@@ -8,8 +8,8 @@ from src.models.user import User
 from src.service.response import Response
 from src.utils.log import logdb
 from src.utils.pagination import Pagination
-    
-    
+
+
 class UsersCore:
     def __init__(self, user_id: int, *args, **kwargs) -> None:
         self.user_id = user_id

@@ -1,7 +1,8 @@
 
-from src.db.database import db
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash
+
+from src.db.database import db
 
 
 class User(db.Model):
