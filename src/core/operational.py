@@ -1,8 +1,9 @@
-from src.models.operational import OperationaModel
 from src.db.pg import PgAdmin
-from src.utils.pagination import Pagination
-from src.utils.log import logdb
+from src.models.operational import OperationaModel
 from src.service.response import Response
+from src.utils.log import logdb
+from src.utils.pagination import Pagination
+
 
 class OperationalCore:
 

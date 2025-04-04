@@ -1,11 +1,12 @@
 import traceback
 
-from src.models.flag import FlagsModels
-from src.db.pg import PgAdmin
-from src.service.response import Response
 from psycopg2.errors import UniqueViolation
-from src.utils.pagination import Pagination
+
+from src.db.pg import PgAdmin
+from src.models.flag import FlagsModels
+from src.service.response import Response
 from src.utils.log import logdb
+from src.utils.pagination import Pagination
 
 
 class FlagsCore:

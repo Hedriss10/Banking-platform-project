@@ -1,6 +1,8 @@
 import pytest
+
 from src.app import create_app
 from src.settings._base import config
+
 
 @pytest.fixture(scope='session')
 def app():

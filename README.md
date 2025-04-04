@@ -170,3 +170,12 @@ Autor -> Hedris Pereira | **Backend Athenas ™️**
 🚀 **Inovação e Eficiência em cada linha de código.**
 
 ---
+
+
+### Execute setup.cfg
+```bash
+flake8 .          # Verifica estilo e erros
+black --check .   # Verifica formatação
+isort --check .   # Verifica imports
+pytest            # Roda testes com cobertura
+```
