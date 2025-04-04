@@ -12,11 +12,7 @@ class OperationalCore:
         self.pg = PgAdmin()
 
     def typing_proposal(self, proposal_id: int, data: dict):
-        """
-            Reseta o os campos obrigaotiros
-            "financial_agreements_id"
-
-        """
+        ## TODO - ajustar depois novamente o financial_agreements_id
         try:
             if data.get("contrato_pago"):
                 fields_proposal = self.pg.fetch_to_dict(query=self.models.check_summary_fields_proposal(proposal_id=proposal_id))

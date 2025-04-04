@@ -12,7 +12,7 @@ user_ns = Namespace("user", description="user")
 pagination_arguments_customer = PaylaodFactoryUser.pagination_arguments_parser()
 payload_add_user = PaylaodFactoryUser.add_user_payload(user_ns)
 payload_edit_user = PaylaodFactoryUser.edit_user_payload(user_ns)
-# resource apis
+
 
 @user_ns.route("")
 class UserResource(Resource):
@@ -75,7 +75,6 @@ class UserResourceManager(Resource):
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", traceback=traceback.format_exc())
         
-    
     @user_ns.doc(description="Delete user filter by id")
     @cross_origin()
     def delete(self, id):
