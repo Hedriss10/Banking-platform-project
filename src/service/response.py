@@ -1,5 +1,6 @@
-from flask import request
 from os import environ
+
+from flask import request
 
 
 class Response():

@@ -1,9 +1,11 @@
 import hashlib
-from src.models.login import LoginModels
-from src.db.pg import PgAdmin
-from src.service.response import Response
-from werkzeug.security import check_password_hash, generate_password_hash
+
 from flask_jwt_extended import create_access_token
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from src.db.pg import PgAdmin
+from src.models.login import LoginModels
+from src.service.response import Response
 from src.utils.log import logdb
 
 

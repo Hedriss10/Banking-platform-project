@@ -1,8 +1,10 @@
 import traceback
-from src.core.dashboard import DashBoardsCore
+
 from flask import request
-from flask_restx import Resource, Namespace, reqparse
 from flask_cors import cross_origin
+from flask_restx import Namespace, Resource, reqparse
+
+from src.core.dashboard import DashBoardsCore
 from src.service.response import Response
 
 pagination_arguments_customer = reqparse.RequestParser()

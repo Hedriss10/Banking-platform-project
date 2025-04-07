@@ -1,10 +1,12 @@
 import traceback
+
 from flask import request
-from flask_restx import Resource, Namespace
 from flask_cors import cross_origin
+from flask_restx import Namespace, Resource
+
 from src.core.user import UsersCore
-from src.service.response import Response
 from src.resource.swagger.factorypayloadsUser import PaylaodFactoryUser
+from src.service.response import Response
 
 # namespace
 user_ns = Namespace("user", description="user")
