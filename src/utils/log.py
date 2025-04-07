@@ -1,10 +1,10 @@
 # src/utils/log.py
 
-from src.models.models import Log
-from src.db.database import db
-from datetime import datetime
 import logging
+from datetime import datetime
 
+from src.db.database import db
+from src.models.models import Log
 
 
 # setup logger para console e arquivo

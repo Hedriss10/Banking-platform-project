@@ -5,7 +5,7 @@ from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 from flask_restx import Namespace, Resource, fields, reqparse
 
-from src.core.datacatalog import DataCatalogCore
+from src.core.datacatalog import DataCatalogBank, DataCatalogBenefit, DataCatalogLoanOperation
 from src.service.response import Response
 
 pagination_arguments_customer = reqparse.RequestParser()
@@ -14,6 +14,7 @@ pagination_arguments_customer.add_argument("rows_per_page", help="Rows per Page"
 pagination_arguments_customer.add_argument("order_by", help="Order By", default="", type=str, required=False)
 pagination_arguments_customer.add_argument("sort_by", help="Sort By", default="", type=str, required=False)
 pagination_arguments_customer.add_argument("filter_by", help="Filter By", default="", type=str, required=False)
+pagination_arguments_customer.add_argument("filter_value", help="Filter Value", default="", type=str, required=False)
 
 
 datacatalog_ns = Namespace("datacatalog", description="Datacatalog Proposals Manager")
@@ -82,7 +83,7 @@ class ListLoanOperationResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )     
                     
-            return DataCatalogCore(user_id=user_id).add_loan_operation(data=request.get_json())
+            return DataCatalogLoanOperation(user_id=user_id).add_loan_operation(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -95,7 +96,7 @@ class ListLoanOperationResource(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).list_loan_operation(data=request.args.to_dict())
+            return DataCatalogLoanOperation(user_id=user_id).list_loan_operation(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -111,7 +112,7 @@ class ManageLoanOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).delete_loan_operation(id=id)
+            return DataCatalogLoanOperation(user_id=user_id).delete_loan_operation(id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -127,7 +128,7 @@ class ManageBenefitOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).delete_benefit(id=id)
+            return DataCatalogBenefit(user_id=user_id).delete_benefit(id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
         
@@ -143,7 +144,7 @@ class ListBenefitOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).add_benefit(data=request.get_json())
+            return DataCatalogBenefit(user_id=user_id).add_benefit(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
     
@@ -155,8 +156,7 @@ class ListBenefitOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).list_benefit(data=request.args.to_dict())
-        
+            return DataCatalogBenefit(user_id=user_id).list_benefit(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -172,7 +172,7 @@ class ListBankOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).add_bank(data=request.get_json())
+            return DataCatalogBank(user_id=user_id).add_bank(data=request.get_json())
 
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
@@ -186,7 +186,7 @@ class ListBankOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).list_bank(data=request.args.to_dict())
+            return DataCatalogBank(user_id=user_id).list_bank(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
     
@@ -202,6 +202,6 @@ class ManageBankOperation(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DataCatalogCore(user_id=user_id).delete_bank(id=id)
+            return DataCatalogBank(user_id=user_id).delete_bank(id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())

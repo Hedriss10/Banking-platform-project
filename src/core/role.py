@@ -1,14 +1,15 @@
 # src/core/role.py
 from psycopg2.errors import UniqueViolation
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from src.db.database import db
 from src.models.models import Role
 from src.service.response import Response
 from src.utils.log import logdb
+from src.utils.metadata import Metadata
 from src.utils.pagination import Pagination
-from src.utils.metadata import model_to_dict
+
 
 class RoleCore:
     
@@ -33,26 +34,52 @@ class RoleCore:
             filter_by=data.get("filter_by", "")
         )
 
-        role = self.role.query.filter(self.role.is_deleted == False).all()
+        stmt = select(
+            self.role.id,
+            func.initcap(func.trim(self.role.name)).label('name')
+        ).where(self.role.is_deleted == False)
+
         if pagination["filter_value"]:
             filter_value = f"%{pagination['filter_value']}%"
             query = query.filter(
                 db.or_(
-                    func.unaccent(self.User.username).ilike(func.unaccent(filter_value)),
-                    func.unaccent(self.User.cpf).ilike(func.unaccent(filter_value))
+                    func.unaccent(self.role.name).ilike(func.unaccent(filter_value)),
                 )
             )
-        if not role:
-            return Response().response(status_code=404, error=True, message_id="role_list_not_found", exception="Not found", data=role)
+            
+        # Paginação
+        offset = pagination["offset"]
+        limit = pagination["limit"]
+
+        paginated_stmt = stmt.offset(offset).limit(limit)
+        results = db.session.execute(paginated_stmt).fetchall()
+        
+        if not results:
+            return Response().response(
+                status_code=404, 
+                error=True, 
+                message_id="role_list_not_found", 
+                exception="Not found",
+            )
+
+        total = db.session.execute(
+            select(func.count(self.role.id)).where(self.role.is_deleted == False)
+        ).scalar()
+
 
         metadata = Pagination().metadata(
             current_page=current_page,
             rows_per_page=rows_per_page,
             sort_by=pagination["sort_by"],
             order_by=pagination["order_by"],
-            filter_by=pagination["filter_by"]
+            filter_by=pagination["filter_by"],
+            total=total
         )
-        return Response().response(status_code=200, message_id="role_list_successful", data=role,  metadata=metadata)
+        return Response().response(
+            status_code=200, 
+            message_id="role_list_successful", 
+            data=Metadata(results).model_to_list(),  
+            metadata=metadata)
         
     def add_role(self, data: dict):
         try:
@@ -66,18 +93,14 @@ class RoleCore:
             role = self.role(name=data.get("name"))
             self.role.query.session.add(role)
             self.role.query.session.commit()
-
-            role_dict = model_to_dict(role)
-
+            
             return Response().response(
                 status_code=200,
                 error=False,
                 message_id="add_role_succesfully",
-                data=role_dict
             )
 
         except IntegrityError as e:
-            # Checa se foi erro de UNIQUE
             if isinstance(e.orig, UniqueViolation):
                 logdb("warning", message="Role name already exists")
                 self.role.query.session.rollback()
