@@ -5,7 +5,7 @@ from flask_cors import cross_origin
 from flask_jwt_extended import jwt_required
 from flask_restx import Namespace, Resource
 
-from src.core.bankerfinance import BankerFinanceCore
+from src.core.finance import BankersCore, FinancialAgreementsCore
 from src.resource.swagger.factorypayloadsFinance import FactoryPayloadsBankers, FactoryPayloadsFinancialAgreements
 from src.service.response import Response
 
@@ -30,7 +30,7 @@ class BankerResourceRegister(Resource):
         """Add banker, name banker is required and unique"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))   
-            return BankerFinanceCore(user_id=user_id).add_banker(data=request.get_json())
+            return BankersCore(user_id=user_id).add_banker(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
         
@@ -42,7 +42,7 @@ class BankerResourceRegister(Resource):
         """List all bankers"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return BankerFinanceCore(user_id=user_id).list_bankers(data=request.args.to_dict())
+            return BankersCore(user_id=user_id).list_bankers(data=request.args.to_dict())
 
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
@@ -60,7 +60,7 @@ class BankerResourceFilterById(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
             
-            return BankerFinanceCore(user_id=user_id).get_banker(id=id)
+            return BankersCore(user_id=user_id).get_banker(id=id)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
     
@@ -73,7 +73,7 @@ class BankerResourceFilterById(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
             
-            return BankerFinanceCore(user_id=user_id).update_banker(id=id, data=request.get_json())
+            return BankersCore(user_id=user_id).update_banker(id=id, data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
     
@@ -86,7 +86,7 @@ class BankerResourceFilterById(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return BankerFinanceCore(user_id=user_id).delete_banker(id=id)
+            return BankersCore(user_id=user_id).delete_banker(id=id)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
         
@@ -100,7 +100,7 @@ class FinancialAgreeementsResource(Resource):
         """Add financial_agreements, name financial_agreements is required and unique"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
-            return BankerFinanceCore(user_id=user_id).add_financial_agreements(data=request.get_json())
+            return FinancialAgreementsCore(user_id=user_id).add_financial_agreements(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -114,7 +114,7 @@ class FinancialAgreementsResourceFilterById(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))  
             
-            return BankerFinanceCore(user_id=user_id).update_financial_agreements(id=id, data=request.get_json())
+            return FinancialAgreementsCore(user_id=user_id).update_financial_agreements(id=id, data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
     
@@ -125,6 +125,6 @@ class FinancialAgreementsResourceFilterById(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))  
             
-            return BankerFinanceCore(user_id=user_id).delete_financial_agreements(id=id)
+            return FinancialAgreementsCore(user_id=user_id).delete_financial_agreements(id=id)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))

@@ -168,3 +168,9 @@ class PaymentsCore:
             logdb("error", message=f"Error processing xlsx or csv: {e}")
             return Response(f"Error: {str(e)}\n{traceback.format_exc()}", status=400, content_type="text/plain")
 
+
+class Payments:
+    
+    def __init__(self, user_id: int, *args, **kwargs):
+        self.user_id = user_id
+

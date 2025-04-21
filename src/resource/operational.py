@@ -147,6 +147,6 @@ class ListProposalDetailsResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )
             
-            return OperationalCore(user_id=user_id).details_propsal(proposal_id=id)
+            return OperationalCore(user_id=user_id).details_proposal(proposal_id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())

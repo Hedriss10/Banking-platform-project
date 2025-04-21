@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_restx import Api
 
 from src.db.database import db
-from src.resource.bankerfinance import bankers_ns
+from src.resource.bankers import bankers_ns
 from src.resource.dashboard import dashboard_ns
 from src.resource.datacatalog import datacatalog_ns
 from src.resource.flag import flag_ns

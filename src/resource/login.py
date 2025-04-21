@@ -38,9 +38,9 @@ class ResetPasswordResourceMaster(Resource):
     def post(self):
         """Request resert password master"""
         try:
-            user_id = request.headers.get("Id", request.environ.get("Id"))  
+            user_id = request.headers.get("Id", request.environ.get("Id"))
             
-            return LoginCore(user_id=user_id).reset_password_authorization(user_id=user_id, data=request.get_json())
+            return LoginCore(user_id=user_id).reset_password_authorization(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
         

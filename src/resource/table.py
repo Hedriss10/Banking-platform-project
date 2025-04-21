@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required
 from flask_restx import Namespace, Resource, reqparse
 from werkzeug.datastructures import FileStorage
 
-from src.core.table import TablesFinanceCore
+from src.core.finance import TablesCore
 from src.resource.swagger.factorypayloadsFinance import FactoryPayloadsTablesFinance
 from src.service.response import Response
 
@@ -45,7 +45,7 @@ class TablesFinanceImportResource(Resource):
             financialagreements_id = args['financialagreements_id']
             file = args['file']
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return TablesFinanceCore(user_id=user_id).add_tables_finance(data={'financialagreements_id': financialagreements_id, 'issue_date': issue_date}, file=file)
+            return TablesCore(user_id=user_id).add_tables_import(data={'financialagreements_id': financialagreements_id, 'issue_date': issue_date}, file=file)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
@@ -61,7 +61,7 @@ class TablesFinanceResource(Resource):
         """Add one tables"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return TablesFinanceCore(user_id=user_id).add_table(data=request.get_json())
+            return TablesCore(user_id=user_id).add_table(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
@@ -76,7 +76,7 @@ class TablesFinanceResourceById(Resource):
         """List tables with board filter by in banker_id with financial_agreements"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return TablesFinanceCore(user_id=user_id).list_board_table(data=request.args.to_dict(), financial_agreements_id=id)
+            return TablesCore(user_id=user_id).list_board_table(data=request.args.to_dict(), financial_agreements_id=id)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
         
@@ -88,7 +88,7 @@ class TablesFinanceResourceById(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return TablesFinanceCore(user_id=user_id).delete_tabels_ids(data=request.get_json(), id=id)
+            return TablesCore(user_id=user_id).delete_tables_ids(data=request.get_json(), id=id)
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
@@ -104,6 +104,6 @@ class RanksTableFinancial(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return TablesFinanceCore(user_id=user_id).rank_comission(data=request.args.to_dict())
+            return TablesCore(user_id=user_id).rank_comission(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(exit))

@@ -16,7 +16,7 @@ class PaylaodFactoryUser:
                 "typecontract": fields.String(required=False, max_length=50, example="Funcionario"),
                 "role": fields.String(required=False, max_length=50, example="Administrador"),
                 "matricula": fields.String(required=True, example="40028922"),
-                "numero_pis": fields.String(required=True, example="40024-32313-3"),
+                "numero_pis": fields.String(required=True, example="414786431503"),
                 "empresa": fields.String(required=True, example="BSC4"),
                 "situacao_cadastro": fields.String(required=True, example="ativo"),
                 "carga_horaria_semanal": fields.Integer(required=True, example=44),

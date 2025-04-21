@@ -1,26 +1,17 @@
 # src/core/datacatalog.py
 from datetime import datetime
 
-from sqlalchemy import func, select, or_
+from sqlalchemy import func, or_, select
+
 from src.db.database import db
-from src.models.models import Benefit, Bank, LoanOperation
+from src.models.models import Bank, Benefit, LoanOperation
 from src.service.response import Response
 from src.utils.log import logdb
 from src.utils.metadata import Metadata
 from src.utils.pagination import Pagination
 
 
-class DataCatalogBenefit:
-    """ Manage CRUD benefit operations
-        - list
-        - add
-        - delete
-    Args:
-        user_id (int): users id
-        
-    Returns:
-        _type_: _description_
-    """
+class DataCatalogBenefitCore:
     
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
@@ -168,7 +159,7 @@ class DataCatalogBenefit:
                 exception=str(e)
             )
 
-class DataCatalogBank:
+class DataCatalogBankCore:
     """ Manage Bank Crud Operations
         - list
         - add
@@ -336,8 +327,7 @@ class DataCatalogBank:
             logdb("error", message=f"Error processing loan operation. {e}")
             return Response().response(status_code=400, error=True, message_id="error_bank_delete", exception=str(e))
 
-class DataCatalogLoanOperation:
-    ### TODO - realizar as mudanças para SQlAlchemy
+class DataCatalogLoanOperationCore:
     """
         Manage Loan Operation Crud Operations
         - list
@@ -351,6 +341,7 @@ class DataCatalogLoanOperation:
     
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
+        self.loan_operation = LoanOperation
     
     
     def list_loan_operation(self, data: dict):
@@ -369,25 +360,69 @@ class DataCatalogLoanOperation:
                 order_by=data.get("order_by", ""),
                 filter_by=data.get("filter_by", "")
             )
-
-            loan_operation = self.pg.fetch_to_dict(query=self.models.list_loan_operation(pagination=pagination))
             
-            if not loan_operation:
-                return Response().response(status_code=404, error=True, message_id="loan_operation_list_not_found", exception="Not found", data=loan_operation)
+            stmt = select(
+                self.loan_operation.id,
+                self.loan_operation.name,
+            ).where(self.loan_operation.is_deleted == False)
+            
+            # Filtro dinâmico com ILIKE + unaccent
+            if pagination["filter_value"]:
+                filter_value = f"%{pagination['filter_value']}%"
+                stmt = stmt.where(
+                    or_(
+                        func.unaccent(self.loan_operation.name).ilike(func.unaccent(filter_value))
+                    )
+                )
+
+            if pagination["sort_by"]:
+                sort_column = getattr(self.loan_operation, pagination["sort_by"])
+                if pagination["order_by"] == "asc":
+                    stmt = stmt.order_by(sort_column.asc())
+                else:
+                    stmt = stmt.order_by(sort_column.desc())
+            else:
+                stmt = stmt.order_by(self.loan_operation.id.desc())
+            
+            # Paginação
+            offset = pagination["offset"]
+            limit = pagination["limit"]
+
+            paginated_stmt = stmt.offset(offset).limit(limit)
+            results = db.session.execute(paginated_stmt).fetchall()
+            
+            if not results:
+                return Response().response(
+                    status_code=404, 
+                    error=True, 
+                    message_id="loan_operation_list_not_found", 
+                    exception="Not found",
+                )
+                        
+            total = db.session.execute(
+                select(func.count(self.loan_operation.id)).where(self.loan_operation.is_deleted == False)
+            ).scalar()
             
             metadata = Pagination().metadata(
                 current_page=current_page,
                 rows_per_page=rows_per_page,
                 sort_by=pagination["sort_by"],
                 order_by=pagination["order_by"],
-                filter_by=pagination["filter_by"]
+                filter_by=pagination["filter_by"],
+                filter_value=pagination["filter_value"],
+                total=total
             )
             
-            return Response().response(status_code=200, message_id="loan_operation_list_successful", data=loan_operation, metadata=metadata)
+            return Response().response(
+                status_code=200, 
+                message_id="loan_operation_list_successful", 
+                data=Metadata(results).model_to_list(), 
+                metadata=metadata
+            )
             
         except Exception as e:
             logdb("error", message=f"Error processing loan operation. {e}")
-            return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
+            return Response().response(status_code=500, error=True, message_id="error_loan_opeartion", exception=str(e))
            
     def add_loan_operation(self, data: dict):
         name = data.get("name")
@@ -395,22 +430,39 @@ class DataCatalogLoanOperation:
             if not name:
                 return Response().response(status_code=400, error=True, message_id="name_is_required", exception="Name is required")
             
-            loan_operation = self.pg.fetch_to_dict(query=self.models.add_loan_operation(name=name))
-            self.pg.commit()
-            return Response().response(status_code=200, message_id="loan_operation_add_successful", data={"name": loan_operation})
+            loan_operation = self.loan_operation(
+                name=name,
+            )
+            db.session.add(loan_operation)
+            db.session.commit()
+            return Response().response(
+                status_code=200, 
+                message_id="loan_operation_add_successful", 
+                error=False
+            )
         
         except Exception as e:
             logdb("error", message=f"Error processing loan operation. {e}")
-            return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
+            return Response().response(status_code=500, error=True, message_id="error_loan_opeartion", exception=str(e))
         
     def delete_loan_operation(self, id: int):
         try:
-            self.pg.execute_query(query=self.models.delete_loan_operation(id=id))
-            self.pg.commit()
-        
-            return Response().response(status_code=200, message_id="loan_operation_delete_successful")
+            if not id:
+                return Response().response(
+                    status_code=400, 
+                    error=True, 
+                    message_id="id_is_required", 
+                    exception="Id is required"
+                )
+            
+            loan_operation = self.loan_operation.query.filter_by(id=id).first()
+            loan_operation.is_deleted = True
+            loan_operation.deleted_by = self.user_id
+            loan_operation.deleted_at = datetime.now()
+            db.session.commit()
+            return Response().response(status_code=200, message_id="loan_operation_delete_successful", error=False)
         
         except Exception as e:
             logdb("error", message=f"Error processing loan operation. {e}")
             return Response().response(status_code=400, error=True, message_id="error_loan_opeartion", exception=str(e))
-     
+
