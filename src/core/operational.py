@@ -1,12 +1,11 @@
 from datetime import datetime
 
 from sqlalchemy import case, func, or_, select, update
-from sqlalchemy.orm import aliased
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import aliased
+
 from src.db.database import db
-from src.db.pg import PgAdmin
-from src.models.models import LoanOperation, ManageOperation, Proposal, ProposalLoan, ProposalStatus, User, History
-from src.models.operational import OperationaModel
+from src.models.models import History, LoanOperation, ManageOperation, Proposal, ProposalLoan, ProposalStatus, User
 from src.service.response import Response
 from src.utils.log import logdb
 from src.utils.metadata import Metadata

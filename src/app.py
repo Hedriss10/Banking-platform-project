@@ -20,13 +20,13 @@ from src.resource.rooms import rooms_ns
 from src.resource.statistics import statistics_ns
 from src.resource.table import tables_ns
 from src.resource.user import user_ns
-from src.settings._base import config
+from src.settings._base import config_by_name, flask_env
 
-# refractor
 
 def create_app():
     app = Flask(__name__, static_folder="static")
-    app.config.from_object(config)
+    config_class = config_by_name[flask_env]
+    app.config.from_object(config_class)
     
     db.init_app(app) # init database
     

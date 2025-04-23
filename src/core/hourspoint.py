@@ -1,4 +1,3 @@
-from src.db.pg import PgAdmin
 from src.models.hourspoint import HourspointModel
 from src.service.response import Response
 from src.utils.log import logdb
@@ -6,11 +5,7 @@ from src.utils.pagination import Pagination
 
 
 class HourspointCore:
-    
-    def __init__(self, user_id: int, *args, **kwargs):
-        self.user_id = user_id
-        self.models = HourspointModel(user_id=user_id)
-        self.pg = PgAdmin()
+
     
     def list_employee(self, data: dict):
         current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
