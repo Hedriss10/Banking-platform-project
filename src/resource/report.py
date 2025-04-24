@@ -1,11 +1,13 @@
 import traceback
-from flask_jwt_extended import jwt_required
+
 from flask import request
-from flask_restx import Resource, Namespace, reqparse
 from flask_cors import cross_origin
-from src.core.report import ReportCore
-from src.service.response import Response
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, reqparse
 from werkzeug.datastructures import FileStorage
+
+from src.core.finance import ReportCore
+from src.service.response import Response
 
 pagination_arguments_customer = reqparse.RequestParser()
 pagination_arguments_customer.add_argument("current_page", help="Current Page", default=1, type=int, required=False)
@@ -60,7 +62,7 @@ class ListImportResource(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return ReportCore(user_id=user_id).list_import(data=request.args.to_dict())
+            return ReportCore(user_id=user_id).list_report_imports(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 

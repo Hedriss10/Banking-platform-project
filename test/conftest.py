@@ -1,12 +1,15 @@
 import pytest
+
 from src.app import create_app
-from src.settings._base import config
+from src.settings._base import config_by_name, flask_env
 
 @pytest.fixture(scope='session')
 def app():
     """Instance of main Flask app."""
     app = create_app()
-    app.config.from_object(config)
+
+    config_class = config_by_name[flask_env]
+    app.config.from_object(config_class)
     
     with app.app_context():
         yield app

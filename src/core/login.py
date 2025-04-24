@@ -1,58 +1,89 @@
+# src/core/login.py
 import hashlib
-from src.models.login import LoginModels
-from src.db.pg import PgAdmin
-from src.service.response import Response
-from werkzeug.security import check_password_hash, generate_password_hash
+
 from flask_jwt_extended import create_access_token
+from sqlalchemy import func, outerjoin, select
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from src.db.database import db
+from src.models.models import Employee, User
+from src.service.response import Response
 from src.utils.log import logdb
+from src.utils.metadata import Metadata
 
 
 class LoginCore:
-
+    
     def __init__(self, *args, **kwargs) -> None:
-        self.pg = PgAdmin()
-        self.user_id = None
+        self.user = User
+        self.employee = Employee
         self.email = None
-        self.model = LoginModels(email=self.email, user_id=self.user_id)
-
+        self.user_id = None
+    
     def compact_token(self, token):
         return hashlib.sha256(token.encode()).hexdigest()
-
+    
     def get_login(self, data: dict):
-        user = self.pg.fetch_to_dict(query=self.model.get_user_login(data.get("email")))
+        user = self.user.query.filter_by(email=data.get("email")).first()
         
-        if not user or not user[0]['id']:
+        if not user or not user.id:
             return Response().response(message_id="user_not_found", status_code=404, error=True)
-
-        self.user_id = user[0]["id"]
-        self.email = user[0]["email"]
+        
+        self.user_id = user.id
+        self.email = user.email
         password = data.get("password")
-
-        # info
-        user_info = self.pg.fetch_to_dict(query=self.model.get_user_list_info(id=self.user_id))
-
+        
+        join_stmt = outerjoin(
+            self.user, self.employee, self.user.id == self.employee.user_id
+        )
+        
+        stmt = select(
+            self.user.id,
+            self.employee.id.label("employee_id"),
+            self.user.cpf,
+            self.user.username,
+            self.user.lastname,
+            self.user.email,
+            self.user.role,
+            self.user.typecontract,
+            self.user.is_first_acess,
+            self.user.is_deleted,
+            self.user.is_acctive,
+            self.employee.matricula,
+            self.employee.numero_pis,
+            self.employee.situacao_cadastro,
+            self.employee.carga_horaria_semanal,
+            self.user.is_admin,
+            self.user.is_block,
+            self.user.is_comission,
+            func.to_char(self.user.create_at, 'YYYY-MM-DD').label("create_at")
+        ).select_from(join_stmt).where(self.user.id == self.user_id)
+        
+        result = db.session.execute(stmt).fetchone()
+        
         if not password:
             return Response().response(message_id="password_not_user", status_code=400, error=True)
-
-        is_valid = check_password_hash(user[0]["password"], password)
+        
+        is_valid = check_password_hash(user.password, password)
+        
         if is_valid:
             access_token = create_access_token(identity={"id": self.user_id, "email": self.email})
-            self.pg.execute_query(query=self.model.add_session_token(token=self.compact_token(token=access_token), id=self.user_id))
-            self.pg.commit()
-            
-            return Response().response(message_id="user_logged_in_successfully", status_code=200, error=False, data=user_info, metadata={'access_token': self.compact_token(access_token)})
+            db.session.commit()
+            return Response().response(
+                message_id="user_logged_in_successfully", 
+                status_code=200, error=False, 
+                data=Metadata(result).model_to_list(), 
+                metadata={'access_token': self.compact_token(access_token)})
         else:
             logdb("warning", message="Incorrect password")
             return Response().response(message_id="incorrect_password", status_code=401, error=True)
-
-    def reset_password_authorization(self, user_id: int, data: dict):
+        
+    def reset_password_authorization(self, data: dict):
         try:
             new_password = generate_password_hash(password="123@bs", method="scrypt")
-            id = self.pg.fetch_to_dict(query=self.model.reset_password_master(id=data.get("id"), user_id=user_id, password=new_password))
-            if not id:
-                return Response().response(message_id="id_not_found", status_code=404, error=True)
-
+            id = self.user.query.filter_by(id=data.get("id")).update({"password": new_password, "updated_at": func.now()})
+            db.session.commit()
             return Response().response(message_id="reset_successfully", status_code=200, error=False, data=id)
-
         except Exception as e:
+            logdb("error", message=str(e))
             return Response().response(message_id="resert_password_error", status_code=401, error=True)

@@ -1,31 +1,32 @@
 import io
 import traceback
 
-from pandas import DataFrame
-from src.models.payment import PayamentsModels
-from src.db.pg import PgAdmin
-from src.service.response import Response
-from src.utils.pagination import Pagination
 from openpyxl import Workbook
+from pandas import DataFrame
+from psycopg2.errors import ForeignKeyViolation, UniqueViolation
+from sqlalchemy import Numeric, func, insert, outerjoin, select
+
+from src.db.database import db
+from src.models.models import ManageOperation, ObtianReport, Payments, ProposalLoan
+from src.service.response import Response
 from src.utils.log import logdb
-from psycopg2.errors import UniqueViolation
-from psycopg2.errors import ForeignKeyViolation
+from src.utils.metadata import Metadata
+from src.utils.pagination import Pagination
+
 
 class PaymentsCore:
-    
+
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
-        self.pg = PgAdmin()
-        self.models = PayamentsModels(user_id=user_id)
 
     def processing_payments(self, data: dict):
         try:
             if data.get("decision_maker") == True:
                 decision_maker = self.pg.fetch_to_all(query=self.models.list_decision_maker(ids=data.get("user_id")))
-                
+
                 if not decision_maker:
                     return Response().response(status_code=409, error=True, message_id="no_decision_maker", exception="No decision maker")
-                
+
                 self.pg.execute_query(query=self.models.processing_payment(proposals=decision_maker, data=data, user_ids=decision_maker))
                 self.pg.commit()
             else:
@@ -44,7 +45,7 @@ class PaymentsCore:
             return Response().response(status_code=409, error=True, message_id="duplicate_proposal_processing_payments", exception=str(q))
         except Exception as e:
             return Response().response(status_code=417, error=True, message_id="error_processing_payment", exception=str(e))
-        
+
     def list_processing_payments(self, data: dict = {}) -> None:
         current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
         if current_page < 1:
@@ -73,7 +74,7 @@ class PaymentsCore:
             filter_by=pagination["filter_by"],
         )
         return Response().response(status_code=200, message_id="list_payments_successful", data=list_payments, metadata=metadata)
-    
+
     def list_sellers(self, data: dict) -> None:
         try:
             current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
@@ -92,7 +93,7 @@ class PaymentsCore:
             )
 
             sellers = self.pg.fetch_to_dict(query=self.models.list_sellers(name_report=data.get("name_report"), has_report=data.get("has_report"), pagination=pagination))
-            
+
             if not sellers:
                 return Response().response(status_code=404, error=True, message_id="sellers_not_found", exception="Not found", data=sellers)
 
@@ -107,18 +108,22 @@ class PaymentsCore:
         except Exception as e:
             logdb("error", message=f"Error check report proposal. {e}")
             return Response().response(status_code=400, error=True, message_id="error_check_report_proposal", exception=str(e), traceback=traceback.format_exc(e))
-    
+
     def delete_processing_payment(self, data: dict):
         try:
             if not data.get("ids"):
                 return Response().response(status_code=409, error=True, message_id="ids_is_required", exception="IDS is required")
-            
+
             self.pg.execute_query(query=self.models.delete_processing_payment(ids=data.get("ids")))
             self.pg.commit()
             return Response().response(status_code=200, error=False, message_id="delete_processing_payments_successfully")
         except Exception as e:
-            return Response().response(status_code=500, error=False, message_id="erro_processing_delete_payments",)
-    
+            return Response().response(
+                status_code=500,
+                error=False,
+                message_id="erro_processing_delete_payments",
+            )
+
     def export_processing_payments(self, file_type: str) -> None:
         from flask import Response
         try:
@@ -167,3 +172,89 @@ class PaymentsCore:
             logdb("error", message=f"Error processing xlsx or csv: {e}")
             return Response(f"Error: {str(e)}\n{traceback.format_exc()}", status=400, content_type="text/plain")
 
+
+class Paymentscore:
+    # TODO - será necessário a implementação completa de um fluxo melhor
+    # TODO - listar usuários que contem propostas pagas
+    
+
+    def __init__(self, user_id: int, *args, **kwargs):
+        self.user_id = user_id
+        self.report = ObtianReport
+        self.proposal_loan = ProposalLoan
+        self.payments = Payments
+        self.manage_operational = ManageOperation
+        
+    def __check_proposal(self, flag_processing: float = 0.10) -> list:
+        # TODO - por enquanto isso está correto é necessário criar um fluxo melhor ...
+        try:
+            check_proposal = select(
+                self.report.id,
+                self.report.flat,
+                self.proposal_loan.user_id,
+                self.proposal_loan.proposal_id,
+                func.round(func.cast(self.report.flat, Numeric) * flag_processing, 2).label("flat_porcent"),
+            ).join(
+                self.manage_operational, self.report.number_proposal == self.manage_operational.number_proposal
+            ).outerjoin(
+                self.proposal_loan, self.proposal_loan.proposal_id == self.manage_operational.proposal_id
+            ).order_by(
+                self.report.id
+            ).distinct(
+                self.report.id
+            )
+            
+            result = db.session.execute(check_proposal).fetchall()
+            
+            return Metadata(result).model_to_list()
+
+        except Exception as e:
+            logdb("error", message=f"Error check proposal. {e}")
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_check_proposal",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
+
+    def add_payment(self, data: dict) -> dict:
+        try:
+            if not data.get("user_id"):
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="user_id_is_required",
+                )
+
+            
+            stmt = insert(self.payments).values()
+            db.session.execute(stmt)
+            db.session.commit()
+            
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="success_add_payment",
+            )
+            
+        except Exception as e:
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_add_payment",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
+
+    def list_sellers(self, data: dict):
+        ...
+
+    def list_processing_payments(self, data: dict):
+        ...
+
+    def delete_processing_payment(self, data: dict):
+        ...
+        
+    def export_processing_payments(self, file_type: str):
+        ...

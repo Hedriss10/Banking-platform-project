@@ -1,12 +1,13 @@
 import traceback
-from flask_jwt_extended import jwt_required
-from flask import request
-from flask_restx import Resource, Namespace
-from flask_cors import cross_origin
-from src.core.payment import PaymentsCore
-from src.service.response import Response
-from src.resource.swagger.payment import PaymentsFactoryPayloads
 
+from flask import request
+from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource
+
+from src.core.payment import PaymentsCore
+from src.resource.swagger.payment import PaymentsFactoryPayloads
+from src.service.response import Response
 
 # pagination
 pagination_arguments_payment = PaymentsFactoryPayloads.pagination_args_parse()

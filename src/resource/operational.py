@@ -1,9 +1,10 @@
 import traceback
 
-from flask_jwt_extended import jwt_required
 from flask import request
-from flask_restx import Resource, Namespace, reqparse, fields
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, fields, reqparse
+
 from src.core.operational import OperationalCore
 from src.service.response import Response
 
@@ -146,6 +147,6 @@ class ListProposalDetailsResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )
             
-            return OperationalCore(user_id=user_id).details_propsal(proposal_id=id)
+            return OperationalCore(user_id=user_id).details_proposal(proposal_id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())

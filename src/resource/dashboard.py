@@ -1,8 +1,10 @@
 import traceback
-from src.core.dashboard import DashBoardsCore
+
 from flask import request
-from flask_restx import Resource, Namespace, reqparse
 from flask_cors import cross_origin
+from flask_restx import Namespace, Resource, reqparse
+
+from src.core.dashboard import DashboardCore
 from src.service.response import Response
 
 pagination_arguments_customer = reqparse.RequestParser()
@@ -27,7 +29,7 @@ class DashBoardSalesPaid(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DashBoardsCore(user_id=user_id).sales_paid()
+            return DashboardCore(user_id=user_id).sales_paid()
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -41,7 +43,7 @@ class DashBoardStatusProposals(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DashBoardsCore(user_id=user_id).status_proposals()
+            return DashboardCore(user_id=user_id).status_proposals()
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -56,7 +58,7 @@ class DashBoardSallesPaidRanking(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))      
             
-            return DashBoardsCore(user_id=user_id).salles_sales_paid_ranking(data=request.args.to_dict())
+            return DashboardCore(user_id=user_id).salles_sales_paid_ranking(data=request.args.to_dict())
         except Exception as e:
             print(e)
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())

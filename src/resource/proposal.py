@@ -1,11 +1,13 @@
 import traceback
-from flask_jwt_extended import jwt_required
+
 from flask import request
-from flask_restx import Resource, Namespace, reqparse, fields
 from flask_cors import cross_origin
-from src.core.proposal import SellerCore
-from src.service.response import Response
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, fields, reqparse
 from werkzeug.datastructures import FileStorage
+
+from src.core.proposal import ProposalCore
+from src.service.response import Response
 
 # pagination arguments customer
 pagination_arguments_customer = reqparse.RequestParser()
@@ -109,7 +111,7 @@ class ListProposalResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )
             
-            return SellerCore(user_id=user_id).add_proposal(data=request.form, image_data=request.files)
+            return ProposalCore(user_id=user_id).add_proposal(data=request.form, image_data=request.files)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -129,7 +131,7 @@ class ListProposalResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )    
             
-            return SellerCore(user_id=user_id).list_proposal(data=request.args.to_dict())
+            return ProposalCore(user_id=user_id).list_proposal(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -151,7 +153,7 @@ class ProposalResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 ) 
             
-            return SellerCore(user_id=user_id).get_proposal(id=id)
+            return ProposalCore(user_id=user_id).get_proposal(id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -171,7 +173,7 @@ class ProposalResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )  
             
-            return SellerCore(user_id=user_id).update_proposal(proposal_id=id, data=request.form, image=request.files)
+            return ProposalCore(user_id=user_id).update_proposal(proposal_id=id, data=request.form, image=request.files)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())
 
@@ -190,6 +192,6 @@ class ProposalResource(Resource):
                     exception="User ID is required but not provided in the request headers."
                 )      
             
-            return SellerCore(user_id=user_id).delete_proposal(proposal_id=id)
+            return ProposalCore(user_id=user_id).delete_proposal(id=id)
         except Exception as e:
             return Response().response(status_code=500, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc())

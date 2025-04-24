@@ -1,11 +1,13 @@
 import traceback
-from flask_jwt_extended import jwt_required
+
 from flask import request
-from flask_restx import Resource, Namespace, fields, reqparse
 from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, fields, reqparse
+
 from src.core.flag import FlagsCore
-from src.service.response import Response
 from src.resource.swagger.flag import FlagsFactoryPayloads
+from src.service.response import Response
 
 # pagination
 paginantion_arguments_flags = FlagsFactoryPayloads().pagination_arguments_parser()

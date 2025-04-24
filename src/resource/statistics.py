@@ -1,12 +1,12 @@
 import traceback
 
-from src.core.statistics import StatisticsCore
-from flask_jwt_extended import jwt_required
 from flask import request
-from flask_restx import Resource, Namespace, reqparse, fields
 from flask_cors import cross_origin
-from src.service.response import Response
+from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, fields, reqparse
 
+from src.core.statistics import StatisticsCore
+from src.service.response import Response
 
 pagination_arguments_customer = reqparse.RequestParser()
 pagination_arguments_customer.add_argument("current_page", help="Current Page", default=1, type=int, required=False)
