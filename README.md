@@ -41,7 +41,7 @@ A gestão operacional do Athenas agiliza a intermediação com bancos, processan
 
 ---
 
-## gestão Financeira
+## Gestão Financeira
 
 O módulo financeiro minimiza erros em cálculos de comissões entre correspondentes bancários e bancos. Ele automatiza:
 - Cálculo e persistência de comissões internas e externas.
