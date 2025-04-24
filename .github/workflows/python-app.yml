@@ -10,35 +10,54 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-20.05
+    runs-on: ubuntu-24.04
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Checkout do código do repositório
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.12'
+      # Configuração do Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libmupdf-dev mupdf mupdf-tools libfreetype6-dev libjpeg-dev
+      # Cache para dependências Python
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Install Python dependencies
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install pytest pytest-cov
-        pip install pymupdf==1.24.2
-        pip install -r requirements/requirements.txt
+      # Verificação de disponibilidade de pacotes do sistema
+      - name: Check system package availability
+        run: |
+          sudo apt-get update
+          apt-cache policy libmupdf-dev mupdf mupdf-tools libfreetype6-dev libjpeg-dev
 
-    - name: Debug PyMuPDF installation
-      run: |
-        source venv/bin/activate
-        python -c "import site; print('Site packages:', site.getsitepackages())"
-        python -c "import fitz; print('PyMuPDF version:', fitz.__version__)" || echo "Failed to import fitz"
-        ls -la venv/lib/python3.12/site-packages/fitz || echo "fitz directory not found"
-        ls -la venv/lib/python3.12/site-packages/frontend || echo "frontend directory not found"
+      # Instalação de dependências do sistema
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmupdf-dev mupdf mupdf-tools libfreetype6-dev libjpeg-dev
+
+      # Configuração do ambiente virtual e instalação de dependências Python
+      - name: Install Python dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install pytest pytest-cov pymupdf==1.24.2
+          pip install -r requirements/requirements.txt
+
+      # Depuração da instalação do PyMuPDF
+      - name: Debug PyMuPDF installation
+        run: |
+          source venv/bin/activate
+          python -c "import site; print('Site packages:', site.getsitepackages())"
+          python -c "import fitz; print('PyMuPDF version:', fitz.__version__)" || echo "Failed to import fitz"
+          ls -la venv/lib/python3.12/site-packages/fitz || echo "fitz directory not found"
+          ls -la venv/lib/python3.12/site-packages/frontend || echo "frontend directory not found"

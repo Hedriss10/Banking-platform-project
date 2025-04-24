@@ -1,181 +1,110 @@
-# Backend Athenas ™️ 🚀
+# CRM - Backend Athenas ™️ 🚀
 
-Bem-vindo ao **Backend Athenas**, a espinha dorsal da nossa plataforma de CRM! Este projeto foi desenvolvido com foco em eficiência, segurança e escalabilidade, utilizando tecnologias modernas e boas práticas de desenvolvimento.
-
----
-
-## 📚 Introdução ao Swagger
-
-**Descrição**:  
-Desenvolvemos endpoints robustos e seguros, utilizando `Flask-JWT-Extended` para garantir a autenticação e proteção dos dados. A documentação completa da API está disponível via **Swagger**, facilitando a integração e o entendimento dos recursos disponíveis.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-Aqui estão as principais tecnologias que alimentam o **Backend Athenas**:
-
-- **Flask** 🐍: Leve e poderoso, ideal para APIs rápidas e escaláveis.
-- **Flask-RESTx** 🔧: Facilita a criação de APIs RESTful com suporte a Swagger.
-- **Pandas** 🐼: Para manipulação eficiente de dados.
-- **Gunicorn** 🦄: Servidor WSGI para produção.
-- **Docker** 🐳: Containerização para fácil deploy e escalabilidade.
-
-**Descrição**:  
-Essas ferramentas foram escolhidas a dedo para garantir um desenvolvimento ágil e uma infraestrutura robusta. Ao instalar as dependências, outras bibliotecas podem ser incluídas automaticamente no arquivo `.env`.
-
----
-
-## 📌 Índice
-
-- [Instalação](#-instalação)
-- [Configuração](#-configuração)
-- [Uso](#-uso)
-- [Tomada de Decisão](#-tomada-de-decisão)
-- [Objetivo](#-objetivo)
-
----
-
-## 🛠️ Instalação
-
-Siga os passos abaixo para configurar o projeto localmente:
-
-1. **Clone o repositório**:
-    ```bash
-    git clone https://github.com/Hedriss10/Banking-platform-project.git
-    ```
-
-2. **Navegue até o diretório do projeto**:
-    ```bash
-    cd banking-platform-project
-    ```
-
-3. **Crie um ambiente virtual**:
-    ```bash
-    python3 -m venv venv
-    ```
-
-4. **Ative o ambiente virtual**:
-    - **macOS/Linux**:
-        ```bash
-        source venv/bin/activate
-        ```
-    - **Windows**:
-        ```bash
-        .\venv\Scripts\activate
-        ```
-
-5. **Instale as dependências**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
----
-
-## 🐳 Docker
-
-### Desenvolvimento
-
-**Gerar a imagem**:
-```bash
-docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t platform-athenas --load .
-```
-
-**Salvar imagem de desenvolvimento**:
-```bash
-docker save -o platform-athenas-app.tar platform-athenas 
-```
-
-**Executar o container**:
-```bash
-docker run --rm -it -p 5001:5001 platform-athenas
-```
-
-### Produção
-
-**Gerar a imagem de produção**:
-```bash
-docker buildx build --platform linux/amd64 -f Dockerfile.prd -t platform-athenas:prd --load .
-```
-
-**Salvar imagem de produção**:
-```bash
-docker save -o platform-athenas-prd.tar platform-athenas:prd
-```
-
-### Comandos Úteis
-
-**Compactar o projeto**:
-```bash
-tar --exclude=".DS_Store" --exclude="__MACOSX" -czvf platform-athenas.tar src .gitignore Dockerfile.dev docker-compose.yml manage.py
-```
-
-**Executar o build com Docker Compose**:
-```bash
-docker-compose up --build
-```
-
----
-
-## ⚙️ Configuração
-
-1. **Crie um arquivo `.env`** na raiz do projeto e adicione as seguintes variáveis de ambiente:
-    ```env
-    FLASK_APP=app.py
-    FLASK_ENV=development
-    JWT_SECRET_KEY=your_secret_key
-    ```
-
----
-
-## 🚀 Uso
-
-**Como rodar o projeto**:
-
-1. **Inicie o servidor Flask**:
-    ```bash
-    flask run
-    ```
-
-2. **Acesse a documentação Swagger**:
-    ```
-    http://127.0.0.1:5000/docs
-    ```
-
-**Executando com Gunicorn**:
-```bash
-gunicorn -w 4 -b 0.0.0.0:5001 'src.app:create_app()'
-```
-
----
-
-## 🤔 Tomada de Decisão
-
-Após uma análise detalhada das necessidades da empresa, optamos por desenvolver um **CRM básico** totalmente personalizado. Inicialmente, consideramos o uso de `Django`, mas devido à sua natureza "pesada" com muitas libs desnecessárias, escolhemos o **Flask** por sua flexibilidade e leveza.
-
-**Estrutura de Conexão**:
-
-A decisão de utilizar `Flask` permitiu um controle maior sobre o processo e a adoção de boas práticas de servidor, mesmo em um ambiente local.
+O **Athenas** é um CRM backend desenvolvido para atender correspondentes bancários que intermediam operações com bancos públicos e privados. Com foco em regras de negócios personalizadas, o sistema suporta empresas de pequeno e grande porte, integrando-se a bancos como `Facta`, `Master`, `Daycoval`, `Bradesco`, entre outros.
 
 ---
 
 ## 🎯 Objetivo
 
-**Descrição**:  
-O **Backend Athenas** foi criado para garantir a **persistência de dados** na empresa, conectando setores de forma ágil e sem perda de informações. Nosso objetivo é proporcionar uma comunicação eficiente entre os setores, garantindo que todos os dados estejam sempre disponíveis e seguros.
+O Athenas foi projetado para otimizar a intermediação bancária, oferecendo:
+- Gestão eficiente de colaboradores, operações, finanças e administração.
+- Integração com APIs de bancos para agilizar consultas e validações.
+- Conformidade com a LGPD para tratamento de dados sensíveis.
+- Automatização de processos, como cálculos de comissões e relatórios financeiros.
 
 ---
 
-Autor -> Hedris Pereira | **Backend Athenas ™️**  
-🚀 **Inovação e Eficiência em cada linha de código.**
+## 📋 Sumário
+
+- [Núcleo de Colaboradores](#núcleo-de-colaboradores)
+- [Gestão Operacional](#gestão-operacional)
+- [Gestão Financeira](#gestão-financeira)
+- [Gestão Administrativa](#gestão-administrativa)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Arquitetura de Software](#arquitetura-de-software)
+- [Configuração](#configuração)
+- [Uso](#uso)
+- [Tomada de Decisão](#tomada-de-decisão)
+- [Autor](#autor)
 
 ---
 
+## Núcleo de Colaboradores
 
-### Execute setup.cfg
-```bash
-flake8 .          # Verifica estilo e erros
-black --check .   # Verifica formatação
-isort --check .   # Verifica imports
-pytest            # Roda testes com cobertura
+O Athenas centraliza a gestão de colaboradores, registrando e caracterizando vendas para intermediação bancária. O sistema consome APIs REST de bancos internos, permitindo consultas rápidas e precisas para servidores públicos, federais e celetistas.
+
+---
+
+## Gestão Operacional
+
+A gestão operacional do Athenas agiliza a intermediação com bancos, processando dados sensíveis validados em conformidade com a LGPD. O sistema garante eficiência e segurança nas operações financeiras realizadas.
+
+---
+
+## gestão Financeira
+
+O módulo financeiro minimiza erros em cálculos de comissões entre correspondentes bancários e bancos. Ele automatiza:
+- Cálculo e persistência de comissões internas e externas.
+- Emissão de relatórios financeiros.
+- Monitoramento de pagamentos.
+
+---
+
+## Gestão Administrativa
+
+O Athenas oferece indicadores globais sobre o desempenho do sistema e dos colaboradores, incluindo:
+- Estatísticas de ganhos e perdas.
+- Automatização de planilhas para maior desempenho.
+- Backups de dados sensíveis entre servidores e o sistema.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+O CRM foi desenvolvido com tecnologias modernas para garantir escalabilidade, segurança e desempenho:
+
+- **Linguagem**: Python
+- **Framework**: Flask (microsserviços)
+- **Banco de Dados**: PostgreSQL
+- **ORM**: SQLAlchemy
+- **Testes**: Pytest (testes unitários)
+- **CI/CD**: Jenkins para deploy automatizado
+- **Servidor**: Gunicorn (Linux)
+
+---
+
+## Arquitetura de Software
+
+O Athenas segue a **Layered Architecture** (arquitetura em camadas), garantindo modularidade e escalabilidade. O banco de dados relacional PostgreSQL suporta a persistência de dados, adaptando-se às necessidades do negócio.
+
+### Estrutura de Diretórios
+
+```plaintext
+src/
+├── core/         # Lógica central do sistema
+├── db/           # Configurações do banco de dados
+├── models/       # Modelos ORM
+├── resource/     # Endpoints da API
+├── service/      # Regras de negócio
+├── settings/     # Configurações do sistema
+├── static/       # Arquivos estáticos
+├── utils/        # Utilitários
+├── app.py        # Ponto de entrada da aplicação
+├── manage.py     # Scripts de gerenciamento
+├── gunicorn.conf.py  # Configurações do Gunicorn
 ```
+
+---
+
+
+## 🤔 Tomada de Decisão
+
+Após análise detalhada das necessidades do negócio, optamos pelo desenvolvimento de um CRM personalizado com o **Flask** devido à sua flexibilidade, leveza e ampla adoção. Embora outros frameworks tenham sido considerados, o Flask foi escolhido por permitir entregas rápidas e atender às demandas de um projeto de nível nacional. Recomenda-se, no entanto, uma curva de aprendizado em princípios web, engenharia de software e estruturas de dados para maximizar seu potencial.
+
+---
+
+## 👤 Autor
+
+**Hedris Pereira**  
+Desenvolvedor Backend do **Athenas ™️**  
+🚀 *Inovação e eficiência em cada linha de código.*
