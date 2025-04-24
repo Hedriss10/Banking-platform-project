@@ -12,36 +12,39 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class DevelopmentConfig(Config):
+    password = quote_plus("maisbs@master")
     APPLICATION_ROOT = "/dev"
     ENV = "development"
     DEBUG = True
     PORT = os.getenv("DEV_PORT")
     DATABASE = os.getenv("DB_DEV_DATABASE")
     USERNAME = os.getenv("DB_DEV_USERNAME")
-    PASSWORD = quote_plus(os.getenv("DB_PASSWORD"))
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DOCS = os.getenv("DOCS_DEV")
     SQLALCHEMY_DATABASE_URI = (
-        f"postgresql+psycopg2://{USERNAME}:{PASSWORD}@{DB_HOST}:{DB_PORT}/{DATABASE}"
+        f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
     )
+    print(SQLALCHEMY_DATABASE_URI)
 
 
 class ProductionConfig(Config):
     APPLICATION_ROOT = "/athenas"
     ENV = "production"
+    password = quote_plus("maisbs@master")
     DEBUG = False
     PORT = os.getenv("PRD_PORT")
     DOCS = os.getenv("DOCS_PRD")
     PORT = os.getenv("PRD_PORT")
     DATABASE = os.getenv("DB_PRD_DATABASE")
     USERNAME = os.getenv("DB_PRD_USERNAME")
-    PASSWORD = quote_plus(os.getenv("DB_PASSWORD"))
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
+    password = quote_plus("maisbs@master")
     SQLALCHEMY_DATABASE_URI = (
-        f"postgresql+psycopg2://{USERNAME}:{PASSWORD}@{DB_HOST}:{DB_PORT}/{DATABASE}"
+        f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
     )
+    print(SQLALCHEMY_DATABASE_URI)
 
 
 config_by_name = {

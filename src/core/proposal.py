@@ -137,7 +137,7 @@ class ProposalCore:
             .outerjoin(self.loan_operation, self.loan_operation.id == self.proposal_loan.loan_operation_id)
             .outerjoin(cp, cp.c.proposal_id == self.proposal.id).where(
                 self.proposal.is_deleted == False,
-                self.user.id == 1,
+                self.user.id == self.user_id,
                 self.user.is_deleted == False,
             ).group_by(
                 self.proposal.id,
