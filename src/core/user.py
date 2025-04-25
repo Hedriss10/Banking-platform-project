@@ -46,7 +46,6 @@ class UsersCore:
             filter_value=data.get("filter_value", "")
         )
         
-        # query = self.user.query.filter(self.user.is_deleted == False, self.user.is_block == False)
         stmt = select(
             self.user.id,
             self.user.cpf,
@@ -82,17 +81,15 @@ class UsersCore:
 
         # pagination
         paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
-        results = db.session.execute(paginated_stmt).fetchall()
+        result = db.session.execute(paginated_stmt).fetchall()
 
-        if not results:
+        if not result:
             return Response().response(
                 status_code=404,
                 error=True,
                 message_id="users_list_not_found",
                 exception="Not found"
             )
-
-        result = db.session.execute(stmt).fetchall()
         
         total = db.session.execute(select(func.count(self.user.id))).scalar()
         
@@ -184,7 +181,8 @@ class UsersCore:
                 password=hashed_password,
                 role=data.get("role"),
                 typecontract=data.get("typecontract"),
-                is_first_acess=True
+                is_first_acess=True,
+                is_block=False
             ).returning(self.user.id)
             
             user_id = db.session.execute(user_insert).scalar()
