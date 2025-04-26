@@ -1,6 +1,6 @@
 # src/core/dashboard.py
 
-from sqlalchemy import Numeric, asc, case, desc, func, literal_column, or_, select
+from sqlalchemy import Numeric, asc, case, desc, func, literal_column, or_, select, cast, Float
 
 from src.db.database import db
 from src.models.models import ProposalLoan, ProposalStatus, User
@@ -21,7 +21,13 @@ class DashboardCore:
     def sales_paid(self):
         try:
             stmt = select(
-                func.round(func.sum(func.coalesce(self.proposal_loan.valor_operacao, 0)).cast(Numeric), 2).label('value_total_operations')
+                cast(
+                    func.round(
+                        cast(func.sum(self.proposal_loan.valor_operacao), Numeric) / 10,
+                        1
+                    ),
+                    Float
+                ).label('value_total_operations')
             ).join(
                 self.proposal_status,
                 self.proposal_status.proposal_id == self.proposal_loan.proposal_id
@@ -29,10 +35,10 @@ class DashboardCore:
                 self.proposal_loan.is_deleted == False,
                 self.proposal_status.contrato_pago == True
             )
-            
+
             result = db.session.execute(stmt).first()
 
-            if not result:
+            if not result or result.value_total_operations is None:
                 return Response().response(
                     status_code=404,
                     error=True,
@@ -43,11 +49,11 @@ class DashboardCore:
                 status_code=200,
                 error=False,
                 message_id="sales_paid_successful",
-                data=Metadata(result).model_to_list(),
+                data=Metadata(result).model_to_list(),  # Aqui virá tipo 26285.6
             )
-            
+
         except Exception as e:
-            logdb("error", message=f"Error processing Dashbaord. {e}")
+            logdb("error", message=f"Error processing Dashboard. {e}")
             return Response().response(
                 status_code=500,
                 error=True,
@@ -103,7 +109,7 @@ class DashboardCore:
                 exception=str(e),
             )
     
-    def salles_sales_paid_ranking(self, data: dict):
+    def sales_paid_ranking(self, data: dict):
         try:
             current_page = int(data.get("current_page", 1))
             rows_per_page = int(data.get("rows_per_page", 10))
