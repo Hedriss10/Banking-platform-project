@@ -47,8 +47,7 @@ class OperationalCore:
 
     def list_proposal(self, data: dict):
         try:
-            current_page = int(data.get("current_page", 1))
-            rows_per_page = int(data.get("rows_per_page", 10))
+            current_page, rows_per_page  = int(data.get("current_page", 1)) , int(data.get("rows_per_page", 10))
 
             if current_page < 1:
                 current_page = 1
@@ -66,21 +65,37 @@ class OperationalCore:
 
             # Define the status_proposal CTE
             u_alias = aliased(self.user)
-            status_proposal_cte = (select(
-                self.proposal_status.proposal_id, u_alias.username.label("digitador_por"), self.manage_operational.created_at.label("digitado_as"), self.proposal_status.action_at.label("status_updated_at"), self.proposal_status.action_by.label("status_updated_by"), u_alias.username.label("status_updated_by_name"),
-                case((self.proposal_status.contrato_pago, "Contrato Pago"), (self.proposal_status.aguardando_digitacao, "Aguardando Digitação"), (self.proposal_status.pendente_digitacao, "Pendente de Digitação"), (self.proposal_status.contrato_em_digitacao, "Contrato em Digitação"), (self.proposal_status.aguardando_pagamento, "Aguardando Pagamento"), (self.proposal_status.aceite_feito_analise_banco, "Aceite Feito - Análise Banco"),
-                     (self.proposal_status.contrato_pendente_banco, "Contrato Pendente - Banco"),
-                     else_="Unknown").label("current_status")).distinct(self.proposal_status.proposal_id).join(self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id, isouter=True).join(u_alias, u_alias.id == self.proposal_status.action_by, isouter=True).where(self.proposal_status.is_deleted == False).order_by(self.proposal_status.proposal_id, self.proposal_status.created_at.desc()).cte("status_proposal"))
+            status_proposal_cte = (
+                select(self.proposal_status.proposal_id, u_alias.username.label("digitador_por"), self.manage_operational.created_at.label("digitado_as"), self.proposal_status.action_at.label("status_updated_at"), self.proposal_status.action_by.label("status_updated_by"), u_alias.username.label("status_updated_by_name"),
+                case((self.proposal_status.contrato_pago, "Contrato Pago"), 
+                    (self.proposal_status.aguardando_digitacao, "Aguardando Digitação"), 
+                    (self.proposal_status.pendente_digitacao, "Pendente de Digitação"), 
+                    (self.proposal_status.contrato_em_digitacao, "Contrato em Digitação"), 
+                    (self.proposal_status.aguardando_pagamento, "Aguardando Pagamento"), 
+                    (self.proposal_status.aceite_feito_analise_banco, "Aceite Feito - Análise Banco"),
+                    (self.proposal_status.contrato_pendente_banco, "Contrato Pendente - Banco"),
+                else_="Unknown").label("current_status"))
+                .distinct(self.proposal_status.proposal_id)
+                .join(self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id, isouter=True)
+                .join(u_alias, u_alias.id == self.proposal_status.action_by, isouter=True).where(self.proposal_status.is_deleted == False)
+                .order_by(self.proposal_status.proposal_id, self.proposal_status.created_at.desc()).cte("status_proposal"))
 
             # Build the main query
             stmt = (select(self.proposal.id,
-                           func.initcap(func.trim(self.user.username)).label("nome_digitador"),
-                           func.initcap(func.trim(self.proposal.nome)).label("nome_cliente"), self.proposal.cpf.label("cpf_cliente"),
-                           func.to_char(self.proposal.created_at, "DD-MM-YYYY HH24:MI").label("data_criacao"), status_proposal_cte.c.current_status,
-                           func.initcap(func.trim(self.loan_operation.name)).label("tipo_operacao"),
-                           func.to_char(status_proposal_cte.c.digitado_as, "DD-MM-YYYY HH24:MI").label("digitado_as"),
-                           func.initcap(func.trim(status_proposal_cte.c.digitador_por)).label("digitador_por")).join(self.user, self.user.id == self.proposal.user_id, isouter=True).join(self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id, isouter=True).join(self.loan_operation, self.loan_operation.id == self.proposal_loan.loan_operation_id, isouter=True).join(status_proposal_cte, status_proposal_cte.c.proposal_id == self.proposal.id,
-                                                                                                                                                                                                                                                                                                                                                                                             isouter=True).where(self.proposal.is_deleted == False, self.proposal_loan.is_deleted == False))
+                        func.initcap(func.trim(self.user.username)).label("nome_digitador"),
+                        func.initcap(func.trim(self.proposal.nome)).label("nome_cliente"), 
+                        self.proposal.cpf.label("cpf_cliente"),
+                        func.to_char(self.proposal.created_at, "DD-MM-YYYY HH24:MI").label("data_criacao"), 
+                        status_proposal_cte.c.current_status,
+                        func.initcap(func.trim(self.loan_operation.name)).label("tipo_operacao"),
+                        func.to_char(status_proposal_cte.c.digitado_as, "DD-MM-YYYY HH24:MI").label("digitado_as"),
+                        func.initcap(func.trim(status_proposal_cte.c.digitador_por)).label("digitador_por"))
+                    .join(self.user, self.user.id == self.proposal.user_id, isouter=True)
+                    .join(self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id, isouter=True)
+                    .join(self.loan_operation, self.loan_operation.id == self.proposal_loan.loan_operation_id, isouter=True)
+                    .join(status_proposal_cte, status_proposal_cte.c.proposal_id == self.proposal.id, isouter=True)
+                    .where(self.proposal.is_deleted == False, self.proposal_loan.is_deleted == False)
+                )
 
             # ====== Filtro dinâmico se existir ======
             if pagination["filter_by"]:
@@ -88,6 +103,7 @@ class OperationalCore:
                 stmt = stmt.where(or_(
                     func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
                     func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
+                    func.unaccent(status_proposal_cte.c.current_status).ilike(func.unaccent(filter_value)),
                 ))
 
             # ====== Ordenação ======
@@ -104,7 +120,7 @@ class OperationalCore:
             # ====== Paginação ======
             paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
             result = db.session.execute(paginated_stmt).fetchall()
-
+            
             # ====== Total de registros respeitando o filtro ======
             count_stmt = select(func.count()).select_from(self.proposal).where(self.proposal.is_deleted == False, )
 
@@ -114,7 +130,6 @@ class OperationalCore:
                     func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
                 ))
 
-            result = db.session.execute(stmt).fetchall()
             total = db.session.execute(count_stmt).scalar()
             if not result:
                 return Response().response(

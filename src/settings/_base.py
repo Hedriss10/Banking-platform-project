@@ -25,7 +25,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
     )
-    print(SQLALCHEMY_DATABASE_URI)
+    
 
 
 class ProductionConfig(Config):
@@ -44,7 +44,7 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
     )
-    print(SQLALCHEMY_DATABASE_URI)
+    
 
 
 config_by_name = {

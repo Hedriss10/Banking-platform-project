@@ -62,8 +62,7 @@ class ProposalCore:
 
     def list_proposal(self, data: dict):
         try:
-            current_page = int(data.get("current_page", 1))
-            rows_per_page = int(data.get("rows_per_page", 10))
+            current_page, rows_per_page = int(data.get("current_page", 1)),int(data.get("rows_per_page", 10))
 
             if current_page < 1:
                 current_page = 1
@@ -153,6 +152,7 @@ class ProposalCore:
                 stmt = stmt.where(or_(
                     func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
                     func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
+                    func.unaccent(cp.c.current_status).ilike(func.unaccent(filter_value)),
                 ))
 
             # ====== Ordenação ======
@@ -170,9 +170,15 @@ class ProposalCore:
             paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
             result = db.session.execute(paginated_stmt).fetchall()
 
-            # ====== Total de registros respeitando o filtro ======
-            count_stmt = select(func.count()).select_from(self.proposal).where(
-                self.proposal.is_deleted == False,
+            # ====== Total de registros respeitando o filtro ======            
+            count_stmt = select(func.count()).select_from(
+                select(self.proposal.id)
+                .where(self.proposal.is_deleted == False)
+                .where(
+                    or_(
+                        func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value))
+                    ) if pagination["filter_by"] else True
+                ).subquery()
             )
 
             if pagination["filter_value"]:
