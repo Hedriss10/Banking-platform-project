@@ -13,6 +13,7 @@ from src.models.models import (
     Benefit,
     FinancialAgreements,
     LoanOperation,
+    ManageOperation,
     Proposal,
     ProposalBenenift,
     ProposalLoan,
@@ -45,6 +46,7 @@ class ProposalCore:
         self.bankers = Bankers
         self.financial_agreements = FinancialAgreements
         self.tables = TablesFinance
+        self.manage_operational = ManageOperation
         
     # helpers
     def convert_value(self, value, field_type):
@@ -250,7 +252,7 @@ class ProposalCore:
             benefit_data = {k: v for k, v in new_data.items() if k in benefit_columns}
 
             # Inserir proposta principal
-            proposal_stmt = insert(self.proposal).values(**proposal_data, user_id=self.user_id).returning(self.proposal.id)
+            proposal_stmt = insert(self.proposal).values(**proposal_data, user_id=self.user_id, is_deleted=False).returning(self.proposal.id)
             proposal_id = db.session.execute(proposal_stmt).scalar()
             db.session.commit()
 
@@ -274,6 +276,7 @@ class ProposalCore:
                     contrato_pendente_banco=False,
                     aguardando_pagamento=False,
                     contrato_pago=False,
+                    contrato_reprovado=False,
                     created_at=datetime.now(),
                 )
                 db.session.execute(status_stmt)
@@ -365,6 +368,7 @@ class ProposalCore:
                     func.to_char(self.proposal.data_nascimento, 'DD-MM-YYYY HH24:MI').label("data_nascimento"),
                     self.proposal.telefone_residencial,
                     self.proposal.telefone_comercial,
+                    func.upper(self.proposal.observe).label("observe"),
                     func.to_char(self.proposal.created_at, 'DD-MM-YYYY HH24:MI').label("created_at"),
                     self.proposal_loan.senha_servidor,
                     self.proposal_loan.matricula,
@@ -631,7 +635,7 @@ class ProposalCore:
             db.session.rollback()
             logdb("error", message=f"Error Processing Proposal {e}")
             return Response().response(
-                status_code=400,
+                status_code=500,
                 error=True,
                 message_id="error_in_update_proposal",
                 exception=str(e)
@@ -651,6 +655,8 @@ class ProposalCore:
             self.proposal_loan.query.filter_by(id=id).update({"is_deleted": True, "deleted_by": self.user_id, "deleted_at": datetime.now()})
             self.proposal_status.query.filter_by(id=id).update({"is_deleted": True, "deleted_by": self.user_id, "deleted_at": datetime.now()})
             self.proposal_wallet.query.filter_by(id=id).update({"is_deleted": True, "deleted_by": self.user_id, "deleted_at": datetime.now()})
+            self.manage_operational.query.filter_by(id=id).update({"is_deleted": True, "deleted_by": self.user_id, "deleted_at": datetime.now()})
+
 
             # Commit da transação
             self.proposal.query.session.commit()
@@ -658,6 +664,7 @@ class ProposalCore:
             self.proposal_wallet.query.session.commit()
             self.proposal_loan.query.session.commit()
             self.proposal_status.query.session.commit()
+            self.manage_operational.query.session.commit()
 
             return Response().response(
                 status_code=200,

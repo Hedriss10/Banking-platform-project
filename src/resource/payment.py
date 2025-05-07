@@ -29,21 +29,20 @@ class PaymentResource(Resource):
         """List payments processing"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return PaymentsCore(user_id=user_id).list_processing_payments(data=request.args.to_dict())
+            return PaymentsCore(user_id=user_id).list_payments(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
     # @jwt_required()
     @payment_ns.doc(description="Add process payments")
-    @payment_ns.expect(payload_add_payments, validate=True)
+    # @payment_ns.expect(payload_add_payments, validate=True)
     @cross_origin()
     def post(self):
-        """Add process payments with id flag and ids users or unique id"""
+        """Add processing payments for with id users"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return PaymentsCore(user_id=user_id).processing_payments(data=request.get_json())
+            return PaymentsCore(user_id=user_id).add_payment(data=request.get_json())
         except Exception as e:
-            print("RETORNO DO PAGAMENTO", e)
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
     @payment_ns.doc(description="Delete process payments")
@@ -57,7 +56,7 @@ class PaymentResource(Resource):
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
 
-@payment_ns.route("/sellers")
+@payment_ns.route("/proposal")
 class ListSellersResource(Resource):
 
     # @jwt_required()
@@ -65,10 +64,10 @@ class ListSellersResource(Resource):
     @payment_ns.expect(pagination_customer_payments_sellers, validate=True)
     @cross_origin()
     def get(self):
-        """list of sellers that contain a paid proposal, parameter has report and contains a paid proposal but is not in the report"""
+        """list proposal the for payments sellers reports"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return PaymentsCore(user_id=user_id).list_sellers(data=request.args.to_dict())
+            return PaymentsCore(user_id=user_id).list_proposal(data=request.args.to_dict())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))

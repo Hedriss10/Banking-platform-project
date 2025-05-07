@@ -18,4 +18,5 @@ app = create_app()
 app.wsgi_app = Middleware(app.wsgi_app)
 
 if __name__ == "__main__":
-    app.run(port=config_by_name[flask_env].PORT, debug=config_by_name[flask_env].DEBUG)
+    # config_by_name[flask_env].DEBUG
+    app.run(port=config_by_name[flask_env].PORT, debug=True)

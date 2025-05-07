@@ -46,13 +46,7 @@ class StatisticsCore:
                 self.user.id.label("seller_id"),
                 self.user.username.label("seller"),
                 self.user.role.label("role"),
-                func.to_char(
-                    func.round(
-                        func.sum(func.coalesce(self.proposal_loan.valor_operacao, 0)).cast(Numeric),
-                        2
-                    ),
-                    'FM"R$ "999G999G999D00'
-                ).label("value_total_operations")
+                func.to_char(func.round(func.sum(func.coalesce(self.proposal_loan.valor_operacao, 0)).cast(Numeric), 2 ), 'FM"R$ "999G999G999D00' ).label("value_total_operations")
             ).join(
                 self.proposal_loan, self.proposal_loan.user_id == self.user.id
             ).join(
@@ -131,79 +125,37 @@ class StatisticsCore:
                 filter_value=data.get("filter_value", "")
             )
 
-            # ===== CTE list_statics =====
-            list_statics_stmt = (
-                select(
-                    self.user.id.label("id_seller"),
-                    self.proposal.id.label("id_proposal"),
-                    self.user.username.label("name_seller"),
-                    self.proposal.nome.label("nome_proposal"),
-                    self.proposal.cpf.label("cpf_proposal"),
-                    self.proposal_status.contrato_pago,
-                    self.proposal_loan.valor_operacao,
-                    func.round(
-                        cast(self.proposal_loan.valor_operacao, Numeric) * 
-                        cast(self.tables_finance.rate, Numeric) / 100,
-                        2
-                    ).label("valor_comissionado")
-                )
-                .join(self.proposal, self.user.id == self.proposal.user_id)
-                .join(self.proposal_status, self.proposal_status.proposal_id == self.proposal.id)
-                .join(self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id)
-                .join(self.tables_finance, self.tables_finance.id == self.proposal_loan.tables_finance_id)
-                .where(
-                    self.user.id == self.user_id,
-                    self.user.is_deleted == False,
-                    self.proposal_status.contrato_pago == True,
-                    self.proposal.is_deleted == False,
-                    self.tables_finance.is_deleted == False
-                )
-                .order_by(self.proposal.id, self.proposal.created_at.asc())
-            ).cte("list_statics")
-
-            # ===== CTE flags_sellers =====
-            flags_sellers_stmt = (
-                select(
-                    self.flags_processing_payments.user_id,
-                    self.flags.name,
-                    self.flags.rate,
-                    self.user.username.label("sellers")
-                )
-                .join(self.flags, self.flags.id == self.flags_processing_payments.flag_id)
-                .join(self.user, self.user.id == self.flags_processing_payments.user_id)
-                .where(
-                    self.user.id == self.user_id,
-                    self.user.is_deleted == False,
-                    self.flags_processing_payments.user_id == self.user_id
-                )
-            ).cte("flags_sellers")
-
-            # ===== Select final =====
-            stmt = (
-                select(
-                    func.initcap(func.trim(list_statics_stmt.c.name_seller)).label("name_seller"),
-                    func.initcap(func.trim(list_statics_stmt.c.nome_proposal)).label("nome_proposal"),
-                    list_statics_stmt.c.cpf_proposal,
-                    list_statics_stmt.c.contrato_pago,
-                    list_statics_stmt.c.valor_operacao,
-                    cast(
-                        func.round(
-                            cast(
-                                list_statics_stmt.c.valor_comissionado * cast(flags_sellers_stmt.c.rate, Numeric) / 100,
-                                Numeric
-                            ),
-                            2
-                        ),
-                        Float
-                    ).label("ganho_esperado")
-                )
-                .join(flags_sellers_stmt, list_statics_stmt.c.id_seller == flags_sellers_stmt.c.user_id)
-                .offset(pagination["offset"])
-                .limit(pagination["limit"])
+            # aliased para facilitar a leitura
+            pl = self.proposal_loan
+            u = self.user
+            ps = self.proposal_status
+            
+            stmt = select(
+                func.row_number().over(
+                    order_by=func.sum(func.coalesce(pl.valor_operacao, 0)).desc()
+                ).label("posicao"),
+                func.upper(u.username).label("username"),
+                func.to_char(
+                    func.round(func.sum(func.coalesce(pl.valor_operacao, 0)).cast(Numeric), 2),
+                    'FM"R$ "999G999G999D00'
+                ).label("total_ranking")
+            ).join(u, u.id == pl.user_id
+            ).join(ps, ps.proposal_id == pl.proposal_id
+            ).where(
+                pl.is_deleted.is_(False),
+                u.is_deleted.is_(False),
+                ps.is_deleted.is_(False),
+                ps.contrato_pago.is_(True)
+            ).group_by(
+                func.upper(u.username)
+            ).order_by(
+                func.sum(func.coalesce(pl.valor_operacao, 0)).desc()
             )
 
-            result = db.session.execute(stmt).fetchall()
-
+            # ====== Paginação ======
+            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            result = db.session.execute(paginated_stmt).fetchall()
+            
             if not result:
                 return Response().response(
                     status_code=404,

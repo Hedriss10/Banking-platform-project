@@ -1,6 +1,6 @@
 # src/core/dashboard.py
 
-from sqlalchemy import Numeric, asc, case, desc, func, literal_column, or_, select, cast, Float
+from sqlalchemy import Float, Numeric, asc, case, cast, desc, func, literal_column, or_, select
 
 from src.db.database import db
 from src.models.models import ProposalLoan, ProposalStatus, User

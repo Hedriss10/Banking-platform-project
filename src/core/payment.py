@@ -1,13 +1,21 @@
-import io
 import traceback
 
-from openpyxl import Workbook
-from pandas import DataFrame
-from psycopg2.errors import ForeignKeyViolation, UniqueViolation
-from sqlalchemy import Numeric, func, insert, outerjoin, select
+from sqlalchemy import BigInteger, Integer, and_, cast, func, insert, or_, outerjoin, select, update
 
 from src.db.database import db
-from src.models.models import ManageOperation, ObtianReport, Payments, ProposalLoan
+from src.models.models import (
+    Flag,
+    LoanOperation,
+    ManageOperation,
+    ObtianReport,
+    PaymentsComission,
+    Proposal,
+    ProposalLoan,
+    ProposalStatus,
+    TablesFinance,
+    User,
+    Wallet,
+)
 from src.service.response import Response
 from src.utils.log import logdb
 from src.utils.metadata import Metadata
@@ -15,67 +23,116 @@ from src.utils.pagination import Pagination
 
 
 class PaymentsCore:
-
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
+        self.report = ObtianReport
+        self.proposal_loan = ProposalLoan
+        self.manage_operational = ManageOperation
+        self.user = User
+        self.proposal_status = ProposalStatus
+        self.proposal = Proposal
+        self.tables_finance = TablesFinance
+        self.loan_operation = LoanOperation
+        self.payments_comission = PaymentsComission
+        self.wallet = Wallet
+        self.flag = Flag
 
-    def processing_payments(self, data: dict):
+    def __is_payment_report(self, proposal_ids: list[int]):
         try:
-            if data.get("decision_maker") == True:
-                decision_maker = self.pg.fetch_to_all(query=self.models.list_decision_maker(ids=data.get("user_id")))
+            subquery = (
+                select(
+                    self.manage_operational.number_proposal,
+                    self.proposal.cpf
+                )
+                .select_from(
+                    self.manage_operational.__table__.join(
+                        self.proposal.__table__,
+                        self.manage_operational.proposal_id == self.proposal.id
+                    )
+                )
+                .where(
+                    self.manage_operational.is_deleted == False,
+                    self.proposal.is_deleted == False,
+                    or_(
+                        self.manage_operational.proposal_id.in_(proposal_ids),
+                        and_(
+                            self.manage_operational.number_proposal.is_(None),
+                            self.proposal.id.in_(proposal_ids)
+                        )
+                    )
+                )
+            )
 
-                if not decision_maker:
-                    return Response().response(status_code=409, error=True, message_id="no_decision_maker", exception="No decision maker")
+            results = db.session.execute(subquery).fetchall()
 
-                self.pg.execute_query(query=self.models.processing_payment(proposals=decision_maker, data=data, user_ids=decision_maker))
-                self.pg.commit()
-            else:
-                check = self.pg.fetch_to_dict(query=self.models.check_proposal(ids=data.get("user_id")))
-                if not check:
-                    return Response().response(status_code=409, error=True, message_id="no_paid_proposals", exception="No paid proposal")
+            number_proposals = [row.number_proposal for row in results if row.number_proposal is not None]
+            cpfs = [row.cpf for row in results if row.number_proposal is None]
 
-                self.pg.execute_query(query=self.models.report_validated(number_proposal=check))
-                self.pg.execute_query(query=self.models.processing_payment(proposals=check, data=data, user_ids=check))
-                self.pg.commit()
+            if number_proposals:
+                stmt = (
+                    update(self.report)
+                    .where(cast(self.report.number_proposal, Integer).in_(number_proposals))
+                    .values(is_payment=True)
+                )
+                db.session.execute(stmt)
 
-            return Response().response(status_code=200, error=False, message_id="payments_process_successfull")
-        except ForeignKeyViolation as fk:
-            return Response().response(status_code=409, error=True, message_id="flag_or_user_is_not_present_database", exception=str(fk))
-        except UniqueViolation as q:
-            return Response().response(status_code=409, error=True, message_id="duplicate_proposal_processing_payments", exception=str(q))
+            if cpfs:
+                stmt = (
+                    update(self.report)
+                    .where(self.report.cpf.in_(cpfs))
+                    .values(is_payment=True)
+                )
+                db.session.execute(stmt)
+
+            db.session.commit()
+
         except Exception as e:
-            return Response().response(status_code=417, error=True, message_id="error_processing_payment", exception=str(e))
+            db.session.rollback()
+            logdb("error", message=f"Error payments report. {e}\n{traceback.format_exc()}")
 
-    def list_processing_payments(self, data: dict = {}) -> None:
-        current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
-        if current_page < 1:
-            current_page = 1
-        if rows_per_page < 1:
-            rows_per_page = 1
+    def add_payment(self, data: dict) -> dict:
+        try:
+            payments = data.get("payments")
+            if not isinstance(payments, list) or not all(
+                isinstance(payment, dict) and
+                all(key in payment for key in ['user_id', 'proposal_id', 'flag_id'])
+                for payment in payments
+            ):
+                return Response.response(
+                    status_code=400,
+                    error=True,
+                    message_id="invalid_payload_or_missing_keys"
+                )
 
-        pagination = Pagination().pagination(
-            current_page=current_page,
-            rows_per_page=rows_per_page,
-            sort_by=data.get("sort_by", ""),
-            order_by=data.get("order_by", ""),
-            filter_by=data.get("filter_by", ""),
-        )
+            db.session.execute(
+                insert(self.payments_comission),
+                [
+                    {
+                        'user_id': payment['user_id'],
+                        'proposal_id': payment['proposal_id'],
+                        'flag_id': payment['flag_id']
+                    }
+                    for payment in payments
+                ]
+            )
+            # passando o numero da proposta para is_payment
+            db.session.commit()
+            self.__is_payment_report(proposal_ids=[p['proposal_id'] for p in payments])
+            return Response().response(
+                error=False,
+                message_id="success_add_payment",
+                status_code=200
+            )
+        except Exception as e:
+            db.session.rollback()
+            return Response().response(
+                message_id="error_add_payment",
+                exception=str(e),
+                traceback=traceback.format_exc()
+            )
 
-        list_payments = self.pg.fetch_to_dict(query=self.models.list_processing_payments(pagination=pagination))
-
-        if not list_payments:
-            return Response().response(status_code=404, error=True, message_id="list_processing_list_not_found", exception="Not found", data=list_payments)
-
-        metadata = Pagination().metadata(
-            current_page=current_page,
-            rows_per_page=rows_per_page,
-            sort_by=pagination["sort_by"],
-            order_by=pagination["order_by"],
-            filter_by=pagination["filter_by"],
-        )
-        return Response().response(status_code=200, message_id="list_payments_successful", data=list_payments, metadata=metadata)
-
-    def list_sellers(self, data: dict) -> None:
+    def list_proposal(self, data: dict):
+        # TODO - Ajuste no `is_payment`, não está trazendo as propostas corretas
         try:
             current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
 
@@ -83,178 +140,235 @@ class PaymentsCore:
                 current_page = 1
             if rows_per_page < 1:
                 rows_per_page = 1
-
+                
             pagination = Pagination().pagination(
                 current_page=current_page,
                 rows_per_page=rows_per_page,
                 sort_by=data.get("sort_by", ""),
                 order_by=data.get("order_by", ""),
                 filter_by=data.get("filter_by", ""),
+                filter_value=data.get("filter_value", ""),
+            )
+            stmt = select(
+                self.proposal.id.label("proposal_id"),
+                self.user.id.label("user_id"),
+                func.upper(self.proposal.nome).label("nome"),
+                func.to_char(self.proposal_loan.valor_operacao, 'FM"R$ "999G999G990D00').label("valor_operacao"),
+                self.loan_operation.name.label("operacao"),
+                func.upper(self.user.username).label("digitador"),
+                func.upper(self.tables_finance.name).label("tabela"),
+                self.tables_finance.rate
+            ).outerjoin(
+                self.user, self.proposal.user_id == self.user.id
+            ).outerjoin(
+                self.proposal_status, self.proposal_status.proposal_id == self.proposal.id
+            ).outerjoin(
+                self.proposal_loan, self.proposal_loan.proposal_id == self.proposal_status.proposal_id
+            ).outerjoin(
+                self.loan_operation, self.loan_operation.id == self.proposal_loan.loan_operation_id
+            ).outerjoin(
+                self.tables_finance, self.tables_finance.id == self.proposal_loan.tables_finance_id
+            ).outerjoin(
+                self.manage_operational, self.proposal.id == self.manage_operational.proposal_id
+            ).outerjoin(
+                self.report, cast(self.report.number_proposal, BigInteger) == self.manage_operational.number_proposal
+            )
+            
+            stmt = stmt.where(
+                and_(
+                    self.proposal.is_deleted == False,
+                    self.proposal_status.contrato_pago == True,
+                    self.loan_operation.is_deleted == False,
+                    self.tables_finance.is_deleted == False,
+                    self.manage_operational.is_deleted == False,
+                    self.report.is_deleted == False,
+                    or_(
+                        self.report.is_payment == False,
+                        self.report.is_payment == None
+                    )
+                )
             )
 
-            sellers = self.pg.fetch_to_dict(query=self.models.list_sellers(name_report=data.get("name_report"), has_report=data.get("has_report"), pagination=pagination))
+            # ====== Filtro dinâmico se existir ======
+            if pagination["filter_by"]:
+                filter_value = f"%{pagination['filter_by']}%"
+                stmt = stmt.where(or_(
+                    func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
+                ))
+            
+            
+            # ====== Paginação ======
+            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            result = db.session.execute(paginated_stmt).fetchall()
 
-            if not sellers:
-                return Response().response(status_code=404, error=True, message_id="sellers_not_found", exception="Not found", data=sellers)
-
+            if not result:
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="proposal_not_found",
+                )
+            
+            count_stmt = select(func.count()).select_from(
+                select(self.proposal.id)
+                .where(self.proposal.is_deleted == False)
+                .where(
+                    or_(
+                        func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value))
+                    ) if pagination["filter_by"] else True
+                ).subquery()
+            )
+            
+            # totals
+            total = db.session.execute(count_stmt).scalar()
+            
             metadata = Pagination().metadata(
                 current_page=current_page,
                 rows_per_page=rows_per_page,
                 sort_by=pagination["sort_by"],
                 order_by=pagination["order_by"],
                 filter_by=pagination["filter_by"],
+                filter_value=pagination["filter_value"],
+                total=total
             )
-            return Response().response(status_code=200, message_id="sellers_successful", data=sellers, metadata=metadata)
-        except Exception as e:
-            logdb("error", message=f"Error check report proposal. {e}")
-            return Response().response(status_code=400, error=True, message_id="error_check_report_proposal", exception=str(e), traceback=traceback.format_exc(e))
-
-    def delete_processing_payment(self, data: dict):
-        try:
-            if not data.get("ids"):
-                return Response().response(status_code=409, error=True, message_id="ids_is_required", exception="IDS is required")
-
-            self.pg.execute_query(query=self.models.delete_processing_payment(ids=data.get("ids")))
-            self.pg.commit()
-            return Response().response(status_code=200, error=False, message_id="delete_processing_payments_successfully")
-        except Exception as e:
-            return Response().response(
-                status_code=500,
-                error=False,
-                message_id="erro_processing_delete_payments",
-            )
-
-    def export_processing_payments(self, file_type: str) -> None:
-        from flask import Response
-        try:
-            if file_type == "csv":
-                result = self.pg.fetch_to_all(query=self.models.export_report())
-
-                if not result:
-                    return Response("No data found for export.", status=404, content_type="text/plain")
-
-                df = DataFrame(result)
-                df.rename(columns={"cpf_client": "CPF", "user_name_seller": "Nome do Vendedor", "number_proposal": "Número da Proposta", "value_operation": "Valor Da Operação", "taxe_comission": "Taxa De Comissão", "value_base": "Valor Base", "taxe_repasse": "Taxa Repassada", "comission": "Comissão", "table_code": "Código de Tabela"}, inplace=True)
-
-                output = io.StringIO()
-                df.to_csv(output, index=False, sep=";")
-                output.seek(0)
-
-                return Response(output.getvalue(), status=200, content_type="text/csv", headers={"Content-Disposition": "attachment; filename=processing_payments.csv"})
-
-            elif file_type == "xlsx":
-                result = self.pg.fetch_to_all(query=self.models.export_report())
-                if not result:
-                    return Response("No data found for export.", status=404, content_type="text/plain")
-
-                df = DataFrame(result)
-                df.rename(columns={"cpf_client": "CPF", "user_name_seller": "Nome do Vendedor", "number_proposal": "Número da Proposta", "value_operation": "Valor Da Operação", "taxe_comission": "Taxa De Comissão", "value_base": "Valor Base", "taxe_repasse": "Taxa Repassada", "comission": "Comissão", "table_code": "Código de Tabela"}, inplace=True)
-
-                output = io.BytesIO()
-                writer = Workbook()
-
-                sheet = writer.active
-                sheet.title = "Sheet1"
-                sheet.append(df.columns.tolist())
-                for i, row in df.iterrows():
-                    sheet.append(row.tolist())
-
-                writer.save(output)
-                output.seek(0)
-
-                return Response(output.getvalue(), status=200, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=processing_payments.xlsx"})
-
-            else:
-                logdb("warning", message=f"Invalid file type. Only 'csv' or 'xlsx' are supported")
-                return Response("Invalid file type. Only 'csv' or 'xlsx' are supported.", status=400, content_type="text/plain")
-
-        except Exception as e:
-            logdb("error", message=f"Error processing xlsx or csv: {e}")
-            return Response(f"Error: {str(e)}\n{traceback.format_exc()}", status=400, content_type="text/plain")
-
-
-class Paymentscore:
-    # TODO - será necessário a implementação completa de um fluxo melhor
-    # TODO - listar usuários que contem propostas pagas
-    
-
-    def __init__(self, user_id: int, *args, **kwargs):
-        self.user_id = user_id
-        self.report = ObtianReport
-        self.proposal_loan = ProposalLoan
-        self.payments = Payments
-        self.manage_operational = ManageOperation
-        
-    def __check_proposal(self, flag_processing: float = 0.10) -> list:
-        # TODO - por enquanto isso está correto é necessário criar um fluxo melhor ...
-        try:
-            check_proposal = select(
-                self.report.id,
-                self.report.flat,
-                self.proposal_loan.user_id,
-                self.proposal_loan.proposal_id,
-                func.round(func.cast(self.report.flat, Numeric) * flag_processing, 2).label("flat_porcent"),
-            ).join(
-                self.manage_operational, self.report.number_proposal == self.manage_operational.number_proposal
-            ).outerjoin(
-                self.proposal_loan, self.proposal_loan.proposal_id == self.manage_operational.proposal_id
-            ).order_by(
-                self.report.id
-            ).distinct(
-                self.report.id
-            )
-            
-            result = db.session.execute(check_proposal).fetchall()
-            
-            return Metadata(result).model_to_list()
-
-        except Exception as e:
-            logdb("error", message=f"Error check proposal. {e}")
-            return Response().response(
-                status_code=500,
-                error=True,
-                message_id="error_check_proposal",
-                exception=str(e),
-                traceback=traceback.format_exc(e),
-            )
-
-    def add_payment(self, data: dict) -> dict:
-        try:
-            if not data.get("user_id"):
-                return Response().response(
-                    status_code=400,
-                    error=True,
-                    message_id="user_id_is_required",
-                )
-
-            
-            stmt = insert(self.payments).values()
-            db.session.execute(stmt)
-            db.session.commit()
             
             return Response().response(
                 status_code=200,
                 error=False,
-                message_id="success_add_payment",
+                message_id="success_list_proposal",
+                data=Metadata(result).model_to_list(),
+                metadata=metadata,
             )
             
         except Exception as e:
+            logdb("error", message=f"Error list proposal. {e}\n{traceback.format_exc()}")
             return Response().response(
                 status_code=500,
                 error=True,
-                message_id="error_add_payment",
+                message_id="error_list_proposal",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )        
+
+    def list_payments(self, data: dict):
+        try:
+            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+            
+            if current_page < 1:  # Force variables min values
+                current_page = 1
+            if rows_per_page < 1:
+                rows_per_page = 1
+                
+            pagination = Pagination().pagination(
+                current_page=current_page,
+                rows_per_page=rows_per_page,
+                sort_by=data.get("sort_by", ""),
+                order_by=data.get("order_by", ""),
+                filter_by=data.get("filter_by", ""),
+                filter_value=data.get("filter_value", ""),
+            )
+            
+            # ===== CTE de comissões com flags =====
+            pc_cte = (
+                select(
+                    self.payments_comission.user_id,
+                    self.payments_comission.proposal_id,
+                    self.payments_comission.flag_id,
+                    self.flag.name.label("flag_name"),
+                    self.flag.rate.label("commission_rate")
+                )
+                .join(self.flag, self.flag.id == self.payments_comission.flag_id)
+                .where(self.payments_comission.is_deleted == False, self.flag.is_deleted == False)
+                .cte("payments_comission")
+            )
+
+            # ===== Query principal com cálculo da comissão =====
+            stmt = (
+                select(
+                    func.upper(self.user.username).label("username"),
+                    self.proposal.cpf,
+                    self.manage_operational.number_proposal,
+                    self.tables_finance.table_code,
+                    self.tables_finance.rate.label("table_rate"),
+                    func.to_char(self.proposal_loan.valor_operacao, 'FM"R$ "999G999G990D00').label("valor_base"),
+                    pc_cte.c.commission_rate.label("taxed"),
+                    func.to_char(
+                        (self.proposal_loan.valor_operacao * self.tables_finance.rate / 100.0) * (pc_cte.c.commission_rate / 100.0), 'FM"R$ "999G999G990D00'
+                    ).label("valor_comissao")
+                )
+                .select_from(self.proposal)
+                .join(self.user, self.user.id == self.proposal.user_id)
+                .join(self.manage_operational, self.manage_operational.proposal_id == self.proposal.id)
+                .join(self.proposal_status, self.proposal_status.proposal_id == self.proposal.id)
+                .join(self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id)
+                .join(self.tables_finance, self.tables_finance.id == self.proposal_loan.tables_finance_id)
+                .join(pc_cte, pc_cte.c.proposal_id == self.proposal.id)
+                .where(
+                    self.proposal.is_deleted == False,
+                    self.user.is_deleted == False,
+                    self.proposal_status.contrato_pago == True,
+                    self.tables_finance.is_deleted == False,
+                    self.proposal_loan.is_deleted == False
+                )
+            )
+            
+            # ====== Filtro dinâmico se existir ======
+            if pagination["filter_by"]:
+                filter_value = f"%{pagination['filter_by']}%"
+                stmt = stmt.where(or_(
+                    func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
+                ))
+
+            # ====== Paginação ======
+            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            result = db.session.execute(paginated_stmt).fetchall()
+
+            if not result:
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="list_payments_not_found",
+                )
+   
+            count_stmt = select(func.count()).select_from(
+                select(self.proposal.id)
+                .where(self.proposal.is_deleted == False)
+                .where(
+                    or_(
+                        func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value))
+                    ) if pagination["filter_by"] else True
+                ).subquery()
+            )
+            
+            # totals
+            total = db.session.execute(count_stmt).scalar()
+            
+            metadata = Pagination().metadata(
+                current_page=current_page,
+                rows_per_page=rows_per_page,
+                sort_by=pagination["sort_by"],
+                order_by=pagination["order_by"],
+                filter_by=pagination["filter_by"],
+                filter_value=pagination["filter_value"],
+                total=total
+            )
+            
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="success_list_payments",
+                data=Metadata(result).model_to_list(),
+                metadata=metadata,
+            )
+            
+        except Exception as e:
+            logdb("error", message=f"Error list payments. {e}\n{traceback.format_exc()}")
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_list_payments",
                 exception=str(e),
                 traceback=traceback.format_exc(e),
             )
 
-    def list_sellers(self, data: dict):
-        ...
-
-    def list_processing_payments(self, data: dict):
-        ...
-
-    def delete_processing_payment(self, data: dict):
-        ...
-        
     def export_processing_payments(self, file_type: str):
         ...

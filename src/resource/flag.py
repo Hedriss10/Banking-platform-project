@@ -16,6 +16,7 @@ paginantion_arguments_flags = FlagsFactoryPayloads().pagination_arguments_parser
 flag_ns = Namespace("flags", description="Manage flags")
 
 payload_add_flags = FlagsFactoryPayloads().payload_add_flags(flag_ns)
+payload_add_users_flags = FlagsFactoryPayloads().payload_add_users_flags(flag_ns)
 payload_delete_ids = FlagsFactoryPayloads().payload_delete_flags(flag_ns)
 
 @flag_ns.route("")
@@ -57,3 +58,29 @@ class FlagsResourceManage(Resource):
             return FlagsCore(user_id=user_id).delete_flag(data=request.get_json())
         except Exception as e:
             return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
+        
+
+@flag_ns.route("/users")
+class FlagResourceManagerUsers(Resource):
+    @flag_ns.doc(description="Add flags users")
+    @flag_ns.expect(payload_add_users_flags, validate=True)
+    @cross_origin()
+    def post(self):
+        """Add flags users"""
+        try:
+            user_id = request.headers.get("Id", request.environ.get("Id"))
+            return FlagsCore(user_id=user_id).add_flags_users(data=request.get_json())
+        except Exception as e:
+            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
+    
+    @flag_ns.doc(description="Delete flags users")
+    @flag_ns.expect(payload_add_users_flags, validate=True)
+    @cross_origin()
+    def delete(self):
+        """Delete flags users"""
+        try:
+            user_id = request.headers.get("Id", request.environ.get("Id"))
+            return FlagsCore(user_id=user_id).delete_flags_users(data=request.get_json())
+        except Exception as e:
+            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
+        
