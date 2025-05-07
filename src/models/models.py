@@ -166,8 +166,27 @@ class FlagsProcessing(db.Model):
     created_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
     
     def __repr__(self):
-        return f"<Flag: {self.name}>"
+        return f"<Flag: {self.flag_id}>"
 
+
+class FlagsUsers(db.Model):
+    __tablename__ = "flags_users"
+    __table_args__ = {'schema': 'public'}
+    
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    
+    flag_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.flags.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.user.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    deleted_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    deleted_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
+    created_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    
+    def __repr__(self):
+        return f"<Flag: {self.name}>"
 
 class Rooms(db.Model):
     __tablename__ = "rooms"
@@ -352,6 +371,7 @@ class ObtianReport(db.Model):
     deleted_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
     deleted_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
     is_deleted: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
+    is_payment: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
     
 
     def __repr__(self):
@@ -389,6 +409,7 @@ class Proposal(db.Model):
     data_emissao: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
     cep: Mapped[str] = mapped_column(db.String(100), nullable=True)
     uf_cidade: Mapped[str] = mapped_column(db.String(100), nullable=True)
+    observe: Mapped[str] = mapped_column(db.String(300), nullable=True)
     created_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
     updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
@@ -456,6 +477,7 @@ class ProposalStatus(db.Model):
     contrato_pendente_banco: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=False)
     aguardando_pagamento: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=False)
     contrato_pago: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=False)
+    contrato_reprovado: Mapped[bool] = mapped_column(db.Boolean, nullable=False, server_default='false')
     created_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
     updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
@@ -532,23 +554,47 @@ class ManageOperation(db.Model):
     updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
     deleted_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
     deleted_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
     
     def __repr__(self):
         return f"<ManageOperation: {self.id}"
 
     
-class Payments(db.Model):
-    __tablename__ = "payments"
+class PaymentsComission(db.Model):
+    __tablename__ = "payments_comission"
     __table_args__ = {'schema': 'public'}
     
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
-    value_operation: Mapped[str] = mapped_column(db.String(250), nullable=True)
+    value_operation: Mapped[int] = mapped_column(Numeric(10, 2), nullable=False)
+    user_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.user.id"), nullable=False)
+    proposal_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.proposal.id"), nullable=False)
+    flag_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.flags.id"), nullable=False) 
+    created_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    deleted_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    deleted_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    is_valided: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
+    is_deleted: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
+    
+    def __repr__(self):
+        return f"<Payments: {self.id}>"
+    
+
+class Wallet(db.Model):
+    __tablename__ = "walleft"
+    __table_args__ = {'schema': 'public'}
+    
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    balance: Mapped[int] = mapped_column(Numeric(10, 2), nullable=False)
+    comission: Mapped[int] = mapped_column(Numeric(10, 2), nullable=False)
     user_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.user.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
     updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
     deleted_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
     deleted_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    is_valided: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
     is_deleted: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
     
     def __repr__(self):

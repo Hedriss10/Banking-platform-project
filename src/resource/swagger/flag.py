@@ -11,6 +11,16 @@ class FlagsFactoryPayloads:
                 "rate": fields.Float(required=True, example=3.6)
             }
         )
+    
+    @staticmethod
+    def payload_add_users_flags(api):
+        return api.model(
+            "AddUsersFlags",
+            {
+                "flag_id": fields.Integer(required=True, example=1),
+                "ids": fields.List(fields.Integer, required=True, example=[1])
+            }
+        )
         
     @staticmethod
     def payload_delete_flags(api):

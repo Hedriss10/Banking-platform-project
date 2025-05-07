@@ -9,7 +9,7 @@ class PaymentsFactoryPayloads:
             "ProcessingPayment",
             {
                 "flag_id": fields.Integer(required=False, example=1),
-                "decision_maker": fields.Boolean(required=False, example=True),
+                "proposal_id": fields.List(fields.Integer, required=True, example=[1, 2, 3]),
                 "user_id": fields.List(fields.Integer, required=True, example=[1])
             }
         )
@@ -39,9 +39,8 @@ class PaymentsFactoryPayloads:
         pagination = reqparse.RequestParser()
         pagination.add_argument("current_page", help="Current Page", default=1, type=int, required=False)
         pagination.add_argument("rows_per_page", help="Rows per Page", default=10, type=int, required=False)
-        pagination.add_argument("order_by", help="Order By", default="", type=str, required=False)
-        pagination.add_argument("sort_by", help="Sort By", default="ASC", type=str, required=False)
+        pagination.add_argument("sort_by", help="Sort By", default="", type=str, required=False)
+        pagination.add_argument("order_by", help="Order By", default="asc", type=str, required=False)
         pagination.add_argument("filter_by", help="Filter By", default="", type=str, required=False)
-        pagination.add_argument("has_report", help="Has Report", default=True, type=bool, required=True)
-        pagination.add_argument("name_report", help="Name report", default="", type=str, required=False)
+        pagination.add_argument("filter_value", help="Filter Value", default="", type=str, required=False)
         return pagination

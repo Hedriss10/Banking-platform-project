@@ -3,6 +3,7 @@ import pytest
 from src.app import create_app
 from src.settings._base import config_by_name, flask_env
 
+
 @pytest.fixture(scope='session')
 def app():
     """Instance of main Flask app."""

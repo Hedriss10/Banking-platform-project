@@ -776,6 +776,7 @@ class TablesCore:
             )
 
 class ReportCore:
+    # TODO - criar um check summary reports vindo do relatorio
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         self.report = ObtianReport
@@ -845,7 +846,8 @@ class ReportCore:
                     "number_proposal": row['NUMERO_PROPOSTA'],
                     "value_operation": row['VALOR_OPERACAO'],
                     "created_at": datetime.now(),
-                    "user_id": self.user_id
+                    "user_id": self.user_id,
+                    "is_payment": False
                 })
 
             if not records:
