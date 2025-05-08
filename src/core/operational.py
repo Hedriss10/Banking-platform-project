@@ -59,12 +59,9 @@ class OperationalCore:
 
     def list_proposal(self, data: dict):
         try:
-            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
-
-            if current_page < 1:
-                current_page = 1
-            if rows_per_page < 1:
-                rows_per_page = 1
+            # ====== Paginação ======
+            current_page = max(int(data.get("current_page", 1)), 1)
+            rows_per_page = max(int(data.get("rows_per_page", 10)), 1)
 
             pagination = Pagination().pagination(
                 current_page=current_page,
@@ -75,99 +72,99 @@ class OperationalCore:
                 filter_value=data.get("filter_value", ""),
             )
 
-            # Define the status_proposal CTE
+            # ====== CTE de status ======
             u_alias = aliased(self.user)
-            status_proposal_cte = (select(
-                self.proposal_status.proposal_id, 
-                u_alias.username.label("digitador_por"), 
-                self.manage_operational.created_at.label("digitado_as"), 
-                self.proposal_status.action_at.label("status_updated_at"),
-                self.proposal_status.action_by.label("status_updated_by"),
-                u_alias.username.label("status_updated_by_name"),
-                case((self.proposal_status.contrato_pago, "Contrato Pago"), 
-                    (self.proposal_status.aguardando_digitacao, "Aguardando Digitação"),
-                    (self.proposal_status.pendente_digitacao, "Pendente de Digitação"), 
-                    (self.proposal_status.contrato_em_digitacao, "Contrato em Digitação"), 
-                    (self.proposal_status.aguardando_pagamento, "Aguardando Pagamento"), 
-                    (self.proposal_status.aceite_feito_analise_banco, "Aceite Feito - Análise Banco"),
-                    (self.proposal_status.contrato_pendente_banco, "Contrato Pendente - Banco"), (self.proposal_status.contrato_reprovado, "Contrato Reprovado"),
-                    else_="Unknown").label("current_status")
-                ).distinct(
-                    self.proposal_status.proposal_id
-                ).join(
-                    self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id, isouter=True
-                ).join(
-                    u_alias, u_alias.id == self.proposal_status.action_by, isouter=True
-                ).where(
-                    self.proposal_status.is_deleted == False
-                ).order_by(
-                    self.proposal_status.proposal_id, self.proposal_status.created_at.desc()).cte("status_proposal"))
+            status_proposal_cte = (
+                select(
+                    self.proposal_status.proposal_id,
+                    u_alias.username.label("digitador_por"),
+                    self.manage_operational.created_at.label("digitado_as"),
+                    self.proposal_status.action_at.label("status_updated_at"),
+                    self.proposal_status.action_by.label("status_updated_by"),
+                    u_alias.username.label("status_updated_by_name"),
+                    case(
+                        (self.proposal_status.contrato_pago, "Contrato Pago"),
+                        (self.proposal_status.aguardando_digitacao, "Aguardando Digitação"),
+                        (self.proposal_status.pendente_digitacao, "Pendente de Digitação"),
+                        (self.proposal_status.contrato_em_digitacao, "Contrato em Digitação"),
+                        (self.proposal_status.aguardando_pagamento, "Aguardando Pagamento"),
+                        (self.proposal_status.aceite_feito_analise_banco, "Aceite Feito - Análise Banco"),
+                        (self.proposal_status.contrato_pendente_banco, "Contrato Pendente - Banco"),
+                        (self.proposal_status.contrato_reprovado, "Contrato Reprovado"),
+                        else_="Unknown",
+                    ).label("current_status"),
+                )
+                .distinct(self.proposal_status.proposal_id)
+                .join(self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id, isouter=True)
+                .join(u_alias, u_alias.id == self.proposal_status.action_by, isouter=True)
+                .where(self.proposal_status.is_deleted == False)
+                .order_by(self.proposal_status.proposal_id, self.proposal_status.created_at.desc())
+                .cte("status_proposal")
+            )
 
-            # Build the main query
-            stmt = (select(
-                self.proposal.id,func.initcap(func.trim(self.user.username)).label("nome_digitador"),
-                func.initcap(func.trim(self.proposal.nome)).label("nome_cliente"), self.proposal.cpf.label("cpf_cliente"),
-                func.to_char(self.proposal.created_at, "DD-MM-YYYY HH24:MI").label("data_criacao"), status_proposal_cte.c.current_status,
-                func.initcap(func.trim(self.loan_operation.name)).label("tipo_operacao"),
-                func.upper(self.bankers.name).label("banco"),
-                func.to_char(status_proposal_cte.c.digitado_as, "DD-MM-YYYY HH24:MI").label("digitado_as"),
-                func.initcap(func.trim(status_proposal_cte.c.digitador_por)).label("digitador_por")
-                ).join(
-                    self.user, self.user.id == self.proposal.user_id, isouter=True
-                ).join(
-                    self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id, isouter=True
-                ).join(
-                    self.loan_operation, self.loan_operation.id == self.proposal_loan.loan_operation_id,isouter=True
-                ).join(
-                    self.financial_agreements, self.financial_agreements.id == self.proposal_loan.financial_agreements_id,isouter=True
-                ).join(
-                    self.bankers, self.bankers.id == self.financial_agreements.banker_id, isouter=True
-                ).join(
-                    status_proposal_cte, status_proposal_cte.c.proposal_id == self.proposal.id, isouter=True
-                ).where(
-                    self.proposal.is_deleted == False, self.proposal_loan.is_deleted == False, 
-                    status_proposal_cte.c.current_status.notin_(["Contrato Pago", "Contrato Reprovado"])))
+            # ====== Filtro especial por status ======
+            status_filters = {
+                "Contrato Pago": ["Contrato Pago"],
+                "Contrato Reprovado": ["Contrato Reprovado"],
+            }
+            filter_by_value = data.get("filter_by")
+            if filter_by_value in status_filters:
+                filter_proposal = status_proposal_cte.c.current_status.in_(status_filters[filter_by_value])
+            else:
+                filter_proposal = status_proposal_cte.c.current_status.notin_(["Contrato Pago", "Contrato Reprovado"])
 
-            # ====== Filtro dinâmico se existir ======
-            if pagination["filter_by"]:
-                filter_value = f"%{pagination['filter_by']}%"
-                stmt = stmt.where(or_(
-                    func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
-                    func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
-                    func.unaccent(status_proposal_cte.c.current_status).ilike(func.unaccent(filter_value)),
-                ))
+            # ====== Query principal ======
+            stmt = (
+                select(
+                    self.proposal.id,
+                    func.initcap(func.trim(self.user.username)).label("nome_digitador"),
+                    func.initcap(func.trim(self.proposal.nome)).label("nome_cliente"),
+                    self.proposal.cpf.label("cpf_cliente"),
+                    func.to_char(self.proposal.created_at, "DD-MM-YYYY HH24:MI").label("data_criacao"),
+                    status_proposal_cte.c.current_status,
+                    func.initcap(func.trim(self.loan_operation.name)).label("tipo_operacao"),
+                    func.upper(self.bankers.name).label("banco"),
+                    func.to_char(status_proposal_cte.c.digitado_as, "DD-MM-YYYY HH24:MI").label("digitado_as"),
+                    func.initcap(func.trim(status_proposal_cte.c.digitador_por)).label("digitador_por"),
+                )
+                .join(self.user, self.user.id == self.proposal.user_id, isouter=True)
+                .join(self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id, isouter=True)
+                .join(self.loan_operation, self.loan_operation.id == self.proposal_loan.loan_operation_id, isouter=True)
+                .join(self.financial_agreements, self.financial_agreements.id == self.proposal_loan.financial_agreements_id, isouter=True)
+                .join(self.bankers, self.bankers.id == self.financial_agreements.banker_id, isouter=True)
+                .join(status_proposal_cte, status_proposal_cte.c.proposal_id == self.proposal.id, isouter=True)
+                .where(self.proposal.is_deleted == False, self.proposal_loan.is_deleted == False, filter_proposal)
+            )
+
+            # ====== Filtro dinâmico ======
+            if pagination["filter_value"]:
+                filter_value = f"%{pagination['filter_value']}%"
+                stmt = stmt.where(
+                    or_(
+                        func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
+                        func.unaccent(status_proposal_cte.c.current_status).ilike(func.unaccent(filter_value)),
+                    )
+                )
 
             # ====== Ordenação ======
             if pagination["order_by"]:
-                sort_column = getattr(self.proposal, pagination["order_by"], None)
-                if sort_column is not None:
-                    if pagination["sort_by"] == "asc":
-                        stmt = stmt.order_by(sort_column.asc())
-                    else:
-                        stmt = stmt.order_by(sort_column.desc())
+                col = getattr(self.proposal, pagination["order_by"], None)
+                if col:
+                    stmt = stmt.order_by(col.asc() if pagination["sort_by"] == "asc" else col.desc())
             else:
                 stmt = stmt.order_by(self.proposal.created_at.desc())
 
-            # ====== Paginação ======
+            # ====== Execução ======
             paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
             result = db.session.execute(paginated_stmt).fetchall()
 
-            # ====== Total de registros respeitando o filtro ======
-            count_stmt = select(func.count()).select_from(self.proposal).where(self.proposal.is_deleted == False, )
-
-            if pagination["filter_value"]:
-                count_stmt = count_stmt.where(or_(
-                    func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
-                    func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
-                ))
-
-            total = db.session.execute(count_stmt).scalar()
             if not result:
-                return Response().response(
-                    status_code=404,
-                    error=True,
-                    message_id="proposal_not_found",
-                )
+                return Response().response(status_code=404, error=True, message_id="proposal_not_found")
+
+            # ====== Contagem total ======
+            count_stmt = select(func.count()).select_from(self.proposal).where(self.proposal.is_deleted == False)
+            total = db.session.execute(count_stmt).scalar()
 
             metadata = Pagination().metadata(
                 current_page=current_page,
@@ -189,11 +186,7 @@ class OperationalCore:
 
         except Exception as e:
             logdb("error", message=f"Error listing proposal: {e}")
-            return Response().response(
-                status_code=500,
-                error=True,
-                message_id="error_list_proposal",
-            )
+            return Response().response(status_code=500, error=True, message_id="error_list_proposal")
 
     def count_proposal(self):
         try:
