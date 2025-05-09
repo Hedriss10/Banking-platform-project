@@ -216,16 +216,16 @@ class OperationalCore:
             if not proposal:
                 return Response().response(status_code=404, error=True, message_id="proposal_not_found")
 
-            # Validar campos obrigatórios se contrato_pago for True
-            if data.get("contrato_pago"):
-                is_valid = self.check_summary_fields_proposal(proposal_id)
-                if not is_valid:
-                    return Response().response(
-                        status_code=409,
-                        error=True,
-                        message_id="proposal_summary_fields_missing",
-                        exception="Required fields (prazo_inicio, prazo_fim, valor_operacao, financial_agreements_id) are missing",
-                    )
+            # Validar campos obrigatórios se contrato_pago for True, Validar com o stack holders essa tratativa
+            # if data.get("contrato_pago"):
+            #     is_valid = self.check_summary_fields_proposal(proposal_id)
+            #     if not is_valid:
+            #         return Response().response(
+            #             status_code=409,
+            #             error=True,
+            #             message_id="proposal_summary_fields_missing",
+            #             exception="Required fields (prazo_inicio, prazo_fim, valor_operacao, financial_agreements_id) are missing",
+            #         )
 
             # Montar dicionário de colunas para atualização
             columns_register = {
