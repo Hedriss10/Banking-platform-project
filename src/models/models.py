@@ -599,3 +599,22 @@ class Wallet(db.Model):
     
     def __repr__(self):
         return f"<Payments: {self.id}>"
+
+
+class ServiceProvided(db.Model):
+    __tablename__ = "service_provided"
+    __table_args__ = {'schema': 'public'}
+    
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    valor_operacao: Mapped[float] = mapped_column(db.Float, nullable=False, default=0.0)
+    user_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.user.id"), nullable=False)
+    proposal_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("public.proposal.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    updated_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    deleted_by: Mapped[int] = mapped_column(db.Integer, nullable=True)
+    deleted_at: Mapped[datetime] = mapped_column(db.DateTime, nullable=True)
+    is_valided: Mapped[bool] = mapped_column(db.Boolean, nullable=True, server_default='false')
+
+    def __repr__(self):
+        return f"<Payments service provided: {self.id}>"

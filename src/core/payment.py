@@ -1,6 +1,6 @@
 import traceback
 
-from sqlalchemy import BigInteger, Integer, and_, cast, func, insert, or_, outerjoin, select, update
+from sqlalchemy import BigInteger, Integer, and_, cast, func, insert, or_, outerjoin, select, update, delete
 
 from src.db.database import db
 from src.models.models import (
@@ -15,6 +15,7 @@ from src.models.models import (
     TablesFinance,
     User,
     Wallet,
+    ServiceProvided
 )
 from src.service.response import Response
 from src.utils.log import logdb
@@ -372,3 +373,196 @@ class PaymentsCore:
 
     def export_processing_payments(self, file_type: str):
         ...
+
+
+class PaymentsServiceProvided:
+    
+    def __init__(self, user_id: int, *args, **kwargs):
+        self.user_id = user_id
+        self.proposal = Proposal
+        self.proposal_status = ProposalStatus
+        self.serivice_provided = ServiceProvided
+        self.user = User
+        self.manage_operational = ManageOperation
+        self.proposal_loan = ProposalLoan
+
+    def list_payments_service_provided(self, data: dict):
+        try:
+            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+
+            if current_page < 1:
+                current_page = 1
+            if rows_per_page < 1:
+                rows_per_page = 1
+
+            pagination = Pagination().pagination(
+                current_page=current_page,
+                rows_per_page=rows_per_page,
+                sort_by=data.get("sort_by", ""),
+                order_by=data.get("order_by", ""),
+                filter_by=data.get("filter_by", ""),
+                filter_value=data.get("filter_value", ""),
+            )
+
+            stmt = select(
+                self.proposal.id.label("proposal_id"),
+                self.user.id.label("user_id"),
+                func.upper(self.user.username).label("name"),
+                func.upper(self.proposal.nome).label("proposal_name"),
+                self.proposal.cpf,
+                self.proposal_status.contrato_pago,
+                func.to_char(self.proposal_loan.valor_operacao, 'FM"R$ "999G999G990D00').label("valor_base"),
+                self.manage_operational.number_proposal
+            ).outerjoin(
+                self.proposal_loan, self.proposal_loan.proposal_id == self.proposal.id
+            ).outerjoin(
+                self.user, self.user.id == self.proposal.user_id
+            ).outerjoin(
+                self.proposal_status, self.proposal_status.proposal_id == self.proposal.id
+            ).outerjoin(
+                self.manage_operational, self.manage_operational.proposal_id == self.proposal.id
+            ).where(
+                self.proposal.is_deleted == False,
+                self.proposal_status.is_deleted == False,
+                self.proposal_loan.is_deleted == False,
+                self.manage_operational.is_deleted == False,
+            )
+            
+            result = db.session.execute(stmt).fetchall()
+            
+            if not result:
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="list_payments_not_found",
+                )
+   
+            count_stmt = select(func.count()).select_from(
+                select(self.proposal.id)
+                .where(self.proposal.is_deleted == False)
+                .where(
+                    or_(
+                        func.unaccent(self.proposal.nome).ilike(func.unaccent(pagination["filter_value"]))
+                    ) if pagination["filter_by"] else True
+                ).subquery()
+            )
+            
+            # totals
+            total = db.session.execute(count_stmt).scalar()
+            
+            metadata = Pagination().metadata(
+                current_page=current_page,
+                rows_per_page=rows_per_page,
+                sort_by=pagination["sort_by"],
+                order_by=pagination["order_by"],
+                filter_by=pagination["filter_by"],
+                filter_value=pagination["filter_value"],
+                total=total
+            )
+            
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="success_list_payments",
+                data=Metadata(result).model_to_list(),
+                metadata=metadata
+            )
+            
+        except Exception as e:
+            logdb("error", message=f"Error list payments paid. {e}\n{traceback.format_exc()}")
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_list_payments",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
+
+    def add_payments_service_provided(self, data: dict):
+        try:
+            user_ids = data.get("user_id")
+            proposal_ids = data.get("proposal_id")
+            values = data.get("valor_operacao")
+
+            if not user_ids or not proposal_ids or not values:
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="invalid_payload_or_missing_keys"
+                )
+
+            if not (isinstance(user_ids, list) and isinstance(proposal_ids, list) and isinstance(values, list)):
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="invalid_payload_types"
+                )
+
+            if not (len(user_ids) == len(proposal_ids) == len(values)):
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="length_mismatch_between_fields"
+                )
+
+            # Monta e executa os inserts
+            for u_id, p_id, value in zip(user_ids, proposal_ids, values):
+                stmt = insert(self.serivice_provided).values(
+                    user_id=u_id,
+                    proposal_id=p_id,
+                    valor_operacao=value
+                )
+                db.session.execute(stmt)
+
+            db.session.commit()
+
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="success_add_payments_service_provided"
+            )
+
+        except Exception as e:
+            db.session.rollback()
+            logdb("error", message=f"Error add payments service provided. {e}\n{traceback.format_exc()}")
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_add_payments_service_provided",
+                exception=str(e),
+                traceback=traceback.format_exc(),
+            )
+
+
+    def delete_payments_service_provided(self, data: dict):
+        try:
+            proposal_id = data.get("proposal_id")
+            
+            if not proposal_id:
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="invalid_payload_or_missing_keys"
+                )
+            
+            for p_in in proposal_id:
+                stmt = delete(self.serivice_provided).where(self.serivice_provided.proposal_id == p_in)
+                db.session.execute(stmt)
+            
+            db.session.commit()
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="success_delete_payments_service_provided"
+            )
+            
+        except Exception as e:
+            db.session.rollback()
+            logdb("error", message=f"Error delete payments provided. {e}\n{traceback.format_exc()}")
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_add_payments_service_provided",
+                exception=str(e),
+                traceback=traceback.format_exc(),
+            )
