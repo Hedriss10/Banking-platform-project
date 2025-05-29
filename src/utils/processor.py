@@ -1,18 +1,33 @@
-import os
 import io
+import os
 from datetime import datetime
-from werkzeug.utils import secure_filename
-from PIL import Image
+
 import fitz  # PyMuPDF
+from PIL import Image
+from werkzeug.utils import secure_filename
+
 
 class UploadProposal:
     image_fields = [
-        'rg_cnh_completo', 'rg_frente', 'rg_verso', 'contracheque',
-        'extrato_consignacoes', 'comprovante_residencia', 'selfie',
-        'comprovante_bancario', 'detalhamento_inss', 'historico_consignacoes_inss'
+        "rg_cnh_completo",
+        "rg_frente",
+        "rg_verso",
+        "contracheque",
+        "extrato_consignacoes",
+        "comprovante_residencia",
+        "selfie",
+        "comprovante_bancario",
+        "detalhamento_inss",
+        "historico_consignacoes_inss",
     ]
 
-    def __init__(self, proposal_id: str, user_id: int, image_data: dict, created_at: datetime):
+    def __init__(
+        self,
+        proposal_id: str,
+        user_id: int,
+        image_data: dict,
+        created_at: datetime,
+    ):
         self.proposal_id = proposal_id
         self.user_id = user_id
         self.image_data = image_data
@@ -23,7 +38,13 @@ class UploadProposal:
         year = self.created_at.strftime("%Y")
         month = self.created_at.strftime("%m")
         day = self.created_at.strftime("%d")
-        base_path = os.path.join("src/static/uploads", year, month, day, f"number_contrato_{self.proposal_id}_digitador_{self.user_id}")
+        base_path = os.path.join(
+            "src/static/uploads",
+            year,
+            month,
+            day,
+            f"number_contrato_{self.proposal_id}_digitador_{self.user_id}",
+        )
         os.makedirs(base_path, exist_ok=True)
         return base_path
 
@@ -48,16 +69,20 @@ class UploadProposal:
                         filename = secure_filename(file.filename)
 
                         if file.mimetype == "application/pdf":
-                            self.save_pdf(io.BytesIO(file_content), field_path, filename)
-                        elif file.mimetype.startswith('image/'):
-                            self.save_image(io.BytesIO(file_content), field_path, filename)
+                            self.save_pdf(
+                                io.BytesIO(file_content), field_path, filename
+                            )
+                        elif file.mimetype.startswith("image/"):
+                            self.save_image(
+                                io.BytesIO(file_content), field_path, filename
+                            )
 
     def save_pdf(self, pdf_stream, field_path, filename):
         # Garante que o arquivo tenha a extensão .pdf
-        if not filename.lower().endswith('.pdf'):
+        if not filename.lower().endswith(".pdf"):
             filename = f"{os.path.splitext(filename)[0]}.pdf"
         filepath = os.path.join(field_path, filename)
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             f.write(pdf_stream.read())
         return filepath
 

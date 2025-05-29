@@ -5,6 +5,7 @@ from src.settings._base import config_by_name, flask_env
 
 load_dotenv()
 
+
 class Middleware:
     def __init__(self, app):
         self.app = app
@@ -13,6 +14,7 @@ class Middleware:
         environ.update({"Id": 1})
         environ.update({"email": "hrpbs@teste.com"})
         return self.app(environ, start_response)
+
 
 app = create_app()
 app.wsgi_app = Middleware(app.wsgi_app)

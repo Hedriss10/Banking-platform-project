@@ -19,7 +19,9 @@ def setup_logger(name: str):
         file_handler = logging.FileHandler("src.log")
         file_handler.setLevel(logging.DEBUG)
 
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         console_handler.setFormatter(formatter)
         file_handler.setFormatter(formatter)
 
@@ -28,6 +30,7 @@ def setup_logger(name: str):
 
     return logger
 
+
 # salva o log no banco de dados
 def log_to_db(logger_name: str, level: str, message: str):
     try:
@@ -35,7 +38,7 @@ def log_to_db(logger_name: str, level: str, message: str):
             timestamp=datetime.utcnow(),  # <-- força o valor
             logger_name=logger_name,
             level=level,
-            message=message
+            message=message,
         )
         db.session.add(log_entry)
         db.session.commit()
@@ -43,7 +46,9 @@ def log_to_db(logger_name: str, level: str, message: str):
         logger = setup_logger("DBLogger")
         logger.error(f"Erro ao salvar log no banco: {e}")
 
+
 logger = setup_logger("AppLogger")
+
 
 def logdb(level: str, message: str):
     """
@@ -56,4 +61,4 @@ def logdb(level: str, message: str):
 
 # logdb("warning", "Not found") example
 # logdb("info", "Users list is empty")
-# logdb("error", "Not found")   
+# logdb("error", "Not found")

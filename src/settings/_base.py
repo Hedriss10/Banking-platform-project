@@ -5,11 +5,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Config:
     ENV = os.getenv("FLASK_ENV", "development")
     DEBUG = True
     DOCS = os.getenv("DOCS_DEV")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
 class DevelopmentConfig(Config):
     password = quote_plus("maisbs@master")
@@ -22,10 +24,7 @@ class DevelopmentConfig(Config):
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DOCS = os.getenv("DOCS_DEV")
-    SQLALCHEMY_DATABASE_URI = (
-        f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
-    )
-    
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
 
 
 class ProductionConfig(Config):
@@ -41,17 +40,16 @@ class ProductionConfig(Config):
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     password = quote_plus("maisbs@master")
-    SQLALCHEMY_DATABASE_URI = (
-        f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
-    )
-    
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{USERNAME}:{password}@{DB_HOST}:{DB_PORT}/{DATABASE}"
 
 
 config_by_name = {
     "development": DevelopmentConfig,
-    "production": ProductionConfig
+    "production": ProductionConfig,
 }
 
 flask_env = os.getenv("FLASK_ENV", "development")
 if flask_env not in config_by_name:
-    raise ValueError(f"Invalid value for FLASK_ENV: {flask_env}. Must be one of {list(config_by_name.keys())}")
+    raise ValueError(
+        f"Invalid value for FLASK_ENV: {flask_env}. Must be one of {list(config_by_name.keys())}"
+    )

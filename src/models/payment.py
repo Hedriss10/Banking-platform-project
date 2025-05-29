@@ -1,4 +1,3 @@
-from typing import Dict, List, Optional
 
 
 class PayamentsModels:
@@ -6,7 +5,10 @@ class PayamentsModels:
         self.user_id = user_id
 
     def report_validated(self, number_proposal: list):
-        conditions = " OR ".join(f""" (number_proposal = '{item['number_proposal']}') """ for item in number_proposal)
+        conditions = " OR ".join(
+            f""" (number_proposal = '{item["number_proposal"]}') """
+            for item in number_proposal
+        )
         query = f"""
             UPDATE report_data 
             SET is_validated = true
@@ -14,7 +16,9 @@ class PayamentsModels:
         """
         return query
 
-    def list_sellers(self, name_report: str, has_report: str, pagination: dict):
+    def list_sellers(
+        self, name_report: str, has_report: str, pagination: dict
+    ):
         query_filter = ""
         if pagination.get("filter_by"):
             query_filter = f"""WHERE (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%') OR unaccent(cpf) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
@@ -34,7 +38,7 @@ class PayamentsModels:
             INNER JOIN public.proposal_status ps ON ps.proposal_id = p.id
             INNER JOIN public.user u ON u.id = p.user_id
             """)
-            where_has_report.append(f"""
+            where_has_report.append("""
             AND ap.proposal_id IS NOT NULL
             """)
             _name_report = f"""AND rd.name = '{name_report}' """
@@ -102,9 +106,9 @@ class PayamentsModels:
             OFFSET {pagination.get("offset", 0)} LIMIT {pagination.get("limit", 10)};
         """
         return query
-    
+
     def list_decision_maker(self, ids: int):
-        ids_str = ', '.join(map(str, ids))
+        ids_str = ", ".join(map(str, ids))
         query = f"""
             SELECT 
                 p.id AS proposal_id,
@@ -125,7 +129,7 @@ class PayamentsModels:
         return query
 
     def check_proposal(self, ids: int):
-        ids_str = ', '.join(map(str, ids))
+        ids_str = ", ".join(map(str, ids))
         query = f"""
             SELECT DISTINCT
                 mo.proposal_id,
@@ -146,26 +150,26 @@ class PayamentsModels:
             ORDER BY mo.proposal_id;
         """
         return query
-        
+
     def processing_payment(self, proposals: list, data: dict, user_ids: list):
         flag_id = data.get("flag_id")
-        
-        valid_sellers = {user['sellers_id'] for user in user_ids}
+
+        valid_sellers = {user["sellers_id"] for user in user_ids}
 
         values = ", ".join(
             f"({proposal['sellers_id']}, {flag_id}, {proposal['proposal_id']}, now(), {self.user_id}, TRUE)"
             for proposal in proposals
-            if proposal['sellers_id'] in valid_sellers
+            if proposal["sellers_id"] in valid_sellers
         )
-                
+
         query = f"""
             INSERT INTO public.flags_processing_payments (user_id, flag_id, proposal_id, created_at, created_by, is_payment)
             VALUES {values};
         """
         return query
-     
+
     def export_payaments(self):
-        query = f"""
+        query = """
             WITH processing_payments AS (
                 SELECT 
                     p.cpf,
@@ -193,7 +197,7 @@ class PayamentsModels:
             SELECT * FROM processing_payments as ps
         """
         return query
-    
+
     def list_processing_payments(self, pagination: dict):
         query_filter = ""
         if pagination["filter_by"]:
@@ -235,7 +239,7 @@ class PayamentsModels:
         return query
 
     def delete_processing_payment(self, ids: list):
-        ids_str = ', '.join(map(str, ids))
+        ids_str = ", ".join(map(str, ids))
         query = f"""
             UPDATE flags_processing_payments 
             SET
