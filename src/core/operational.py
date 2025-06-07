@@ -221,22 +221,17 @@ class OperationalCore:
             )
 
             # ====== Filtro dinâmico ======
-            if pagination["filter_value"]:
-                filter_value = f"%{pagination['filter_value']}%"
+            if pagination["filter_by"]:
+                filter_value = f"%{pagination['filter_by']}%"
                 stmt = stmt.where(
                     or_(
-                        func.unaccent(self.proposal.nome).ilike(
-                            func.unaccent(filter_value)
-                        ),
-                        func.unaccent(self.proposal.cpf).ilike(
-                            func.unaccent(filter_value)
-                        ),
-                        func.unaccent(
-                            status_proposal_cte.c.current_status
-                        ).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
+                        func.unaccent(status_proposal_cte.c.current_status).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.user.username).ilike(func.unaccent(filter_value)),
+                        func.unaccent(status_proposal_cte.c.digitador_por).ilike(func.unaccent(filter_value)),
                     )
-                )
-
+                )       
             # ====== Ordenação ======
             if pagination["order_by"]:
                 col = getattr(self.proposal, pagination["order_by"], None)
