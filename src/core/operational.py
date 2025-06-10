@@ -94,7 +94,6 @@ class OperationalCore:
                 filter_by=data.get("filter_by", ""),
                 filter_value=data.get("filter_value", ""),
             )
-
             # ====== CTE de status ======
             u_alias = aliased(self.user)
             status_proposal_cte = (
@@ -118,21 +117,10 @@ class OperationalCore:
                     ).label("current_status"),
                 )
                 .distinct(self.proposal_status.proposal_id)
-                .join(
-                    self.manage_operational,
-                    self.manage_operational.proposal_id == self.proposal_status.proposal_id,
-                    isouter=True,
-                )
-                .join(
-                    u_alias,
-                    u_alias.id == self.proposal_status.action_by,
-                    isouter=True,
-                )
+                .join(self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id, isouter=True)
+                .join(u_alias, u_alias.id == self.proposal_status.action_by, isouter=True)
                 .where(self.proposal_status.is_deleted == False)
-                .order_by(
-                    self.proposal_status.proposal_id,
-                    self.proposal_status.created_at.desc(),
-                )
+                .order_by(self.proposal_status.proposal_id, self.proposal_status.created_at.desc())
                 .cte("status_proposal")
             )
 
@@ -147,8 +135,8 @@ class OperationalCore:
             else:
                 filter_proposal = status_proposal_cte.c.current_status.notin_(["Contrato Pago", "Contrato Reprovado"])
 
-            # ====== Query principal ======
-            stmt = (
+            # ====== Query base com filtros ======
+            base_stmt = (
                 select(
                     self.proposal.id,
                     func.initcap(func.trim(self.user.username)).label("nome_digitador"),
@@ -169,7 +157,6 @@ class OperationalCore:
                 .join(status_proposal_cte, status_proposal_cte.c.proposal_id == self.proposal.id, isouter=True)
             )
 
-            # ====== Filtros gerais ======
             filters = [
                 self.proposal.is_deleted == False,
                 self.proposal_loan.is_deleted == False,
@@ -180,12 +167,12 @@ class OperationalCore:
             if end_date:
                 filters.append(self.proposal.created_at <= end_date)
 
-            stmt = stmt.where(*filters)
+            base_stmt = base_stmt.where(*filters)
 
             # ====== Filtro dinâmico ======
             if pagination["filter_by"]:
                 filter_value = f"%{pagination['filter_by']}%"
-                stmt = stmt.where(
+                base_stmt = base_stmt.where(
                     or_(
                         func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
                         func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
@@ -198,13 +185,17 @@ class OperationalCore:
             # ====== Ordenação ======
             if pagination["order_by"]:
                 col = getattr(self.proposal, pagination["order_by"], None)
-                if col:
-                    stmt = stmt.order_by(col.asc() if pagination["sort_by"] == "asc" else col.desc())
+                if col is not None:
+                    base_stmt = base_stmt.order_by(col.asc() if pagination["sort_by"] == "asc" else col.desc())
             else:
-                stmt = stmt.order_by(self.proposal.created_at.desc())
+                base_stmt = base_stmt.order_by(self.proposal.created_at.desc())
 
-            # ====== Execução ======
-            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            # ====== Total real com filtros aplicados ======
+            count_stmt = select(func.count()).select_from(base_stmt.alias())
+            total = db.session.execute(count_stmt).scalar()
+
+            # ====== Paginação ======
+            paginated_stmt = base_stmt.offset(pagination["offset"]).limit(pagination["limit"])
             result = db.session.execute(paginated_stmt).fetchall()
 
             if not result:
@@ -214,14 +205,7 @@ class OperationalCore:
                     message_id="proposal_not_found",
                 )
 
-            # ====== Contagem total ======
-            count_stmt = (
-                select(func.count())
-                .select_from(self.proposal)
-                .where(self.proposal.is_deleted == False)
-            )
-            total = db.session.execute(count_stmt).scalar()
-
+            # ====== Retorno seguro ======
             metadata = Pagination().metadata(
                 current_page=current_page,
                 rows_per_page=rows_per_page,
@@ -245,6 +229,7 @@ class OperationalCore:
             return Response().response(
                 status_code=500, error=True, message_id="error_list_proposal"
             )
+
 
 
     def count_proposal(self):
