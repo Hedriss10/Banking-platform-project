@@ -2,26 +2,29 @@ import traceback
 
 from flask import request
 from flask_cors import cross_origin
-from flask_jwt_extended import jwt_required
-from flask_restx import Namespace, Resource, fields, reqparse
+from flask_restx import Namespace, Resource
 
 from src.core.flag import FlagsCore
 from src.resource.swagger.flag import FlagsFactoryPayloads
 from src.service.response import Response
 
 # pagination
-paginantion_arguments_flags = FlagsFactoryPayloads().pagination_arguments_parser()
+paginantion_arguments_flags = (
+    FlagsFactoryPayloads().pagination_arguments_parser()
+)
 
 # namespace
 flag_ns = Namespace("flags", description="Manage flags")
 
 payload_add_flags = FlagsFactoryPayloads().payload_add_flags(flag_ns)
-payload_add_users_flags = FlagsFactoryPayloads().payload_add_users_flags(flag_ns)
+payload_add_users_flags = FlagsFactoryPayloads().payload_add_users_flags(
+    flag_ns
+)
 payload_delete_ids = FlagsFactoryPayloads().payload_delete_flags(flag_ns)
+
 
 @flag_ns.route("")
 class FlagsResourceManage(Resource):
-
     # @jwt_required()
     @flag_ns.doc(description="list flags")
     @flag_ns.expect(paginantion_arguments_flags, validate=True)
@@ -31,9 +34,17 @@ class FlagsResourceManage(Resource):
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
 
-            return FlagsCore(user_id=user_id).list_flags(data=request.args.to_dict())
+            return FlagsCore(user_id=user_id).list_flags(
+                data=request.args.to_dict()
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="something_went_wrong",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
 
     # @jwt_required()
     @flag_ns.doc(description="Add flags")
@@ -43,9 +54,17 @@ class FlagsResourceManage(Resource):
         """Add flags"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return FlagsCore(user_id=user_id).add_flags(data=request.get_json())
+            return FlagsCore(user_id=user_id).add_flags(
+                data=request.get_json()
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="something_went_wrong",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
 
     # @jwt_required()
     @flag_ns.doc(description="Delete flags")
@@ -55,10 +74,18 @@ class FlagsResourceManage(Resource):
         """Delete flags"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return FlagsCore(user_id=user_id).delete_flag(data=request.get_json())
+            return FlagsCore(user_id=user_id).delete_flag(
+                data=request.get_json()
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
-        
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="something_went_wrong",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
+
 
 @flag_ns.route("/users")
 class FlagResourceManagerUsers(Resource):
@@ -69,10 +96,18 @@ class FlagResourceManagerUsers(Resource):
         """Add flags users"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return FlagsCore(user_id=user_id).add_flags_users(data=request.get_json())
+            return FlagsCore(user_id=user_id).add_flags_users(
+                data=request.get_json()
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
-    
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="something_went_wrong",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )
+
     @flag_ns.doc(description="Delete flags users")
     @flag_ns.expect(payload_add_users_flags, validate=True)
     @cross_origin()
@@ -80,7 +115,14 @@ class FlagResourceManagerUsers(Resource):
         """Delete flags users"""
         try:
             user_id = request.headers.get("Id", request.environ.get("Id"))
-            return FlagsCore(user_id=user_id).delete_flags_users(data=request.get_json())
+            return FlagsCore(user_id=user_id).delete_flags_users(
+                data=request.get_json()
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="something_went_wrong", exception=str(e), traceback=traceback.format_exc(e))
-        
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="something_went_wrong",
+                exception=str(e),
+                traceback=traceback.format_exc(e),
+            )

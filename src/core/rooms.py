@@ -16,7 +16,6 @@ from src.utils.pagination import Pagination
 
 
 class RoomsCore:
-
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         self.users = User
@@ -27,10 +26,8 @@ class RoomsCore:
         current_page = int(data.get("current_page", 1))
         rows_per_page = int(data.get("rows_per_page", 10))
 
-        if current_page < 1:
-            current_page = 1
-        if rows_per_page < 1:
-            rows_per_page = 1
+        current_page = max(current_page, 1)
+        rows_per_page = max(rows_per_page, 1)
 
         pagination = Pagination().pagination(
             current_page=current_page,
@@ -38,7 +35,7 @@ class RoomsCore:
             sort_by=data.get("sort_by", ""),
             order_by=data.get("order_by", ""),
             filter_by=data.get("filter_by", ""),
-            filter_value=data.get("filter_value", "")
+            filter_value=data.get("filter_value", ""),
         )
 
         Room = aliased(self.rooms)
@@ -74,14 +71,16 @@ class RoomsCore:
 
         if not results:
             return Response().response(
-                status_code=404, 
-                error=True, 
-                message_id="rooms_list_not_found", 
-                exception="Not found"
+                status_code=404,
+                error=True,
+                message_id="rooms_list_not_found",
+                exception="Not found",
             )
-        
+
         total = db.session.execute(
-            select(func.count()).select_from(Room).where(Room.is_deleted == False)
+            select(func.count())
+            .select_from(Room)
+            .where(Room.is_deleted == False)
         ).scalar()
 
         metadata = Pagination().metadata(
@@ -91,129 +90,135 @@ class RoomsCore:
             order_by=pagination["order_by"],
             filter_by=pagination["filter_by"],
             filter_value=pagination["filter_value"],
-            total=total
+            total=total,
         )
 
         return Response().response(
-            status_code=200, 
-            message_id="rooms_list_successful", 
+            status_code=200,
+            message_id="rooms_list_successful",
             data=Metadata(results).model_to_list(),
-            metadata=metadata
+            metadata=metadata,
         )
 
     def add_rooms(self, data: dict):
         try:
             if not data.get("name"):
                 return Response().response(
-                    status_code=401, 
-                    error=True, 
-                    message_id="rooms_is_required", 
-                    exception="Rooms Name Is Required"
+                    status_code=401,
+                    error=True,
+                    message_id="rooms_is_required",
+                    exception="Rooms Name Is Required",
                 )
-            rooms = self.rooms(name=data.get("name"), 
-                is_deleted=False, is_inactive=False, is_status=False, created_at=func.now()
+            rooms = self.rooms(
+                name=data.get("name"),
+                is_deleted=False,
+                is_inactive=False,
+                is_status=False,
+                created_at=func.now(),
             )
             self.rooms.query.session.add(rooms)
             self.rooms.query.session.commit()
-            
+
             return Response().response(
-                status_code=200, 
-                error=False, 
+                status_code=200,
+                error=False,
                 message_id="rooms_add_successful",
             )
         except UniqueViolation:
             return Response().response(
-                status_code=401, 
-                error=True, 
-                message_id="room_name_already_exists", 
-                data=data
+                status_code=401,
+                error=True,
+                message_id="room_name_already_exists",
+                data=data,
             )
 
     def get_room(self, id: int):
         try:
             stmt = select(
                 self.rooms.id,
-                func.initcap(func.trim(self.rooms.name)).label('name')
+                func.initcap(func.trim(self.rooms.name)).label("name"),
             ).where(self.rooms.id == id, self.rooms.is_deleted == False)
 
             result = db.session.execute(stmt).fetchone()
 
             if not result:
                 return Response().response(
-                    status_code=404, 
-                    error=True, 
-                    message_id="rooms_not_found", 
-                    exception="Not found", 
-                    data=None
+                    status_code=404,
+                    error=True,
+                    message_id="rooms_not_found",
+                    exception="Not found",
+                    data=None,
                 )
 
             return Response().response(
-                status_code=200, 
-                error=False, 
-                message_id="rooms_fetch_successful", 
-                data=Metadata(result).model_to_dict()
+                status_code=200,
+                error=False,
+                message_id="rooms_fetch_successful",
+                data=Metadata(result).model_to_dict(),
             )
 
         except Exception as e:
             logdb("error", message=f"Error processing rooms: {e}")
             return Response().response(
-                status_code=409, 
-                error=True, 
-                message_id="error_processing_rooms", 
+                status_code=409,
+                error=True,
+                message_id="error_processing_rooms",
                 exception=str(e),
-                data=None
+                data=None,
             )
 
     def update_rooms(self, id: int, data: dict):
         try:
             if not data.get("name"):
                 return Response().response(
-                    status_code=401, 
-                    error=True, 
-                    message_id="name_is_required", 
-                    exception="Rooms Name Is Required"
+                    status_code=401,
+                    error=True,
+                    message_id="name_is_required",
+                    exception="Rooms Name Is Required",
                 )
 
             rooms = self.rooms.query.filter_by(id=id, is_deleted=False).first()
             rooms.name = data.get("name")
             self.rooms.query.session.commit()
-            
+
             return Response().response(
-                status_code=200, 
-                error=False, 
-                message_id="rooms_update_successful"
+                status_code=200,
+                error=False,
+                message_id="rooms_update_successful",
             )
         except UniqueViolation:
             return Response().response(
-                status_code=401, 
-                error=True, 
-                message_id="room_name_already_exists", 
-                data=data, 
-                metadata={"message_id": "room_name_already_exists"}
+                status_code=401,
+                error=True,
+                message_id="room_name_already_exists",
+                data=data,
+                metadata={"message_id": "room_name_already_exists"},
             )
 
     def delete_rooms(self, id: int):
         if not id:
             return Response().response(
-                status_code=401, 
-                error=True, 
-                message_id="rooms_is_required", 
-                exception="Roomns Id Is Required"
+                status_code=401,
+                error=True,
+                message_id="rooms_is_required",
+                exception="Roomns Id Is Required",
             )
 
         rooms = self.rooms.query.filter_by(id=id, is_deleted=False).first()
         if not rooms:
             return Response().response(
-                status_code=404, 
-                error=True, 
-                message_id="rooms_not_found", 
-                exception="Not found", 
-                data=rooms
+                status_code=404,
+                error=True,
+                message_id="rooms_not_found",
+                exception="Not found",
+                data=rooms,
             )
 
         rooms.is_deleted = True
         self.rooms.query.session.commit()
-        return Response().response(status_code=200, error=False, message_id="rooms_delete_successfull")
+        return Response().response(
+            status_code=200, error=False, message_id="rooms_delete_successfull"
+        )
 
     def rooms_user(self, id: int, data: dict):
         try:
@@ -233,17 +238,17 @@ class RoomsCore:
 
             # JOIN entre rooms, rooms_user e users
             join_stmt = join(
-                self.rooms, self.rooms_users, self.rooms.id == self.rooms_users.rooms_id
-            ).join(
-                self.users, self.rooms_users.user_id == self.users.id
-            )
+                self.rooms,
+                self.rooms_users,
+                self.rooms.id == self.rooms_users.rooms_id,
+            ).join(self.users, self.rooms_users.user_id == self.users.id)
 
             stmt = (
                 select(
                     self.users.id.label("id"),
                     func.initcap(func.trim(self.users.username)).label("name"),
                     func.initcap(func.trim(self.users.role)).label("role"),
-                    self.rooms.name.label("room_name")
+                    self.rooms.name.label("room_name"),
                 )
                 .select_from(join_stmt)
                 .where(
@@ -251,7 +256,7 @@ class RoomsCore:
                     self.rooms.is_deleted == False,
                     self.users.is_deleted == False,
                     self.users.is_block == False,
-                    self.rooms_users.is_deleted == False
+                    self.rooms_users.is_deleted == False,
                 )
                 .offset(offset)
                 .limit(limit)
@@ -265,14 +270,14 @@ class RoomsCore:
                     error=True,
                     message_id="rooms_users_not_found",
                     exception="Not found",
-                    data=[]
+                    data=[],
                 )
 
             return Response().response(
                 status_code=200,
                 error=False,
                 message_id="list_rooms_user_successfull",
-                data=Metadata(result).model_to_list()
+                data=Metadata(result).model_to_list(),
             )
 
         except Exception as e:
@@ -282,7 +287,7 @@ class RoomsCore:
                 error=True,
                 message_id="error_rooms_user",
                 exception=str(e),
-                data=[]
+                data=[],
             )
 
     def add_rooms_user(self, data: dict):
@@ -297,7 +302,7 @@ class RoomsCore:
                     status_code=401,
                     error=True,
                     message_id="ids_and_rooms_id",
-                    exception="Ids and rooms_id are required"
+                    exception="Ids and rooms_id are required",
                 )
 
             values = [
@@ -305,22 +310,22 @@ class RoomsCore:
                     "user_id": user_id,
                     "rooms_id": room_id,
                     "created_at": datetime.utcnow(),
-                    "is_deleted": False
+                    "is_deleted": False,
                 }
                 for user_id in ids
             ]
 
             # Monta o INSERT com ON CONFLICT DO NOTHING
             stmt = insert(self.rooms_users).values(values)
-            stmt = stmt.on_conflict_do_nothing(index_elements=["user_id", "rooms_id"])
+            stmt = stmt.on_conflict_do_nothing(
+                index_elements=["user_id", "rooms_id"]
+            )
 
             db.session.execute(stmt)
             db.session.commit()
 
             return Response().response(
-                status_code=200,
-                message_id="user_add_to_room",
-                error=False
+                status_code=200, message_id="user_add_to_room", error=False
             )
 
         except Exception as e:
@@ -330,7 +335,7 @@ class RoomsCore:
                 status_code=500,
                 error=True,
                 message_id="error_add_rooms_user",
-                exception=str(e)
+                exception=str(e),
             )
 
     def delete_rooms_user(self, data: dict, id: int):
@@ -342,14 +347,14 @@ class RoomsCore:
                     status_code=401,
                     error=True,
                     message_id="ids_and_rooms_id",
-                    exception="Ids and rooms_id are required"
+                    exception="Ids and rooms_id are required",
                 )
 
             stmt = (
                 update(self.rooms_users)
                 .where(
                     self.rooms_users.user_id.in_(user_ids),
-                    self.rooms_users.rooms_id == id
+                    self.rooms_users.rooms_id == id,
                 )
                 .values(is_deleted=True)
             )
@@ -359,7 +364,7 @@ class RoomsCore:
             return Response().response(
                 status_code=200,
                 error=False,
-                message_id="rooms_user_delete_successful"
+                message_id="rooms_user_delete_successful",
             )
 
         except Exception as e:
@@ -369,6 +374,5 @@ class RoomsCore:
                 status_code=500,
                 error=True,
                 message_id="error_delete_rooms_user",
-                exception=str(e)
+                exception=str(e),
             )
-

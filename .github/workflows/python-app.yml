@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -51,7 +51,7 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install pytest pytest-cov pymupdf==1.24.2
-          pip install -r requirements/requirements.txt
+          pip install -r requirements.txt
 
       # Depuração da instalação do PyMuPDF
       - name: Debug PyMuPDF installation

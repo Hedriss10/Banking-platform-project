@@ -1,6 +1,17 @@
 # src/core/dashboard.py
 
-from sqlalchemy import Float, Numeric, asc, case, cast, desc, func, literal_column, or_, select
+from sqlalchemy import (
+    Float,
+    Numeric,
+    asc,
+    case,
+    cast,
+    desc,
+    func,
+    literal_column,
+    or_,
+    select,
+)
 
 from src.db.database import db
 from src.models.models import ProposalLoan, ProposalStatus, User
@@ -11,7 +22,6 @@ from src.utils.pagination import Pagination
 
 
 class DashboardCore:
-
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         self.proposal_loan = ProposalLoan
@@ -20,20 +30,29 @@ class DashboardCore:
 
     def sales_paid(self):
         try:
-            stmt = select(
-                cast(
-                    func.round(
-                        cast(func.sum(self.proposal_loan.valor_operacao), Numeric) / 10,
-                        1
-                    ),
-                    Float
-                ).label('value_total_operations')
-            ).join(
-                self.proposal_status,
-                self.proposal_status.proposal_id == self.proposal_loan.proposal_id
-            ).where(
-                self.proposal_loan.is_deleted == False,
-                self.proposal_status.contrato_pago == True
+            stmt = (
+                select(
+                    cast(
+                        func.round(
+                            cast(
+                                func.sum(self.proposal_loan.valor_operacao),
+                                Numeric,
+                            )
+                            / 10,
+                            1,
+                        ),
+                        Float,
+                    ).label("value_total_operations")
+                )
+                .join(
+                    self.proposal_status,
+                    self.proposal_status.proposal_id
+                    == self.proposal_loan.proposal_id,
+                )
+                .where(
+                    self.proposal_loan.is_deleted == False,
+                    self.proposal_status.contrato_pago == True,
+                )
             )
 
             result = db.session.execute(stmt).first()
@@ -49,7 +68,9 @@ class DashboardCore:
                 status_code=200,
                 error=False,
                 message_id="sales_paid_successful",
-                data=Metadata(result).model_to_list(),  # Aqui virá tipo 26285.6
+                data=Metadata(
+                    result
+                ).model_to_list(),  # Aqui virá tipo 26285.6
             )
 
         except Exception as e:
@@ -64,26 +85,28 @@ class DashboardCore:
     def status_proposals(self):
         try:
             status_fields = [
-                'aguardando_digitacao',
-                'pendente_digitacao',
-                'contrato_em_digitacao',
-                'aceite_feito_analise_banco',
-                'contrato_pendente_banco',
-                'aguardando_pagamento',
-                'contrato_pago'
+                "aguardando_digitacao",
+                "pendente_digitacao",
+                "contrato_em_digitacao",
+                "aceite_feito_analise_banco",
+                "contrato_pendente_banco",
+                "aguardando_pagamento",
+                "contrato_pago",
             ]
 
             columns = [
                 func.sum(
                     case(
                         (getattr(self.proposal_status, field) == True, 1),
-                        else_=0
+                        else_=0,
                     )
                 ).label(f"{field}_count")
                 for field in status_fields
             ]
 
-            stmt = select(*columns).where(self.proposal_status.is_deleted == False)
+            stmt = select(*columns).where(
+                self.proposal_status.is_deleted == False
+            )
             result = db.session.execute(stmt).fetchall()
 
             if not result:
@@ -108,7 +131,7 @@ class DashboardCore:
                 message_id="error_processs_dashboard",
                 exception=str(e),
             )
-    
+
     def sales_paid_ranking(self, data: dict):
         try:
             current_page = int(data.get("current_page", 1))
@@ -124,41 +147,56 @@ class DashboardCore:
             )
 
             # Base query
-            stmt = select(
-                self.user.id.label('seller_id'),
-                self.user.username.label('seller'),
-                self.user.role.label('role'),
-                func.round(
-                    func.sum(func.coalesce(self.proposal_loan.valor_operacao, 0)).cast(Numeric),
-                    2
-                ).label('value_total_operations')
-            ).join(
-                self.proposal_loan,
-                self.proposal_loan.user_id == self.user.id
-            ).join(
-                self.proposal_status,
-                (self.proposal_status.proposal_id == self.proposal_loan.proposal_id) &
-                (self.proposal_status.user_id == self.user.id) &
-                (self.proposal_status.is_deleted == False)
-            ).where(
-                self.user.is_deleted == False,
-                self.proposal_status.contrato_pago == True,
-                self.proposal_loan.is_deleted == False
-            ).group_by(
-                self.user.id,
-                self.user.username,
-                self.user.role
+            stmt = (
+                select(
+                    self.user.id.label("seller_id"),
+                    self.user.username.label("seller"),
+                    self.user.role.label("role"),
+                    func.round(
+                        func.sum(
+                            func.coalesce(self.proposal_loan.valor_operacao, 0)
+                        ).cast(Numeric),
+                        2,
+                    ).label("value_total_operations"),
+                )
+                .join(
+                    self.proposal_loan,
+                    self.proposal_loan.user_id == self.user.id,
+                )
+                .join(
+                    self.proposal_status,
+                    (
+                        self.proposal_status.proposal_id
+                        == self.proposal_loan.proposal_id
+                    )
+                    & (self.proposal_status.user_id == self.user.id)
+                    & (self.proposal_status.is_deleted == False),
+                )
+                .where(
+                    self.user.is_deleted == False,
+                    self.proposal_status.contrato_pago == True,
+                    self.proposal_loan.is_deleted == False,
+                )
+                .group_by(self.user.id, self.user.username, self.user.role)
             )
-            
+
             # ====== Filtro dinâmico se existir ======
             if pagination["filter_by"]:
                 filter_value = f"%{pagination['filter_by']}%"
-                stmt = stmt.where(or_(
-                    func.unaccent(self.user.username).ilike(func.unaccent(filter_value)),
-                ))
+                stmt = stmt.where(
+                    or_(
+                        func.unaccent(self.user.username).ilike(
+                            func.unaccent(filter_value)
+                        ),
+                    )
+                )
 
             # ====== Ordenação dinâmica segura ======
-            allowed_order_columns = ["value_total_operations", "seller", "role"]
+            allowed_order_columns = [
+                "value_total_operations",
+                "seller",
+                "role",
+            ]
             order_column = pagination["order_by"]
             sort_direction = pagination["sort_by"]
 
@@ -172,22 +210,32 @@ class DashboardCore:
                 stmt = stmt.order_by(desc("value_total_operations"))
 
             # Paginação
-            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            paginated_stmt = stmt.offset(pagination["offset"]).limit(
+                pagination["limit"]
+            )
             result = db.session.execute(paginated_stmt).fetchall()
 
             # Contagem de registros
-            count_stmt = select(func.count(self.user.id.distinct())).join(
-                self.proposal_loan,
-                self.proposal_loan.user_id == self.user.id
-            ).join(
-                self.proposal_status,
-                (self.proposal_status.proposal_id == self.proposal_loan.proposal_id) &
-                (self.proposal_status.user_id == self.user.id) &
-                (self.proposal_status.is_deleted == False)
-            ).where(
-                self.user.is_deleted == False,
-                self.proposal_status.contrato_pago == True,
-                self.proposal_loan.is_deleted == False
+            count_stmt = (
+                select(func.count(self.user.id.distinct()))
+                .join(
+                    self.proposal_loan,
+                    self.proposal_loan.user_id == self.user.id,
+                )
+                .join(
+                    self.proposal_status,
+                    (
+                        self.proposal_status.proposal_id
+                        == self.proposal_loan.proposal_id
+                    )
+                    & (self.proposal_status.user_id == self.user.id)
+                    & (self.proposal_status.is_deleted == False),
+                )
+                .where(
+                    self.user.is_deleted == False,
+                    self.proposal_status.contrato_pago == True,
+                    self.proposal_loan.is_deleted == False,
+                )
             )
 
             total = db.session.execute(count_stmt).scalar() or 0
@@ -206,7 +254,7 @@ class DashboardCore:
                 order_by=pagination["order_by"],
                 filter_by=pagination["filter_by"],
                 filter_value=pagination["filter_value"],
-                total=total
+                total=total,
             )
 
             return Response().response(
@@ -214,7 +262,7 @@ class DashboardCore:
                 error=False,
                 message_id="salles_sales_paid_ranking_successful",
                 data=Metadata(result).model_to_list(),
-                metadata=metadata
+                metadata=metadata,
             )
 
         except Exception as e:

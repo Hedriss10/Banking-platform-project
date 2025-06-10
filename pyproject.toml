@@ -1,0 +1,32 @@
+name = "banking-platform-project"
+version = "0.0.1"
+description = ""
+authors = [
+    {name = "Hedris Pereira", email = "hedrisgts@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+
+[tool.ruff]
+# Define o comprimento máximo da linha como 79.
+line-length = 79
+
+[tool.ruff.lint]
+# Adiciona a regra `line-too-long` (E501) explicitamente.
+extend-select = ["E501"]
+# Seleciona as regras para linting.
+select = ["I", "F", "E", "W", "PL", "PT"]
+# Ignora as regras especificadas.
+ignore = ["E402", "F811"]
+
+[tool.black]
+# Configurações do Black para formatação.
+line-length = 79
+target-version = ["py313"]
+
+[tool.pytest.ini_options] # para gerar o html --cov-report=html
+testpaths = ["tests"]
+asyncio_mode = "auto"
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "--verbose --cov=src"

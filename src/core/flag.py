@@ -3,7 +3,6 @@ import traceback
 
 from psycopg2.errors import UniqueViolation
 from sqlalchemy import func, insert, select, update
-from sqlalchemy.orm import aliased
 
 from src.db.database import db
 from src.models.models import Flag, FlagsProcessing, FlagsUsers
@@ -14,7 +13,6 @@ from src.utils.pagination import Pagination
 
 
 class FlagsCore:
-
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         self.flag = Flag
@@ -23,12 +21,14 @@ class FlagsCore:
 
     def list_flags(self, data: dict) -> None:
         try:
-            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+            current_page, rows_per_page = (
+                int(data.get("current_page", 1)),
+                int(data.get("rows_per_page", 10)),
+            )
 
             if current_page < 1:  # Force variables min values
                 current_page = 1
-            if rows_per_page < 1:
-                rows_per_page = 1
+            rows_per_page = max(rows_per_page, 1)
 
             pagination = Pagination().pagination(
                 current_page=current_page,
@@ -39,10 +39,17 @@ class FlagsCore:
                 filter_value=data.get("filter_value", ""),
             )
 
-            stmt = select(self.flag.id, self.flag.name, self.flag.rate, self.flag.created_by).where(self.flag.is_deleted == False)
+            stmt = select(
+                self.flag.id,
+                self.flag.name,
+                self.flag.rate,
+                self.flag.created_by,
+            ).where(self.flag.is_deleted == False)
 
             # Paginação
-            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            paginated_stmt = stmt.offset(pagination["offset"]).limit(
+                pagination["limit"]
+            )
             results = db.session.execute(paginated_stmt).fetchall()
 
             if not results:
@@ -53,7 +60,11 @@ class FlagsCore:
                     exception="Not found",
                 )
 
-            total = db.session.execute(select(func.count()).select_from(self.flag).where(self.flag.is_deleted == False)).scalar()
+            total = db.session.execute(
+                select(func.count())
+                .select_from(self.flag)
+                .where(self.flag.is_deleted == False)
+            ).scalar()
 
             metadata = Pagination().metadata(
                 current_page=current_page,
@@ -73,7 +84,10 @@ class FlagsCore:
                 error=False,
             )
         except Exception as e:
-            logdb("error", message=f"Error list flags. {e}\n{traceback.format_exc()}")
+            logdb(
+                "error",
+                message=f"Error list flags. {e}\n{traceback.format_exc()}",
+            )
             return Response().response(
                 status_code=400,
                 error=True,
@@ -91,7 +105,11 @@ class FlagsCore:
                     message_id="name_is_required",
                     exception="Name is required",
                 )
-            flag = self.flag(name=data.get("name"), rate=data.get("rate"), created_by=self.user_id)
+            flag = self.flag(
+                name=data.get("name"),
+                rate=data.get("rate"),
+                created_by=self.user_id,
+            )
             self.flag.query.session.add(flag)
             self.flag.query.session.commit()
 
@@ -102,9 +120,16 @@ class FlagsCore:
                 data=model_to_dict(flag),
             )
         except UniqueViolation:
-            return Response().response(status_code=409, error=True, message_id="name_already_exists")
+            return Response().response(
+                status_code=409, error=True, message_id="name_already_exists"
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="erro_processing",
+                exception=str(e),
+            )
 
     def add_flags_users(self, data: dict):
         try:
@@ -116,17 +141,22 @@ class FlagsCore:
                     exception="Users id and flag id is required",
                 )
             for ids in data.get("ids"):
-                stmt = insert(self.flags_users).values(flag_id=data.get("flag_id"), user_id=ids)
+                stmt = insert(self.flags_users).values(
+                    flag_id=data.get("flag_id"), user_id=ids
+                )
                 db.session.execute(stmt)
                 db.session.commit()
-            
+
             return Response().response(
                 status_code=200,
                 error=False,
                 message_id="add_flags_users_successfully",
             )
         except Exception as e:
-            logdb("error", message=f"Error add flags user. {e}\n{traceback.format_exc()}")
+            logdb(
+                "error",
+                message=f"Error add flags user. {e}\n{traceback.format_exc()}",
+            )
             return Response().response(
                 status_code=500,
                 error=True,
@@ -134,7 +164,7 @@ class FlagsCore:
                 exception=str(e),
                 traceback=traceback.format_exc(e),
             )
-            
+
     def delete_flags_users(self, data: dict):
         try:
             if not data.get("ids"):
@@ -144,21 +174,26 @@ class FlagsCore:
                     message_id="ids_is_required",
                     exception="Ids is required",
                 )
-            
-            stmt = update(self.flags_users).values(is_deleted=True).where(
-                self.flags_users.user_id.in_(data.get("ids"))
+
+            stmt = (
+                update(self.flags_users)
+                .values(is_deleted=True)
+                .where(self.flags_users.user_id.in_(data.get("ids")))
             )
             db.session.execute(stmt)
             db.session.commit()
-            
+
             return Response().response(
                 status_code=200,
                 error=False,
                 message_id="delete_flags_users_successfully",
             )
-            
+
         except Exception as e:
-            logdb("error", message=f"Error delete flags user. {e}\n{traceback.format_exc()}")
+            logdb(
+                "error",
+                message=f"Error delete flags user. {e}\n{traceback.format_exc()}",
+            )
             return Response().response(
                 status_code=500,
                 error=True,
@@ -170,15 +205,36 @@ class FlagsCore:
     def delete_flag(self, data: dict):
         try:
             if not data.get("ids"):
-                return Response().response(status_code=400, error=True, message_id="id_is_required", exception="Ids is required")
+                return Response().response(
+                    status_code=400,
+                    error=True,
+                    message_id="id_is_required",
+                    exception="Ids is required",
+                )
 
-            flags = self.flag.query.filter(self.flag.id.in_(data.get("ids"))).all()
+            flags = self.flag.query.filter(
+                self.flag.id.in_(data.get("ids"))
+            ).all()
             if not flags:
-                return Response().response(status_code=404, error=True, message_id="flags_not_found", exception="Not found")
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="flags_not_found",
+                    exception="Not found",
+                )
 
             for flag in flags:
                 flag.is_deleted = True
             self.flag.query.session.commit()
-            return Response().response(status_code=200, error=False, message_id="delete_flags_successfully")
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="delete_flags_successfully",
+            )
         except Exception as e:
-            return Response().response(status_code=400, error=True, message_id="erro_processing", exception=str(e))
+            return Response().response(
+                status_code=400,
+                error=True,
+                message_id="erro_processing",
+                exception=str(e),
+            )

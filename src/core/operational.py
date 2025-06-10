@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import case, func, or_, select, update, literal
+from sqlalchemy import case, func, literal, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import aliased
 
@@ -23,7 +23,6 @@ from src.utils.pagination import Pagination
 
 
 class OperationalCore:
-
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
         self.proposal = Proposal
@@ -45,11 +44,17 @@ class OperationalCore:
                 self.proposal_loan.prazo_inicio,
                 self.proposal_loan.prazo_fim,
                 self.proposal_loan.valor_operacao,
-            ).where(self.proposal_loan.proposal_id == proposal_id, self.proposal_loan.is_deleted == False)
+            ).where(
+                self.proposal_loan.proposal_id == proposal_id,
+                self.proposal_loan.is_deleted == False,
+            )
             result = db.session.execute(stmt).fetchone()
             if result:
                 prazo_inicio, prazo_fim, valor_operacao = result
-                is_valid = all(field is not None for field in [prazo_inicio, prazo_fim, valor_operacao])
+                is_valid = all(
+                    field is not None
+                    for field in [prazo_inicio, prazo_fim, valor_operacao]
+                )
                 return is_valid
             return False
 
@@ -57,8 +62,26 @@ class OperationalCore:
             logdb("error", message=f"Error checking summary proposal: {e}")
             raise
 
+    def __parse_date(self, date_str: str, is_start: bool = True):
+        if not date_str:
+            return None
+        formats = ["%d-%m-%Y %H:%M", "%Y-%m-%d %H:%M", "%d-%m-%Y", "%Y-%m-%d"]
+        for fmt in formats:
+            try:
+                dt = datetime.strptime(date_str.strip(), fmt)
+                if fmt in ["%d-%m-%Y", "%Y-%m-%d"]: 
+                    return dt.replace(hour=0, minute=0, second=0) if is_start else dt.replace(hour=23, minute=59, second=59)
+                return dt
+            except ValueError:
+                continue
+        return None
+
     def list_proposal(self, data: dict):
         try:
+            # ====== Datas ======
+            start_date = self.__parse_date(date_str=data.get("start_date", ""), is_start=True)
+            end_date = self.__parse_date(date_str=data.get("end_date", ""), is_start=False)
+
             # ====== Paginação ======
             current_page = max(int(data.get("current_page", 1)), 1)
             rows_per_page = max(int(data.get("rows_per_page", 10)), 1)
@@ -95,10 +118,21 @@ class OperationalCore:
                     ).label("current_status"),
                 )
                 .distinct(self.proposal_status.proposal_id)
-                .join(self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id, isouter=True)
-                .join(u_alias, u_alias.id == self.proposal_status.action_by, isouter=True)
+                .join(
+                    self.manage_operational,
+                    self.manage_operational.proposal_id == self.proposal_status.proposal_id,
+                    isouter=True,
+                )
+                .join(
+                    u_alias,
+                    u_alias.id == self.proposal_status.action_by,
+                    isouter=True,
+                )
                 .where(self.proposal_status.is_deleted == False)
-                .order_by(self.proposal_status.proposal_id, self.proposal_status.created_at.desc())
+                .order_by(
+                    self.proposal_status.proposal_id,
+                    self.proposal_status.created_at.desc(),
+                )
                 .cte("status_proposal")
             )
 
@@ -133,17 +167,31 @@ class OperationalCore:
                 .join(self.financial_agreements, self.financial_agreements.id == self.proposal_loan.financial_agreements_id, isouter=True)
                 .join(self.bankers, self.bankers.id == self.financial_agreements.banker_id, isouter=True)
                 .join(status_proposal_cte, status_proposal_cte.c.proposal_id == self.proposal.id, isouter=True)
-                .where(self.proposal.is_deleted == False, self.proposal_loan.is_deleted == False, filter_proposal)
             )
 
+            # ====== Filtros gerais ======
+            filters = [
+                self.proposal.is_deleted == False,
+                self.proposal_loan.is_deleted == False,
+                filter_proposal,
+            ]
+            if start_date:
+                filters.append(self.proposal.created_at >= start_date)
+            if end_date:
+                filters.append(self.proposal.created_at <= end_date)
+
+            stmt = stmt.where(*filters)
+
             # ====== Filtro dinâmico ======
-            if pagination["filter_value"]:
-                filter_value = f"%{pagination['filter_value']}%"
+            if pagination["filter_by"]:
+                filter_value = f"%{pagination['filter_by']}%"
                 stmt = stmt.where(
                     or_(
                         func.unaccent(self.proposal.nome).ilike(func.unaccent(filter_value)),
                         func.unaccent(self.proposal.cpf).ilike(func.unaccent(filter_value)),
                         func.unaccent(status_proposal_cte.c.current_status).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.user.username).ilike(func.unaccent(filter_value)),
+                        func.unaccent(status_proposal_cte.c.digitador_por).ilike(func.unaccent(filter_value)),
                     )
                 )
 
@@ -160,10 +208,18 @@ class OperationalCore:
             result = db.session.execute(paginated_stmt).fetchall()
 
             if not result:
-                return Response().response(status_code=404, error=True, message_id="proposal_not_found")
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="proposal_not_found",
+                )
 
             # ====== Contagem total ======
-            count_stmt = select(func.count()).select_from(self.proposal).where(self.proposal.is_deleted == False)
+            count_stmt = (
+                select(func.count())
+                .select_from(self.proposal)
+                .where(self.proposal.is_deleted == False)
+            )
             total = db.session.execute(count_stmt).scalar()
 
             metadata = Pagination().metadata(
@@ -186,11 +242,18 @@ class OperationalCore:
 
         except Exception as e:
             logdb("error", message=f"Error listing proposal: {e}")
-            return Response().response(status_code=500, error=True, message_id="error_list_proposal")
+            return Response().response(
+                status_code=500, error=True, message_id="error_list_proposal"
+            )
+
 
     def count_proposal(self):
         try:
-            stmt = select(func.count()).select_from(self.proposal).where(self.proposal.is_deleted == False)
+            stmt = (
+                select(func.count())
+                .select_from(self.proposal)
+                .where(self.proposal.is_deleted == False)
+            )
 
             result = db.session.execute(stmt).fetchall()
 
@@ -201,20 +264,43 @@ class OperationalCore:
                     message_id="proposal_not_found",
                 )
 
-            return Response().response(status_code=200, error=False, message_id="count_proposal_successful", data=Metadata(result).model_to_list())
+            return Response().response(
+                status_code=200,
+                error=False,
+                message_id="count_proposal_successful",
+                data=Metadata(result).model_to_list(),
+            )
         except Exception as e:
             logdb("error", message=f"Error Count Proposal: {e}")
-            return Response().response(status_code=500, error=True, message_id="error_count_proposal", exception=str(e))
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_count_proposal",
+                exception=str(e),
+            )
 
     def typing_proposal(self, proposal_id: int, data: dict):
         try:
             # Validar ID da proposta
             if not proposal_id:
-                return Response().response(status_code=400, error=True, message_id="id_is_required")
+                return Response().response(
+                    status_code=400, error=True, message_id="id_is_required"
+                )
 
-            proposal = db.session.query(self.proposal).filter(self.proposal.id == proposal_id, self.proposal.is_deleted == False).first()
+            proposal = (
+                db.session.query(self.proposal)
+                .filter(
+                    self.proposal.id == proposal_id,
+                    self.proposal.is_deleted == False,
+                )
+                .first()
+            )
             if not proposal:
-                return Response().response(status_code=404, error=True, message_id="proposal_not_found")
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="proposal_not_found",
+                )
 
             # Validar campos obrigatórios se contrato_pago for True, Validar com o stack holders essa tratativa
             # if data.get("contrato_pago"):
@@ -232,7 +318,9 @@ class OperationalCore:
                 "aguardando_digitacao": data.get("aguardando_digitacao"),
                 "pendente_digitacao": data.get("pendente_digitacao"),
                 "contrato_em_digitacao": data.get("contrato_em_digitacao"),
-                "aceite_feito_analise_banco": data.get("aceite_feito_analise_banco"),
+                "aceite_feito_analise_banco": data.get(
+                    "aceite_feito_analise_banco"
+                ),
                 "contrato_pendente_banco": data.get("contrato_pendente_banco"),
                 "aguardando_pagamento": data.get("aguardando_pagamento"),
                 "contrato_pago": data.get("contrato_pago"),
@@ -242,7 +330,9 @@ class OperationalCore:
             }
 
             # Filtrar apenas campos com valores não nulos
-            columns_register = {k: v for k, v in columns_register.items() if v is not None}
+            columns_register = {
+                k: v for k, v in columns_register.items() if v is not None
+            }
 
             # Verificar se há campos para atualizar
             if not columns_register:
@@ -254,33 +344,65 @@ class OperationalCore:
                 )
 
             # Buscar ou criar registro em proposal_status
-            proposal_status = db.session.query(self.proposal_status).filter(self.proposal_status.proposal_id == proposal_id, self.proposal_status.is_deleted == False).first()
+            proposal_status = (
+                db.session.query(self.proposal_status)
+                .filter(
+                    self.proposal_status.proposal_id == proposal_id,
+                    self.proposal_status.is_deleted == False,
+                )
+                .first()
+            )
 
             if not proposal_status:
                 # Criar novo registro
-                proposal_status = self.proposal_status(proposal_id=proposal_id, **columns_register, is_deleted=False)
+                proposal_status = self.proposal_status(
+                    proposal_id=proposal_id,
+                    **columns_register,
+                    is_deleted=False,
+                )
                 db.session.add(proposal_status)
             else:
                 # Atualizar registro existente
-                stmt = update(self.proposal_status).where(self.proposal_status.proposal_id == proposal_id, self.proposal_status.is_deleted == False).values(**columns_register)
+                stmt = (
+                    update(self.proposal_status)
+                    .where(
+                        self.proposal_status.proposal_id == proposal_id,
+                        self.proposal_status.is_deleted == False,
+                    )
+                    .values(**columns_register)
+                )
                 db.session.execute(stmt)
 
             # Inserir registro em history
             description = data.get("description", "")
             if description:
-                history_stmt = insert(self.history).values(proposal_id=proposal_id, user_id=self.user_id, description=description, created_at=datetime.now())
+                history_stmt = insert(self.history).values(
+                    proposal_id=proposal_id,
+                    user_id=self.user_id,
+                    description=description,
+                    created_at=datetime.now(),
+                )
                 db.session.execute(history_stmt)
 
             # Gerenciar manage_operational se number_proposal for fornecido
             number_proposal = data.get("number_proposal")
             if number_proposal is not None:
-                manage_op_stmt = insert(self.manage_operational).values(number_proposal=number_proposal, proposal_id=proposal_id, created_at=datetime.now(), user_id=self.user_id).on_conflict_do_update(
-                    index_elements=["proposal_id"],
-                    set_={
-                        "number_proposal": number_proposal,
-                        "created_at": datetime.now(),
-                        "user_id": self.user_id
-                    },
+                manage_op_stmt = (
+                    insert(self.manage_operational)
+                    .values(
+                        number_proposal=number_proposal,
+                        proposal_id=proposal_id,
+                        created_at=datetime.now(),
+                        user_id=self.user_id,
+                    )
+                    .on_conflict_do_update(
+                        index_elements=["proposal_id"],
+                        set_={
+                            "number_proposal": number_proposal,
+                            "created_at": datetime.now(),
+                            "user_id": self.user_id,
+                        },
+                    )
                 )
                 db.session.execute(manage_op_stmt)
 
@@ -296,16 +418,22 @@ class OperationalCore:
         except Exception as e:
             db.session.rollback()
             logdb("error", message=f"Error typing proposal: {e}")
-            return Response().response(status_code=500, error=True, message_id="error_typing_proposal", exception=str(e))
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_typing_proposal",
+                exception=str(e),
+            )
 
     def history_proposal(self, proposal_id: int, data: dict):
         try:
-            current_page, rows_per_page = int(data.get("current_page", 1)), int(data.get("rows_per_page", 10))
+            current_page, rows_per_page = (
+                int(data.get("current_page", 1)),
+                int(data.get("rows_per_page", 10)),
+            )
 
-            if current_page < 1:
-                current_page = 1
-            if rows_per_page < 1:
-                rows_per_page = 1
+            current_page = max(current_page, 1)
+            rows_per_page = max(rows_per_page, 1)
 
             pagination = Pagination().pagination(
                 current_page=current_page,
@@ -317,19 +445,27 @@ class OperationalCore:
             )
 
             # Query principal com JOIN para proposal
-            stmt = select(
-                self.history.id.label("id_historico"),
-                self.user.username.label("criado_por"), 
-                func.to_char(self.history.created_at, 'YYYY-MM-DD').label('criado_as'), 
-                func.initcap(func.trim(self.history.description)).label("descricao")
-            ).outerjoin(
-                self.user, self.user.id == self.history.user_id
-            ).where(self.history.proposal_id == proposal_id
-            ).order_by(self.history.created_at.desc())
+            stmt = (
+                select(
+                    self.history.id.label("id_historico"),
+                    self.user.username.label("criado_por"),
+                    func.to_char(self.history.created_at, "YYYY-MM-DD").label(
+                        "criado_as"
+                    ),
+                    func.initcap(func.trim(self.history.description)).label(
+                        "descricao"
+                    ),
+                )
+                .outerjoin(self.user, self.user.id == self.history.user_id)
+                .where(self.history.proposal_id == proposal_id)
+                .order_by(self.history.created_at.desc())
+            )
 
             # ====== Ordenação ======
             if pagination["order_by"]:
-                sort_column = getattr(self.history, pagination["order_by"], None)
+                sort_column = getattr(
+                    self.history, pagination["order_by"], None
+                )
                 if sort_column is not None:
                     if pagination["sort_by"] == "asc":
                         stmt = stmt.order_by(sort_column.asc())
@@ -339,38 +475,53 @@ class OperationalCore:
                 stmt = stmt.order_by(self.history.created_at.desc())
 
             # Paginação
-            paginated_stmt = stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            paginated_stmt = stmt.offset(pagination["offset"]).limit(
+                pagination["limit"]
+            )
             result = db.session.execute(paginated_stmt).fetchall()
 
             # Contagem de registros
-            count_stmt = select(func.count()).select_from(self.history).where(self.history.proposal_id == proposal_id)
+            count_stmt = (
+                select(func.count())
+                .select_from(self.history)
+                .where(self.history.proposal_id == proposal_id)
+            )
             total = db.session.execute(count_stmt).scalar() or 0
 
             # Verificar se há resultados
             if not result:
-                return Response().response(status_code=404, error=False, message_id="history_not_found")
+                return Response().response(
+                    status_code=404,
+                    error=False,
+                    message_id="history_not_found",
+                )
 
             metadata = Pagination().metadata(
-                current_page=current_page, 
-                rows_per_page=rows_per_page, 
-                sort_by=pagination["sort_by"], 
-                order_by=pagination["order_by"], 
-                filter_by=pagination["filter_by"], 
-                filter_value=pagination["filter_value"], 
-                total=total
+                current_page=current_page,
+                rows_per_page=rows_per_page,
+                sort_by=pagination["sort_by"],
+                order_by=pagination["order_by"],
+                filter_by=pagination["filter_by"],
+                filter_value=pagination["filter_value"],
+                total=total,
             )
 
             return Response().response(
-                status_code=200, 
+                status_code=200,
                 error=False,
                 message_id="history_proposal_successful",
                 data=Metadata(result).model_to_list(),
-                metadata=metadata
+                metadata=metadata,
             )
 
         except Exception as e:
             logdb("error", message=f"Error processing history proposal: {e}")
-            return Response().response(status_code=500, error=True, message_id="error_history_proposal", exception=str(e))
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_history_proposal",
+                exception=str(e),
+            )
 
     def details_proposal(self, proposal_id: int):
         try:
@@ -381,53 +532,94 @@ class OperationalCore:
                     message_id="id_proposal_is_required",
                 )
 
-            stmt = select(
-                self.proposal_status.proposal_id.label("proposal_id"),
-                self.proposal_status.aguardando_digitacao.label("aguardando_digitacao"),
-                self.proposal_status.pendente_digitacao.label("pendente_digitacao"),
-                self.proposal_status.contrato_em_digitacao.label("contrato_em_digitacao"),
-                self.proposal_status.aceite_feito_analise_banco.label("aceite_feito_analise_banco"),
-                self.proposal_status.contrato_pendente_banco.label("contrato_pendente_banco"),
-                self.proposal_status.aguardando_pagamento.label("aguardando_pagamento"),
-                self.proposal_status.contrato_pago.label("contrato_pago"),
-                self.proposal_status.contrato_reprovado.label("contrato_reprovado"),
-                self.manage_operational.number_proposal.label("number_proposal"),
-                func.coalesce(
-                    func.json_agg(
-                        func.json_build_object(
-                            "user_description", self.user.username,
-                            "description", func.initcap(func.trim(self.history.description)),
-                            "created_at", func.to_char(self.history.created_at, 'YYYY-MM-DD HH24:MI:SS')
-                        )
-                    ).filter(self.history.id.isnot(None)),
-                    literal([])
-                ).label("reports")
-            ).outerjoin(
-                self.manage_operational, self.manage_operational.proposal_id == self.proposal_status.proposal_id
-            ).outerjoin(
-                self.history, self.history.proposal_id == self.proposal_status.proposal_id
-            ).outerjoin(
-                self.user, self.user.id == self.history.user_id
-            ).where(
-                self.proposal_status.proposal_id == proposal_id,
-                self.proposal_status.is_deleted == False
-            ).group_by(
-                self.proposal_status.id,
-                self.manage_operational.number_proposal
+            stmt = (
+                select(
+                    self.proposal_status.proposal_id.label("proposal_id"),
+                    self.proposal_status.aguardando_digitacao.label(
+                        "aguardando_digitacao"
+                    ),
+                    self.proposal_status.pendente_digitacao.label(
+                        "pendente_digitacao"
+                    ),
+                    self.proposal_status.contrato_em_digitacao.label(
+                        "contrato_em_digitacao"
+                    ),
+                    self.proposal_status.aceite_feito_analise_banco.label(
+                        "aceite_feito_analise_banco"
+                    ),
+                    self.proposal_status.contrato_pendente_banco.label(
+                        "contrato_pendente_banco"
+                    ),
+                    self.proposal_status.aguardando_pagamento.label(
+                        "aguardando_pagamento"
+                    ),
+                    self.proposal_status.contrato_pago.label("contrato_pago"),
+                    self.proposal_status.contrato_reprovado.label(
+                        "contrato_reprovado"
+                    ),
+                    self.manage_operational.number_proposal.label(
+                        "number_proposal"
+                    ),
+                    func.coalesce(
+                        func.json_agg(
+                            func.json_build_object(
+                                "user_description",
+                                self.user.username,
+                                "description",
+                                func.initcap(
+                                    func.trim(self.history.description)
+                                ),
+                                "created_at",
+                                func.to_char(
+                                    self.history.created_at,
+                                    "YYYY-MM-DD HH24:MI:SS",
+                                ),
+                            )
+                        ).filter(self.history.id.isnot(None)),
+                        literal([]),
+                    ).label("reports"),
+                )
+                .outerjoin(
+                    self.manage_operational,
+                    self.manage_operational.proposal_id
+                    == self.proposal_status.proposal_id,
+                )
+                .outerjoin(
+                    self.history,
+                    self.history.proposal_id
+                    == self.proposal_status.proposal_id,
+                )
+                .outerjoin(self.user, self.user.id == self.history.user_id)
+                .where(
+                    self.proposal_status.proposal_id == proposal_id,
+                    self.proposal_status.is_deleted == False,
+                )
+                .group_by(
+                    self.proposal_status.id,
+                    self.manage_operational.number_proposal,
+                )
             )
 
             result = db.session.execute(stmt).fetchall()
 
             if not result:
-                return Response().response(status_code=404, error=True, message_id="details_proposal_not_found")
+                return Response().response(
+                    status_code=404,
+                    error=True,
+                    message_id="details_proposal_not_found",
+                )
 
             return Response().response(
                 status_code=200,
                 error=False,
                 message_id="details_proposal_successful",
-                data=Metadata(result).model_to_list()
+                data=Metadata(result).model_to_list(),
             )
         except Exception as e:
             logdb("error", message=f"Error processing details proposal: {e}")
-            return Response().response(status_code=500, error=True, message_id="error_details_proposal", exception=str(e))
-
+            return Response().response(
+                status_code=500,
+                error=True,
+                message_id="error_details_proposal",
+                exception=str(e),
+            )

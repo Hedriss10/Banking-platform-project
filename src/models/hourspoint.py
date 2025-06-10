@@ -1,9 +1,7 @@
-
 class HourspointModel:
-    
     def __init__(self, user_id: int, *args, **kwargs):
         self.user_id = user_id
-        
+
     def list_employee(self, pagination: dict):
         """
             Employee list filtered by deleted field equal to false.
@@ -13,11 +11,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(u.cpf) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-    
+
         query = f"""
             SELECT 
                 el.id AS id_employee,
@@ -37,7 +35,7 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-        
+
     def add_holiday(self, data: dict):
         """
             add holiday associate employee id.
@@ -47,10 +45,10 @@ class HourspointModel:
         """
         query = f"""
             INSERT INTO holiday (data, estado, descricao, tipo, employee_id, is_deleted) 
-            values ('{data.get("data")}', '{data.get("estado")}', '{data.get('descricao')}', '{data.get("tipo")}', {data.get("employee_id")}, false);
+            values ('{data.get("data")}', '{data.get("estado")}', '{data.get("descricao")}', '{data.get("tipo")}', {data.get("employee_id")}, false);
         """
         return query
-    
+
     def list_holiday(self, pagination: dict):
         """
             list holiday associate with employee intersects with users.
@@ -60,11 +58,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-            
+
         query = f"""
             SELECT
                 h.id,
@@ -83,7 +81,7 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-    
+
     def delete_holiday(self, id: int):
         query = f"""
             update holiday
@@ -93,11 +91,11 @@ class HourspointModel:
             where id = {id};
         """
         return query
-    
+
     def add_absence_resource(self, decription: str, justified: bool):
         """
             Add absence resource -> descricao, justificavel, is_deleted
-            returning id 
+            returning id
         Args:
             data (dict): _description_
             id (int): id_absence_resource
@@ -108,7 +106,7 @@ class HourspointModel:
             RETURNING id;
         """
         return query
-    
+
     def add_absence(self, motivo_id: int, employee_id: int, data: dict):
         """
             Add absence assciate with `add_absence_resource`
@@ -123,10 +121,10 @@ class HourspointModel:
             VALUES ({employee_id}, '{data.get("data")}', {motivo_id}, '{data.get("justificativa")}', false);
         """
         return query
-    
+
     def edit_absence_reason(self, id: int, description: str, justified: bool):
         """_summary_
-            Update absence_reason filter by id 
+            Update absence_reason filter by id
         Args:
             id (int): id absence_reason
         """
@@ -140,7 +138,7 @@ class HourspointModel:
             WHERE id = {id};
         """
         return query
-    
+
     def list_absence(self, pagination: dict):
         """
             listing of justified and unjustified absences by users
@@ -150,11 +148,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
+
         query = f"""
             select
                 abr.id as id_absence_reason,
@@ -173,23 +171,23 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-    
+
     def add_vacation(self, data: dict):
         """
             columns: employee_id, data_inicio, data_fim, aprovado, user_id, is_deleted
         Args:
             data (dict): _description_
         """
-        
+
         query = f"""
             INSERT INTO vacation (employee_id, data_inicio, data_fim, aprovado, user_id, is_deleted) 
             VALUES ({data.get("employee_id")}, '{data.get("data_inicio")}', '{data.get("data_fim")}', {data.get("aprovado")}, {self.user_id}, false);
         """
         return query
-    
+
     def edit_vacation(self, id: int, data: dict):
-        """ 
-            Update vacation filter by id 
+        """
+            Update vacation filter by id
 
         Args:
             id (int): _description_
@@ -198,11 +196,11 @@ class HourspointModel:
         # iterating over the pagination collecting the items that are present and creating a set within the database
         set_clasule = []
         for key, value in data.items():
-            if value is not None:                    
+            if value is not None:
                 set_clasule.append(f""" {key} = '{value}' """)
-        
+
         set_clause_str = ", ".join(set_clasule)
-        
+
         query = f"""
             update vacation
             set
@@ -212,7 +210,7 @@ class HourspointModel:
             where id = {id};
         """
         return query
-    
+
     def delete_vacation(self, id: int):
         """
             Delete vacation filter by id
@@ -227,7 +225,7 @@ class HourspointModel:
             where id = {id};
         """
         return query
-    
+
     def add_time_point(self, data: dict):
         """
             columns: employee_id, data, entrada, saida, entrada_almoco, saida_almoco, entrada_lanche, saida_lanche, user_id, is_deleted
@@ -239,7 +237,7 @@ class HourspointModel:
             VALUES  ({data.get("employee_id")}, '{data.get("data")}', '{data.get("entrada")}', '{data.get("saida")}', '{data.get("entrada_almoco")}', '{data.get("saida_almoco")}', '{data.get("entrada_lanche")}', '{data.get("saida_lanche")}', {self.user_id}, false);
         """
         return query
-    
+
     def add_justification_for_delay(self, data: dict):
         """
             columns: employee_id, data, justificativa, user_id, is_deleted
@@ -252,7 +250,7 @@ class HourspointModel:
             VALUES ({data.get("employee_id")}, now(), '{data.get("justificativa")}', {self.user_id}, false);
         """
         return query
-    
+
     def list_day_offs(self, pagination: dict):
         """
             quantitative report sum of justified or unjustified absences managed by the user manager
@@ -262,11 +260,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-            
+
         query = f"""
             SELECT 
                 e.id AS employee_id,
@@ -285,7 +283,7 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-    
+
     def list_works_hours_overtime(self, pagination: dict):
         """
             List of overtime hours within the CLT rule: Up to 2 extra hours per day are called 50% overtime and from the 3rd hour onwards they are called 100% overtime
@@ -295,11 +293,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(co.username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-            
+
         query = f"""
             WITH work_hours AS (
                 SELECT
@@ -408,7 +406,7 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-        
+
     def list_works_delay(self, pagination: dict):
         """_summary_
 
@@ -418,11 +416,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(wk.username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
+
         query = f"""
             WITH work_hours AS (
                 SELECT
@@ -502,7 +500,7 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-    
+
     def list_vocation_apply(self, pagination: dict):
         """
             report of approved and rejected vacations select
@@ -512,11 +510,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
+
         query = f"""
             SELECT 
                 v.id,
@@ -533,7 +531,7 @@ class HourspointModel:
             OFFSET {pagination["offset"]} LIMIT {pagination["limit"]};
         """
         return query
-    
+
     def list_ranking_user_delayed_works_employess(self, pagination: dict):
         """
             report of the most delayed employees
@@ -544,11 +542,11 @@ class HourspointModel:
         query_filter = ""
         if pagination["filter_by"]:
             query_filter = f"""AND (unaccent(username) ILIKE unaccent('%{pagination["filter_by"]}%'))"""
-        
+
         query_order_by = ""
         if pagination["sort_by"] and pagination["order_by"]:
             query_order_by = f"""ORDER BY b.{pagination["order_by"]} {pagination["sort_by"]}"""
-        
+
         query = f"""
             WITH employee_delays AS (
                 SELECT
@@ -611,4 +609,3 @@ class HourspointModel:
             ORDER BY username, data;
         """
         return query
-    
