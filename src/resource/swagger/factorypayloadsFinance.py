@@ -137,13 +137,6 @@ class FactoryPayloadsTablesFinance:
         parser.add_argument(
             "filter_by", help="Filter By", default="", type=str, required=False
         )
-        parser.add_argument(
-            "filter_value",
-            help="Filter Value",
-            default="",
-            type=str,
-            required=False,
-        )
         return parser
 
     @staticmethod

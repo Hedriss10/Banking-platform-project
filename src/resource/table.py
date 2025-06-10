@@ -13,7 +13,7 @@ from src.service.response import Response
 
 tables_ns = Namespace("table", description="Manage Tables Finance Manager")
 
-pagination_arguments_customer = (
+pagination_arguments_tables = (
     FactoryPayloadsTablesFinance.pagination_arguments_parser()
 )
 paylaod_add_tables = FactoryPayloadsTablesFinance.add_payload_tablesfinance(
@@ -133,7 +133,7 @@ class TablesFinanceResourceById(Resource):
     @tables_ns.doc(
         description="List board tables banker_id and financialagreements_id"
     )
-    @tables_ns.expect(pagination_arguments_customer, validate=True)
+    @tables_ns.expect(pagination_arguments_tables, validate=True)
     @cross_origin()
     def get(self, id: int):
         """List tables with board filter by in banker_id with financial_agreements"""
@@ -176,7 +176,7 @@ class TablesFinanceResourceById(Resource):
 class RanksTableFinancial(Resource):
     # @jwt_required()
     @tables_ns.doc(description="List ranks tables")
-    @tables_ns.expect(pagination_arguments_customer, validate=True)
+    @tables_ns.expect(pagination_arguments_tables, validate=True)
     @cross_origin()
     def get(self):
         """List ranks tables"""

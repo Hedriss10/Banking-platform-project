@@ -443,12 +443,8 @@ class TablesCore:
 
     def rank_comission(self, data: dict) -> None:
         try:
-            current_page, rows_per_page = (
-                int(data.get("current_page", 1)),
-                int(data.get("rows_per_page", 10)),
-            )
-            current_page = max(current_page, 1)
-            rows_per_page = max(rows_per_page, 1)
+            current_page = max(int(data.get("current_page", 1)), 1)
+            rows_per_page = max(int(data.get("rows_per_page", 10)), 1)
 
             pagination = Pagination().pagination(
                 current_page=current_page,
@@ -456,10 +452,11 @@ class TablesCore:
                 sort_by=data.get("sort_by", ""),
                 order_by=data.get("order_by", ""),
                 filter_by=data.get("filter_by", ""),
-                filter_value=data.get("filter_value", ""),
             )
 
-            stmt = (
+            filter_value = f"%{pagination['filter_by']}%" if pagination["filter_by"] else None
+
+            base_stmt = (
                 select(
                     self.tables.id,
                     self.tables.name.label("table"),
@@ -471,8 +468,7 @@ class TablesCore:
                 )
                 .join(
                     self.financial_agreements,
-                    self.financial_agreements.id
-                    == self.tables.financial_agreements_id,
+                    self.financial_agreements.id == self.tables.financial_agreements_id,
                 )
                 .join(
                     self.bankers,
@@ -483,65 +479,64 @@ class TablesCore:
                     self.financial_agreements.is_deleted.is_(False),
                     self.bankers.is_deleted.is_(False),
                 )
-                .group_by(
-                    self.tables.id,
-                    self.bankers.id,
-                    self.financial_agreements.id,
-                )
-                .order_by(self.tables.rate.desc())
             )
 
             # Filtro dinâmico
-            if pagination["filter_value"]:
-                filter_value = f"%{pagination['filter_value']}%"
-                stmt = stmt.where(
+            if filter_value:
+                base_stmt = base_stmt.where(
                     or_(
-                        func.unaccent(self.tables.name).ilike(
-                            func.unaccent(filter_value)
-                        ),
-                        func.unaccent(self.tables.table_code).ilike(
-                            func.unaccent(filter_value)
-                        ),
+                        func.unaccent(self.tables.name).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.tables.table_code).ilike(func.unaccent(filter_value)),
                     )
                 )
 
+            # Ordenação
             if pagination["order_by"]:
-                sort_column = getattr(
-                    self.tables, pagination["order_by"], None
-                )
+                sort_column = getattr(self.tables, pagination["order_by"], None)
                 if sort_column is not None:
-                    if pagination["sort_by"] == "asc":
-                        stmt = stmt.order_by(sort_column.asc())
-                    else:
-                        stmt = stmt.order_by(sort_column.desc())
+                    direction = pagination["sort_by"].lower()
+                    base_stmt = base_stmt.order_by(sort_column.asc() if direction == "asc" else sort_column.desc())
             else:
-                stmt = stmt.order_by(self.bankers.id.desc())
+                base_stmt = base_stmt.order_by(self.bankers.id.desc())
 
-            # Aplicar paginação
-            paginated_stmt = stmt.offset(pagination["offset"]).limit(
-                pagination["limit"]
-            )
+            # Paginação
+            paginated_stmt = base_stmt.offset(pagination["offset"]).limit(pagination["limit"])
             result = db.session.execute(paginated_stmt).fetchall()
 
-            # Total respeitando o filtro
-            count_stmt = select(func.count()).select_from(
-                select(self.bankers.id)
-                .where(self.bankers.is_deleted == False)
-                .where(
-                    or_(
-                        func.unaccent(self.tables.table_code).ilike(
-                            func.unaccent(filter_value)
-                        )
-                    )
-                    if pagination["filter_value"]
-                    else True
+            # Contagem total respeitando todos os filtros
+            count_subq = (
+                select(self.tables.id)
+                .join(
+                    self.financial_agreements,
+                    self.financial_agreements.id == self.tables.financial_agreements_id,
                 )
-                .subquery()
+                .join(
+                    self.bankers,
+                    self.bankers.id == self.financial_agreements.banker_id,
+                )
+                .where(
+                    self.tables.is_deleted.is_(False),
+                    self.financial_agreements.is_deleted.is_(False),
+                    self.bankers.is_deleted.is_(False),
+                )
             )
+
+            if filter_value:
+                count_subq = count_subq.where(
+                    or_(
+                        func.unaccent(self.tables.name).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.tables.table_code).ilike(func.unaccent(filter_value)),
+                    )
+                )
+
+            count_stmt = select(func.count()).select_from(count_subq.subquery())
             total = db.session.execute(count_stmt).scalar()
+
             if not result:
                 return Response().response(
-                    status_code=404, error=False, message_id="tables_not_found"
+                    status_code=404,
+                    error=False,
+                    message_id="tables_not_found"
                 )
 
             metadata = Pagination().metadata(
@@ -556,19 +551,20 @@ class TablesCore:
             return Response().response(
                 status_code=200,
                 error=False,
-                message_id="tables_list",
+                message_id="tables_list_successful",
                 data=Metadata(result).model_to_list(),
                 metadata=metadata,
             )
 
         except Exception as e:
-            logdb("error", message=f"Error processing add tables: {e}")
+            logdb("error", message=f"Error processing rank_comission: {e}")
             return Response().response(
                 status_code=500,
                 error=True,
-                message_id="error_add_tables",
+                message_id="error_rank_comission",
                 exception=str(e),
             )
+
 
     def add_table(self, data: dict) -> None:
         try:
