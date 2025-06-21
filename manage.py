@@ -21,4 +21,5 @@ app.wsgi_app = Middleware(app.wsgi_app)
 
 if __name__ == "__main__":
     # config_by_name[flask_env].DEBUG
+    # gunicorn -w 4 -b 0.0.0.0:5002 'src.app:create_app()'
     app.run(port=config_by_name[flask_env].PORT, debug=True, host="0.0.0.0")
