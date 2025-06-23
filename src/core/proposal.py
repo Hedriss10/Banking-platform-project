@@ -58,18 +58,49 @@ class ProposalCore:
         self.tables = TablesFinance
         self.manage_operational = ManageOperation
 
+    # TODO - helpers wontfix
+    # def convert_value(self, value, field_type):
+    #     if value in (None, "", " "):
+    #         return None
+    #     if field_type == str:
+    #         return value.strip()
+    #     if field_type == Decimal:
+    #         return Decimal(str(value).replace(",", "."))
+    #     if field_type == datetime:
+    #         return datetime.strptime(value, "%d-%m-%Y %H:%M")
+    #     if field_type == int:
+    #         return int(value)
+    #     raise ValueError(f"type check: {field_type}")
+    
+    
     # helpers
     def convert_value(self, value, field_type):
         if value in (None, "", " "):
             return None
+
         if field_type == str:
             return value.strip()
+
         if field_type == Decimal:
             return Decimal(str(value).replace(",", "."))
+
         if field_type == datetime:
-            return datetime.strptime(value, "%d-%m-%Y %H:%M")
+            if isinstance(value, datetime):
+                return value
+            if isinstance(value, str):
+                # Tenta múltiplos formatos comuns (ISO + BR)
+                for fmt in ("%d-%m-%Y %H:%M", "%d-%m-%Y", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+                    try:
+                        return datetime.strptime(value.strip(), fmt)
+                    except ValueError:
+                        continue
+                raise ValueError(f"Formato de data inválido: '{value}'")
+
+            raise TypeError(f"Esperado str ou datetime para campo datetime, recebido: {type(value)}")
+
         if field_type == int:
             return int(value)
+
         raise ValueError(f"type check: {field_type}")
 
     def list_proposal(self, data: dict):
@@ -718,7 +749,7 @@ class ProposalCore:
             tables_and_fields = {
                 "proposal": {
                     "nome": str,
-                    "data_nascimento": str,
+                    "data_nascimento": datetime,
                     "genero": str,
                     "email": str,
                     "cpf": str,
