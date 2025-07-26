@@ -454,7 +454,11 @@ class TablesCore:
                 filter_by=data.get("filter_by", ""),
             )
 
-            filter_value = f"%{pagination['filter_by']}%" if pagination["filter_by"] else None
+            filter_value = (
+                f"%{pagination['filter_by']}%"
+                if pagination["filter_by"]
+                else None
+            )
 
             base_stmt = (
                 select(
@@ -468,7 +472,8 @@ class TablesCore:
                 )
                 .join(
                     self.financial_agreements,
-                    self.financial_agreements.id == self.tables.financial_agreements_id,
+                    self.financial_agreements.id
+                    == self.tables.financial_agreements_id,
                 )
                 .join(
                     self.bankers,
@@ -485,22 +490,34 @@ class TablesCore:
             if filter_value:
                 base_stmt = base_stmt.where(
                     or_(
-                        func.unaccent(self.tables.name).ilike(func.unaccent(filter_value)),
-                        func.unaccent(self.tables.table_code).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.tables.name).ilike(
+                            func.unaccent(filter_value)
+                        ),
+                        func.unaccent(self.tables.table_code).ilike(
+                            func.unaccent(filter_value)
+                        ),
                     )
                 )
 
             # Ordenação
             if pagination["order_by"]:
-                sort_column = getattr(self.tables, pagination["order_by"], None)
+                sort_column = getattr(
+                    self.tables, pagination["order_by"], None
+                )
                 if sort_column is not None:
                     direction = pagination["sort_by"].lower()
-                    base_stmt = base_stmt.order_by(sort_column.asc() if direction == "asc" else sort_column.desc())
+                    base_stmt = base_stmt.order_by(
+                        sort_column.asc()
+                        if direction == "asc"
+                        else sort_column.desc()
+                    )
             else:
                 base_stmt = base_stmt.order_by(self.bankers.id.desc())
 
             # Paginação
-            paginated_stmt = base_stmt.offset(pagination["offset"]).limit(pagination["limit"])
+            paginated_stmt = base_stmt.offset(pagination["offset"]).limit(
+                pagination["limit"]
+            )
             result = db.session.execute(paginated_stmt).fetchall()
 
             # Contagem total respeitando todos os filtros
@@ -508,7 +525,8 @@ class TablesCore:
                 select(self.tables.id)
                 .join(
                     self.financial_agreements,
-                    self.financial_agreements.id == self.tables.financial_agreements_id,
+                    self.financial_agreements.id
+                    == self.tables.financial_agreements_id,
                 )
                 .join(
                     self.bankers,
@@ -524,19 +542,23 @@ class TablesCore:
             if filter_value:
                 count_subq = count_subq.where(
                     or_(
-                        func.unaccent(self.tables.name).ilike(func.unaccent(filter_value)),
-                        func.unaccent(self.tables.table_code).ilike(func.unaccent(filter_value)),
+                        func.unaccent(self.tables.name).ilike(
+                            func.unaccent(filter_value)
+                        ),
+                        func.unaccent(self.tables.table_code).ilike(
+                            func.unaccent(filter_value)
+                        ),
                     )
                 )
 
-            count_stmt = select(func.count()).select_from(count_subq.subquery())
+            count_stmt = select(func.count()).select_from(
+                count_subq.subquery()
+            )
             total = db.session.execute(count_stmt).scalar()
 
             if not result:
                 return Response().response(
-                    status_code=404,
-                    error=False,
-                    message_id="tables_not_found"
+                    status_code=404, error=False, message_id="tables_not_found"
                 )
 
             metadata = Pagination().metadata(
@@ -564,7 +586,6 @@ class TablesCore:
                 message_id="error_rank_comission",
                 exception=str(e),
             )
-
 
     def add_table(self, data: dict) -> None:
         try:

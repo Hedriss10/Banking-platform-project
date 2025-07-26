@@ -20,7 +20,7 @@ class DevelopmentConfig(Config):
     PORT = 5002
     DOCS = "/docs"
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = f"{os.getenv("SQLALCHEMY_DATABASE_URI")}"
+    SQLALCHEMY_DATABASE_URI = f"{os.getenv('SQLALCHEMY_DATABASE_URI')}"
 
 
 class ProductionConfig(Config):
@@ -29,7 +29,7 @@ class ProductionConfig(Config):
     PORT = 5002
     DOCS = "/docs"
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = f"{os.getenv("SQLALCHEMY_DATABASE_URI")}"
+    SQLALCHEMY_DATABASE_URI = f"{os.getenv('SQLALCHEMY_DATABASE_URI')}"
 
 
 config_by_name = {

@@ -1,11 +1,4 @@
 # src/models/models.py
-"""
-Pendencias de desenvolvimento:
-# TODO - Desenvolvimento do banco de horas
-# TODO - Desenvolvimento dos pagamentos o controle de pagamentos
-# TODO - Desenvolvimento da carteira
-"""
-
 import decimal
 import enum
 from datetime import datetime

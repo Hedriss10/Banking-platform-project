@@ -71,8 +71,7 @@ class ProposalCore:
     #     if field_type == int:
     #         return int(value)
     #     raise ValueError(f"type check: {field_type}")
-    
-    
+
     # helpers
     def convert_value(self, value, field_type):
         if value in (None, "", " "):
@@ -89,14 +88,21 @@ class ProposalCore:
                 return value
             if isinstance(value, str):
                 # Tenta múltiplos formatos comuns (ISO + BR)
-                for fmt in ("%d-%m-%Y %H:%M", "%d-%m-%Y", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+                for fmt in (
+                    "%d-%m-%Y %H:%M",
+                    "%d-%m-%Y",
+                    "%Y-%m-%d %H:%M:%S",
+                    "%Y-%m-%d",
+                ):
                     try:
                         return datetime.strptime(value.strip(), fmt)
                     except ValueError:
                         continue
                 raise ValueError(f"Formato de data inválido: '{value}'")
 
-            raise TypeError(f"Esperado str ou datetime para campo datetime, recebido: {type(value)}")
+            raise TypeError(
+                f"Esperado str ou datetime para campo datetime, recebido: {type(value)}"
+            )
 
         if field_type == int:
             return int(value)
