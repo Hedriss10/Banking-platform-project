@@ -30,6 +30,13 @@ pagination_arguments_customer.add_argument(
 pagination_arguments_customer.add_argument(
     "end_date", help="End Date", default="", type=str, required=False
 )
+pagination_arguments_customer.add_argument(
+    "financial_agreements",
+    help="Financial Agreements",
+    default="",
+    type=int,
+    required=False,
+)
 
 
 operatinal_ns = Namespace("operational", description="Manage Operational")

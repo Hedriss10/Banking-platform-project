@@ -34,6 +34,7 @@ class OperationalCore:
         self.history = History
         self.financial_agreements = FinancialAgreements
         self.bankers = Bankers
+        self.financial_agreements = FinancialAgreements
 
     def check_summary_fields_proposal(self, proposal_id: int):
         # TODO - Depois colcoar o financial_agreements_id no tratamento antes de pagar a proposta...
@@ -84,11 +85,13 @@ class OperationalCore:
         try:
             # ====== Datas ======
             start_date = self.__parse_date(
-                date_str=data.get("start_date", ""), is_start=True
+                data.get("start_date", ""), is_start=True
             )
             end_date = self.__parse_date(
-                date_str=data.get("end_date", ""), is_start=False
+                data.get("end_date", ""), is_start=False
             )
+
+            financial_agreements = data.get("financial_agreements")
 
             # ====== Paginação ======
             current_page = max(int(data.get("current_page", 1)), 1)
@@ -102,13 +105,21 @@ class OperationalCore:
                 filter_by=data.get("filter_by", ""),
                 filter_value=data.get("filter_value", ""),
             )
+
             # ====== CTE de status ======
             u_alias = aliased(self.user)
+
+            cte_filters = [self.proposal_status.is_deleted == False]
+            if financial_agreements:
+                cte_filters.append(
+                    self.proposal_loan.financial_agreements_id
+                    == int(financial_agreements)
+                )
+
             status_proposal_cte = (
                 select(
                     self.proposal_status.proposal_id,
                     u_alias.username.label("digitador_por"),
-                    self.manage_operational.created_at.label("digitado_as"),
                     self.proposal_status.action_at.label("status_updated_at"),
                     self.proposal_status.action_by.label("status_updated_by"),
                     u_alias.username.label("status_updated_by_name"),
@@ -147,17 +158,17 @@ class OperationalCore:
                 )
                 .distinct(self.proposal_status.proposal_id)
                 .join(
-                    self.manage_operational,
-                    self.manage_operational.proposal_id
-                    == self.proposal_status.proposal_id,
-                    isouter=True,
-                )
-                .join(
                     u_alias,
                     u_alias.id == self.proposal_status.action_by,
                     isouter=True,
                 )
-                .where(self.proposal_status.is_deleted == False)
+                .join(
+                    self.proposal_loan,
+                    self.proposal_loan.proposal_id
+                    == self.proposal_status.proposal_id,
+                    isouter=True,
+                )
+                .where(*cte_filters)
                 .order_by(
                     self.proposal_status.proposal_id,
                     self.proposal_status.created_at.desc(),
@@ -170,6 +181,7 @@ class OperationalCore:
                 "Contrato Pago": ["Contrato Pago"],
                 "Contrato Reprovado": ["Contrato Reprovado"],
             }
+
             filter_by_value = data.get("filter_by")
             if filter_by_value in status_filters:
                 filter_proposal = status_proposal_cte.c.current_status.in_(
@@ -180,7 +192,7 @@ class OperationalCore:
                     ["Contrato Pago", "Contrato Reprovado"]
                 )
 
-            # ====== Query base com filtros ======
+            # ====== Query base ======
             base_stmt = (
                 select(
                     self.proposal.id,
@@ -200,7 +212,8 @@ class OperationalCore:
                     ),
                     func.upper(self.bankers.name).label("banco"),
                     func.to_char(
-                        status_proposal_cte.c.digitado_as, "DD-MM-YYYY HH24:MI"
+                        self.manage_operational.created_at,
+                        "DD-MM-YYYY HH24:MI",
                     ).label("digitado_as"),
                     func.initcap(
                         func.trim(status_proposal_cte.c.digitador_por)
@@ -234,12 +247,18 @@ class OperationalCore:
                     isouter=True,
                 )
                 .join(
+                    self.manage_operational,
+                    self.manage_operational.proposal_id == self.proposal.id,
+                    isouter=True,
+                )
+                .join(
                     status_proposal_cte,
                     status_proposal_cte.c.proposal_id == self.proposal.id,
                     isouter=True,
                 )
             )
 
+            # ====== Filtros padrão ======
             filters = [
                 self.proposal.is_deleted == False,
                 self.proposal_loan.is_deleted == False,
@@ -287,7 +306,7 @@ class OperationalCore:
             else:
                 base_stmt = base_stmt.order_by(self.proposal.created_at.desc())
 
-            # ====== Total real com filtros aplicados ======
+            # ====== Total com filtros ======
             count_stmt = select(func.count()).select_from(base_stmt.alias())
             total = db.session.execute(count_stmt).scalar()
 
@@ -304,7 +323,7 @@ class OperationalCore:
                     message_id="proposal_not_found",
                 )
 
-            # ====== Retorno seguro ======
+            # ====== Retorno ======
             metadata = Pagination().metadata(
                 current_page=current_page,
                 rows_per_page=rows_per_page,
